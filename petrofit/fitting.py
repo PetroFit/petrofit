@@ -10,11 +10,34 @@ from matplotlib import pyplot as plt
 
 
 def print_model_params(model):
+    """Print the params and values of an AstroPy model"""
     for param, value in zip(model.param_names, model.parameters):
         print("{:0.4f}\t{}".format(value,param))
 
 
 def model_to_image(x, y, size, model):
+    """
+    Construct an image from a model.
+
+    Parameters
+    ----------
+    x : int
+        x center of sampling grid.
+
+    y : int
+        y center of sampling grid.
+
+    size : int
+        Size of sampling pixel grid.
+
+    model : `~astropy.modeling.FittableModel`
+        AstroPy model to sample from.
+
+    Returns
+    -------
+    model_image : array
+        2D image of the model.
+    """
     y_arange, x_arange = np.mgrid[
                          int(y) - size//2:int(y) + size//2,
                          int(x) - size//2:int(x) + size//2, ]
@@ -22,6 +45,19 @@ def model_to_image(x, y, size, model):
 
 
 def fit_plane(image):
+    """
+    Given an image, fit a 2D plane.
+
+    Parameters
+    ----------
+    image : array
+        2D array to fit.
+
+    Returns
+    -------
+    model : `~astropy.modeling.models.Planar2D`
+        Plane model with best fit params
+    """
     model = models.Planar2D(slope_x=0., slope_y=0, intercept=0)
 
     # Make x and y grid to fit to
@@ -37,40 +73,68 @@ def fit_plane(image):
 
 
 def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
+    """
+    Wrapper function to conveniently fit an image to an input model.
+
+    Parameters
+    ----------
+    image : array
+        2D array to fit.
+
+    model : `~astropy.modeling.FittableModel`
+        AstroPy model to sample from.
+
+    maxiter : int
+        maximum number of iterations
+
+    epsilon : float
+        A suitable step length for the forward-difference
+        approximation of the Jacobian (if model.fjac=None). If
+        epsfcn is less than the machine precision, it is
+        assumed that the relative errors in the functions are
+        of the order of the machine precision.
+
+    acc : float
+        Relative error desired in the approximate solution
+
+    Returns
+    -------
+    fitted_model, fitter
+
+        * fitted_model : `~astropy.modeling.FittableModel`
+            A copy of the input model with parameters set by the fitter.
+
+        * fitter : LevMarLSQFitter
+            Fitter used to estimate and set model parameters.
+    """
+
     # Make x and y grid to fit to
     y_arange, x_arange = np.where(~(np.isnan(image)))
 
     z = image[(y_arange, x_arange)]
 
     # Fit model to grid
-    fit = fitting.LevMarLSQFitter()
-    fitted_line = fit(model, x_arange, y_arange, z, maxiter=maxiter, epsilon=epsilon, acc=acc)
+    fitter = fitting.LevMarLSQFitter()
+    fitted_model= fitter(model, x_arange, y_arange, z, maxiter=maxiter, epsilon=epsilon, acc=acc)
 
-    return fitted_line, fit
-
-
-def fit_sersic2d(image, ellip=0.5, theta=0, fixed={}):
-    # Estimate center of target
-    y_mean, x_mean = np.array(image.shape) // 2  # Center guess
-
-    # Create model to fit
-    model = models.Sersic2D(amplitude=image.max(),
-                            r_eff=x_mean//4,
-                            n=2,
-                            x_0=x_mean,
-                            y_0=y_mean,
-                            ellip=ellip,
-                            theta=theta,
-                            fixed=fixed
-                            )
-
-    # Fit model to grid
-    fitted_line, fit = fit_model(image, model)
-
-    return fitted_line
+    return fitted_model, fitter
 
 
 def fit_gaussian2d(image):
+    """
+    Fit a 2D gaussian to a source in an image.
+
+    Parameters
+    ----------
+    image : array
+        2D array to fit.
+
+    Returns
+    -------
+    fitted_model : `~astropy.modeling.models.Gaussian2D`
+        AstroPy Gaussian2D model with parameters set by the fitter.
+    """
+
     # Estimate center of target
     y_mean, x_mean = np.array(image.shape) // 2  # Center guess
 
@@ -82,43 +146,29 @@ def fit_gaussian2d(image):
                               )
 
     # Fit model to grid
-    fitted_line, fit = fit_model(image, model)
+    fitted_model, fit = fit_model(image, model)
 
-    return fitted_line
-
-
-def model_subtract(image, target, x, y):
-    dy, dx = target.shape
-    bounds = np.array([y - dy // 2, y + dy // 2, x - dx // 2, x + dx // 2])
-
-    ymin, ymax, xmin, xmax = bounds
-
-    targ_xmin = None
-    if xmin < 0:
-        targ_xmin = abs(xmin)
-        xmin = 0
-
-    targ_ymin = None
-    if ymin < 0:
-        targ_ymin = abs(ymin)
-        ymin = 0
-
-    targ_xmax = None
-    if xmax >= image.shape[1]:
-        targ_xmax = image.shape[1] - x + target.shape[1] // 2
-        xmax = image.shape[1]
-
-    targ_ymax = None
-    if ymax >= image.shape[0]:
-        targ_ymax = image.shape[0] - y + target.shape[0] // 2
-        ymax = image.shape[0]
-
-    image[ymin:ymax, xmin:xmax] -= target[targ_ymin:targ_ymax, targ_xmin:targ_xmax]
-
-    return image
+    return fitted_model
 
 
 def plot_fit(image, model, vmin=None, vmax=None):
+    """
+    Plot fitted model, its 1D fit profile and residuals.
+
+    Parameters
+    ----------
+    image : array
+        2D array that was fit by the model.
+
+    model : `~astropy.modeling.FittableModel`
+        Fitted AstroPy model.
+
+    vmin : float
+        Min plot value
+
+    vmax : float
+        Max plot value 
+    """
     if isinstance(model, models.Sersic2D):
         x_0, y_0 = model.x_0, model.y_0  # Center
     elif isinstance(model, models.Gaussian2D):
@@ -201,6 +251,7 @@ def plot_fit(image, model, vmin=None, vmax=None):
 
 @custom_model
 def Nuker2D(x, y, amplitude=1, r_eff=1, x_0=0, y_0=0, a=1, b=2, g=0, ellip=0, theta=0):
+    """Two dimensional Nuker2D model"""
     A, B = 1 * r_eff, (1 - ellip) * r_eff
     cos_theta, sin_theta = np.cos(theta), np.sin(theta)
     x_maj = (x - x_0) * cos_theta + (y - y_0) * sin_theta

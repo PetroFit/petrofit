@@ -80,15 +80,19 @@ def segm_mask(obj, segm, mask_background=False):
 
     Parameters
     ----------
+
     obj : int or photutils.segmentation.properties.SourceProperties
-        The catalog object for the target or id of target in the segmentation object
+        The catalog object for the target or id of target in the segmentation object.
+
     segm : photutils.segmentation.core.SegmentationImage
-        Segmentation image
+        Segmentation image.
+
     mask_background : bool
         Option to also mask out all the un-segmented background pixels.
 
     Returns
     -------
+
     mask : bool array
     """
 
@@ -106,19 +110,25 @@ def masked_segm_image(obj, image, segm, fill=None, mask_background=False):
     Returns a masked image of the original image by masking out other sources
     Parameters
     ----------
+
     obj : int or photutils.segmentation.properties.SourceProperties
-        The catalog object for the target or id of target in the segmentation object
+        The catalog object for the target or id of target in the segmentation object.
+
     image : CCDData or array
-        Image to mask
+        Image to mask.
+
     segm : photutils.segmentation.core.SegmentationImage
-        Segmentation image
+        Segmentation image.
+
     fill : float
-        Fill in the masked pixels with this value
+        Fill in the masked pixels with this value.
+
     mask_background : bool
         Option to also mask out all the un-segmented background pixels.
 
     Returns
     -------
+
     masked_image : CCDData or array
     """
 
@@ -138,25 +148,32 @@ def masked_segm_image(obj, image, segm, fill=None, mask_background=False):
 def make_segments(image, npixels=None, nsigma=3., fwhm=8., kernel_size=4):
     """
     Segment an image.
+
     Parameters
     ----------
+
     image : array like
         Input image
+
     npixels : int
         The number of connected pixels, each greater than ``threshold``,
         that an object must have to be detected.  ``npixels`` must be a
         positive integer.
+
     nsigma : float or image array
         The number of standard deviations per pixel above the
         ``background`` for which to consider a pixel as possibly being
         part of a source.
+
     fwhm : float
-        FWHM of smoothing gaussian kernel
+        FWHM of smoothing gaussian kernel.
+
     kernel_size : int
-        Size of smoothing kernel
+        Size of smoothing kernel.
 
     Returns
     -------
+
     segment_image : `~photutils.segmentation.SegmentationImage` or `None`
         A 2D segmentation image, with the same shape as ``data``, where
         sources are marked by different positive integer values.  A
@@ -185,25 +202,31 @@ def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=
     Parameters
     ----------
     image : array like
-        Input image
+        Input image.
+
     segm : `~photutils.segmentation.SegmentationImage` or `None`
         A 2D segmentation image, with the same shape as ``data``, where
         sources are marked by different positive integer values.  A
         value of zero is reserved for the background.  If no sources
         are found then `None` is returned.
+
     npixels : int
         The number of connected pixels, each greater than ``threshold``,
         that an object must have to be detected.  ``npixels`` must be a
         positive integer.
+
     fwhm : float
-        FWHM of smoothing gaussian kernel
+        FWHM of smoothing gaussian kernel.
+
     kernel_size : int
-        Size of smoothing kernel
+        Size of smoothing kernel.
+
     nlevels : int, optional
         The number of multi-thresholding levels to use.  Each source
         will be re-thresholded at ``nlevels`` levels spaced
         exponentially or linearly (see the ``mode`` keyword) between its
         minimum and maximum values within the source segment.
+
     contrast : float, optional
         The fraction of the total (blended) source flux that a local
         peak must have (at any one of the multi-thresholds) to be
@@ -216,6 +239,7 @@ def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=
 
     Returns
     -------
+
     segment_image : `~photutils.segmentation.SegmentationImage`
         A segmentation image, with the same shape as ``data``, where
         sources are marked by different positive integer values.  A

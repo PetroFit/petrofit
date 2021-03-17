@@ -12,7 +12,7 @@ from astropy.coordinates import SkyCoord
 
 from matplotlib import pyplot as plt
 
-#from .fitting import fit_gaussian2d, plot_fit
+from .fitting import fit_gaussian2d, plot_fit
 
 
 def natural_sort(l):
@@ -51,9 +51,9 @@ def pixel_to_angular(pixel_size, wcs):
     return angular_diameter
 
 
-def elliptical_area_to_r(area, e):
-    a = np.sqrt(e * area / (np.pi))
-    b = a / e
+def elliptical_area_to_r(area, elong):
+    a = np.sqrt(elong * area / (np.pi))
+    b = a / elong
     return a, b
 
 
