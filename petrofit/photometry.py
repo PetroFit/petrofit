@@ -232,7 +232,7 @@ def photometry_step(position, r_list, image, error=None, mask=None, elong=1., th
 
     Returns
     -------
-    photometry, aperture_area, error: array
+    photometry, aperture_area, error
         Returns photometry, aperture area (unmasked pixels) and error at each radius.
     """
 
@@ -255,7 +255,6 @@ def photometry_step(position, r_list, image, error=None, mask=None, elong=1., th
         photometric_value = float(np.round(photometric_value, 6))
         photometric_err = float(np.round(photometric_err, 6)) if photometric_err.size > 0 else np.nan
 
-        photometric_value
         if np.isnan(photometric_value):
             raise Exception("Nan photometric_value")
 
@@ -273,6 +272,7 @@ def object_photometry(obj, image, segm_deblend, r_list, error=None, cutout_size=
                       bkg_sub=False, sigma=3.0, sigma_type='clip', method='exact', mask_background=False,
                       plot=False, vmin=0, vmax=None, ):
     """
+    Aperture photometry on a PhotUtils `SourceProperties` object.
 
     Parameters
     ----------

@@ -471,7 +471,6 @@ class Petrosian:
         """Given a fraction, compute the radius containing that fraction of the Petrosian total flux"""
         return self.fraction_flux_to_r(self.r_list, self.flux_list, self.r_total_flux, fraction=fraction)
 
-
     def plot(self, plot_r=False, plot_normalized_flux=False):
         """
         Plots Petrosian profile.
