@@ -1,4 +1,3 @@
-import os
 import re
 
 import numpy as np
@@ -12,7 +11,8 @@ from astropy.coordinates import SkyCoord
 
 from matplotlib import pyplot as plt
 
-from .fitting import fit_gaussian2d, plot_fit
+from .fitting.fitting import fit_gaussian2d
+from .fitting.utils import plot_fit
 
 
 def natural_sort(l):
