@@ -1,10 +1,10 @@
-Petrosian library
------------------
+.. image:: docs/images/petrofit_full_logo.png
+    :width: 100%
 
-.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-    :target: http://www.astropy.org
-    :alt: Powered by Astropy Badge
+Petrosian Fitter (PetroFit)
+---------------------------
 
+Package for calculating Petrosian properties and fitting galaxy light profiles.
 
 License
 -------
