@@ -1,3 +1,6 @@
+.. image:: docs/images/petrofit_full_logo.png
+    :width: 100%
+
 Petrosian Fitter (PetroFit)
 ---------------------------
 
@@ -5,8 +8,7 @@ Petrosian Fitter (PetroFit)
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
 
-.. image:: docs/images/petrofit_full_logo.png
-    :width: 100%
+Package for calculating Petrosian properties and fitting galaxy light profiles.
 
 License
 -------
