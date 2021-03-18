@@ -1,10 +1,12 @@
-Petrosian library
------------------
+Petrosian Fitter (PetroFit)
+---------------------------
 
 .. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
     :target: http://www.astropy.org
     :alt: Powered by Astropy Badge
 
+.. image:: docs/images/petrofit_full_logo.png
+    :width: 100%
 
 License
 -------
