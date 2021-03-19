@@ -10,7 +10,40 @@ from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model
 
 
+def make_grid(size, factor=1):
+    assert isinstance(factor, int)
+    x_arange = y_arange = np.arange(0.5, size * factor, 1) / factor
+    return np.meshgrid(x_arange, y_arange)
+
+
 class PSFModel(FittableModel):
+    oversample = None
+
+    _cache_grid = True
+    _cached_grid_size = 0
+    _cached_grid_factor = 0
+    _cached_grid = None
+
+    def clear_cached_grid(self):
+        self._cached_grid_size = 0
+        self._cached_grid_factor = 0
+        if self._cached_grid is not None:
+            del self._cached_grid
+        self._cached_grid = None
+
+    @property
+    def cache_grid(self):
+        return self._cache_grid
+
+    @cache_grid.setter
+    def cache_grid(self, value):
+        if value == False:
+            self._cache_grid = False
+            self.clear_cached_grid()
+        elif value == True:
+            self._cache_grid = True
+        else:
+            raise ValueError("{} is not a bool, use True or False".format(value))
 
     def evaluate(self, *args, **kwargs):
         psf_p = args[-1]
@@ -18,39 +51,78 @@ class PSFModel(FittableModel):
 
         x = args[0]
         y = args[1]
-        x_size = max([i.max() + 1 for i in [x, y]])
 
-        x_0 = np.round(args[3][0])
-        y_0 = np.round(args[4][0])
+        grid_size = max([i.max() + 1 for i in [x, y]])
+        grid_factor = self.oversample if isinstance(self.oversample, int) else 1
 
-        factor = self.oversample
-        size = x_size * factor
-        mid = size // 2
+        if grid_size == self._cached_grid_size and self._cached_grid_factor == grid_factor:
+            main_grid = self._cached_grid
+        else:
+            main_grid = make_grid(grid_size, factor=grid_factor)
 
-        x_arange = y_arange = np.arange(0.5, size * factor, 1) / factor
-        x_grid, y_grid = np.meshgrid(x_arange, y_arange)  # Scale to x_size
-        temp_galaxy_image = self._model.evaluate(x_grid, y_grid, *args[self.n_inputs:])
+            if self.cache_grid:
+                self._cached_grid = main_grid
+                self._cached_grid_size = grid_size
+                self._cached_grid_factor = grid_factor
 
-        x_0_over_sampled = np.argmin(np.abs(x_arange - (x_0 * factor)))
-        y_0_over_sampled = np.argmin(np.abs(y_arange - (y_0 * factor)))
-        temp_galaxy_image[y_0_over_sampled, x_0_over_sampled] = self._model.evaluate(x_0, y_0, *args[self.n_inputs:])
+        x_grid, y_grid = main_grid
 
-        temp_galaxy_image = block_reduce(temp_galaxy_image, factor) / factor ** 2
+        model_image = self._model.evaluate(x_grid, y_grid, *args[self.n_inputs:])
 
-        del x_grid, y_grid, x_arange, y_arange
+        if isinstance(self.oversample, int):
+            model_image = block_reduce(model_image, grid_factor) / grid_factor ** 2
+
+        elif isinstance(self.oversample, tuple):
+            sub_grid_x0, sub_grid_y0, sub_grid_size, sub_grid_factor = self.oversample
+
+            if isinstance(sub_grid_x0, str):
+                idx = self._model.param_names.index(sub_grid_x0)
+                sub_grid_x0 = np.round(args[self.n_inputs:][idx][0])
+
+            if isinstance(sub_grid_y0, str):
+                idx = self._model.param_names.index(sub_grid_y0)
+                sub_grid_y0 = np.round(args[self.n_inputs:][idx][0])
+
+            x_sub_grid, y_sub_grid = make_grid(sub_grid_size, factor=sub_grid_factor)
+
+            x_sub_grid += sub_grid_x0 - sub_grid_size // 2
+            y_sub_grid += sub_grid_y0 - sub_grid_size // 2
+
+            sub_model_oversampled_image = self._model.evaluate(x_sub_grid, y_sub_grid, *args[self.n_inputs:])
+
+            over_sampled_sub_model_x0 = np.argmin(
+                np.abs(x_sub_grid[0, :] - 1 / (2 * sub_grid_factor) - (sub_grid_x0 * sub_grid_factor)))
+            over_sampled_sub_model_y0 = np.argmin(
+                np.abs(y_sub_grid[:, 0] - 1 / (2 * sub_grid_factor) - (sub_grid_y0 * sub_grid_factor)))
+
+            sub_model_oversampled_image[
+                over_sampled_sub_model_y0,
+                over_sampled_sub_model_x0
+            ] = self._model.evaluate(sub_grid_x0, sub_grid_y0, *args[self.n_inputs:])
+
+            sub_model_image = block_reduce(sub_model_oversampled_image, sub_grid_factor) / sub_grid_factor ** 2
+
+            x_sub_min = int(x_sub_grid[0][0] - 1 / (2 * sub_grid_factor))
+            y_sub_min = int(y_sub_grid[0][0] - 1 / (2 * sub_grid_factor))
+
+            model_image[
+            y_sub_min: y_sub_min + sub_grid_size,
+            x_sub_min: x_sub_min + sub_grid_size
+            ] = sub_model_image
+
         if self.psf is None:
-            return temp_galaxy_image[y.astype(int), x.astype(int)]
+            return model_image[y.astype(int), x.astype(int)]
 
         else:
             PSF_2 = rotate(self.psf, psf_p[0], reshape=False)
-            return convolve(temp_galaxy_image, PSF_2)[y.astype(int), x.astype(int)]
+            return convolve(model_image, PSF_2)[y.astype(int), x.astype(int)]
 
     @property
     def model(self):
 
-        model = self._model.copy()
+        model = self._model
         for param in model.param_names:
-            setattr(model, param, getattr(self, param))
+            setattr(model, param, getattr(self, param).value)
 
         fixed = self.fixed
         del fixed['psf_pa']
@@ -64,7 +136,7 @@ class PSFModel(FittableModel):
         return model
 
     @staticmethod
-    def wrap(model, psf=None, oversample=1):
+    def wrap(model, psf=None, oversample=None):
 
         # Extract model params
         params = OrderedDict(
@@ -78,7 +150,6 @@ class PSFModel(FittableModel):
             ('__doc__', 'PSF Wrapped Model\n{}'.format(model.__doc__)),
             ('n_inputs', model.n_inputs),
             ('n_outputs', model.n_outputs),
-            ('oversample', oversample),
             ('psf', psf),
             ('_model', model),
         ])
@@ -97,8 +168,16 @@ class PSFModel(FittableModel):
         new_model.fixed.update(model.fixed)
         new_model.bounds.update(model.bounds)
 
+        # add oversample regions
+        if oversample is not None:
+            if isinstance(oversample, int) or isinstance(oversample, tuple):
+                new_model.oversample = oversample
+            else:
+                raise ValueError("oversample should be a single int factor or a tuple (x, y, size, factor).")
+
         # Return new model
         return new_model
+
 
 @custom_model
 def Nuker2D(x, y, amplitude=1, r_eff=1, x_0=0, y_0=0, a=1, b=2, g=0, ellip=0, theta=0):
