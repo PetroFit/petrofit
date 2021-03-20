@@ -9,6 +9,17 @@ from astropy.convolution import convolve
 from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model
 
+import os
+from collections import OrderedDict
+
+import numpy as np
+
+from scipy.ndimage import rotate
+
+from astropy.convolution import convolve
+from astropy.nddata import block_reduce
+from astropy.modeling import FittableModel, Parameter, custom_model
+
 
 def make_grid(size, factor=1):
     assert isinstance(factor, int)
@@ -76,29 +87,36 @@ class PSFModel(FittableModel):
             sub_grid_x0, sub_grid_y0, sub_grid_size, sub_grid_factor = self.oversample
 
             if isinstance(sub_grid_x0, str):
+                assert sub_grid_x0 in self._model.param_names, "oversample param '{}' is not in the wrapped model param list".format(
+                    sub_grid_x0)
+
                 idx = self._model.param_names.index(sub_grid_x0)
-                sub_grid_x0 = np.round(args[self.n_inputs:][idx][0])
+                sub_grid_x0 = args[self.n_inputs:][idx][0]
 
             if isinstance(sub_grid_y0, str):
+                assert sub_grid_y0 in self._model.param_names, "oversample param '{}' is not in the wrapped model param list".format(
+                    sub_grid_y0)
+
                 idx = self._model.param_names.index(sub_grid_y0)
-                sub_grid_y0 = np.round(args[self.n_inputs:][idx][0])
+                sub_grid_y0 = args[self.n_inputs:][idx][0]
 
             x_sub_grid, y_sub_grid = make_grid(sub_grid_size, factor=sub_grid_factor)
 
-            x_sub_grid += sub_grid_x0 - sub_grid_size // 2
-            y_sub_grid += sub_grid_y0 - sub_grid_size // 2
+            x_sub_grid += int(sub_grid_x0) - sub_grid_size // 2
+            y_sub_grid += int(sub_grid_y0) - sub_grid_size // 2
 
             sub_model_oversampled_image = self._model.evaluate(x_sub_grid, y_sub_grid, *args[self.n_inputs:])
 
-            over_sampled_sub_model_x0 = np.argmin(
-                np.abs(x_sub_grid[0, :] - 1 / (2 * sub_grid_factor) - (sub_grid_x0 * sub_grid_factor)))
-            over_sampled_sub_model_y0 = np.argmin(
-                np.abs(y_sub_grid[:, 0] - 1 / (2 * sub_grid_factor) - (sub_grid_y0 * sub_grid_factor)))
-
-            sub_model_oversampled_image[
-                over_sampled_sub_model_y0,
-                over_sampled_sub_model_x0
-            ] = self._model.evaluate(sub_grid_x0, sub_grid_y0, *args[self.n_inputs:])
+            # Experimental  
+            # over_sampled_sub_model_x0 = np.argmin(
+            #     np.abs(x_sub_grid[0, :] - 1 / (2 * sub_grid_factor) - (sub_grid_x0 * sub_grid_factor)))
+            # over_sampled_sub_model_y0 = np.argmin(
+            #     np.abs(y_sub_grid[:, 0] - 1 / (2 * sub_grid_factor) - (sub_grid_y0 * sub_grid_factor)))
+            #
+            # sub_model_oversampled_image[
+            #     over_sampled_sub_model_y0,
+            #     over_sampled_sub_model_x0
+            # ] = self._model.evaluate(sub_grid_x0, sub_grid_y0, *args[self.n_inputs:])
 
             sub_model_image = block_reduce(sub_model_oversampled_image, sub_grid_factor) / sub_grid_factor ** 2
 
@@ -120,7 +138,7 @@ class PSFModel(FittableModel):
     @property
     def model(self):
 
-        model = self._model
+        model = self._model.copy()
         for param in model.param_names:
             setattr(model, param, getattr(self, param).value)
 
@@ -137,6 +155,8 @@ class PSFModel(FittableModel):
 
     @staticmethod
     def wrap(model, psf=None, oversample=None):
+        if isinstance(model, PSFModel):
+            raise TypeError("Can not wrap a PSFModel, try: PSFModel.wrap(psf_model.model)")
 
         # Extract model params
         params = OrderedDict(
