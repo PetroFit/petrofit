@@ -28,7 +28,6 @@ def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None,
 
     all_n_data = {}
 
-    print("Start...")
     with ProgressBar(len(r_eff_list) * len(n_list)) as bar:
         for r_eff_idx, r_eff in enumerate(r_eff_list):
 
@@ -60,7 +59,6 @@ def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None,
                     n=n
                 )
                 r_total_flux = r_total_flux * 1.5
-                print(r_eff, n, r_total_flux)
 
                 image_size = int(r_total_flux * 2)
                 x_0 = image_size // 2
@@ -91,7 +89,9 @@ def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None,
 
                 flux_list, area_list, err = photometry_step((x_0, y_0), r_list, galaxy_image, plot=plot,
                                                             vmax=amplitude / 100)
-                plt.show()
+                if plot:
+                    print(r_eff, n, r_total_flux)
+                    plt.show()
 
                 # Petrosian from Photometry
                 p = Petrosian(r_list, area_list, flux_list)
