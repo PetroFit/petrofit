@@ -572,4 +572,3 @@ class PetrosianCorrection:
             if verbose:
                 print("Could not estimate n for {}, returning closest".format(c2080pet))
             return 2
-

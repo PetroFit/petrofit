@@ -4,21 +4,11 @@ from collections import OrderedDict
 import numpy as np
 
 from scipy.ndimage import rotate
+from scipy.special import gammainc, gamma, gammaincinv
 
 from astropy.convolution import convolve
 from astropy.nddata import block_reduce
-from astropy.modeling import FittableModel, Parameter, custom_model
-
-import os
-from collections import OrderedDict
-
-import numpy as np
-
-from scipy.ndimage import rotate
-
-from astropy.convolution import convolve
-from astropy.nddata import block_reduce
-from astropy.modeling import FittableModel, Parameter, custom_model
+from astropy.modeling import FittableModel, Parameter, custom_model, models
 
 
 def make_grid(size, factor=1):
@@ -230,3 +220,55 @@ def EllipMoffat2D(x, y, amplitude=1.0, x_0=0.0, y_0=0.0, gamma=1.0, alpha=1.0, e
     rr_gg = (z) / gamma ** 2
 
     return amplitude * (1 + rr_gg) ** (-alpha)
+
+
+def sersic_enclosed(
+        r,
+        amplitude,
+        r_eff,
+        n,
+):
+    bn = gammaincinv(2. * n, 0.5)
+    x = bn * (r / r_eff) ** (1 / n)
+    g = gamma(2. * n) * gammainc(2. * n, x)
+
+    return amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * g
+
+
+def sersic_enclosed_inv(
+        f,
+        amplitude,
+        r_eff,
+        n,
+):
+    bn = gammaincinv(2. * n, 0.5)
+    g = f / (amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)))
+
+    x = gammaincinv(2. * n, g / gamma(2. * n))
+
+    return (x / bn) ** n * r_eff
+
+
+@custom_model
+def sersic_enclosed_model(
+        x,
+        amplitude=1000,
+        r_eff=30,
+        n=2,
+):
+    return sersic_enclosed(x, amplitude, r_eff, n)
+
+
+def petrosian(r, r_eff, n):
+    bn = models.Sersic2D._gammaincinv(2. * n, 0.5)
+
+    x = bn * (r / r_eff) ** (1 / n)
+
+    g = gamma(2 * n) * gammainc(2 * n, x)
+
+    return (np.exp(-x) * x ** (2 * n)) / (2 * n * g)
+
+
+@custom_model
+def petrosian_model(x, r_eff=1, n=4):
+    return petrosian(x, r_eff, n)
