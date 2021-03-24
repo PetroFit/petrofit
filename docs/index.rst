@@ -1,14 +1,15 @@
-Documentation
-=============
 
-This is the documentation for petrofit.
+##########################
+PetroFit: Petrosian Fitter
+##########################
+
+PetroFit is a package for calculating Petrosian properties, such as radii and consecration indices, as well as fitting
+galaxy light profiles. This package includes tools for preforming accurate photometry, segmentations, Petrosian properties
+and fitting. This documentation is intended to serve as a description and guide to the `petrofit` module.
+
 
 .. toctree::
+  :caption: Table of Contents
   :maxdepth: 2
 
-  petrofit/index.rst
-
-.. note:: The layout of this directory is simply a suggestion.  To follow
-          traditional practice, do *not* edit this page, but instead place
-          all documentation for the package inside ``petrofit/``.
-          You can follow this practice or choose your own layout.
+  installation

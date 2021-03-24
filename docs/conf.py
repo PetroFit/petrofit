@@ -64,10 +64,14 @@ exclude_patterns.append('_templates')
 rst_epilog += """
 """
 
+extensions += [
+    'nbsphinx'
+]
+
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = setup_cfg['name']
+project = "PetroFit" #setup_cfg['name']
 author = setup_cfg['author']
 copyright = '{0}, {1}'.format(
     datetime.datetime.now().year, setup_cfg['author'])
@@ -102,14 +106,17 @@ release = package.__version__
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes. To override the custom theme, set this to the
 # name of a builtin theme or the name of a custom theme in html_theme_path.
-#html_theme = None
+html_theme = "sphinx_rtd_theme"
 
+html_logo = "./images/petrofit_logo_no_bg.png"
 
 html_theme_options = {
-    'logotext1': 'petrofit',  # white,  semi-bold
-    'logotext2': '',  # orange, light
-    'logotext3': ':docs'   # white,  light
-    }
+    'style_nav_header_background': 'linear-gradient(90deg, #00B0F0 0%, #8D00ED 100%)',
+}
+#     'logotext1': 'petrofit',  # white,  semi-bold
+#     'logotext2': '',  # orange, light
+#     'logotext3': ':docs'   # white,  light
+#     }
 
 
 # Custom sidebar templates, maps document names to template names.
