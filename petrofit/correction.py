@@ -17,8 +17,47 @@ from .fitting.fitting import model_to_image
 from .petrosian import Petrosian
 
 
-def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None, oversample=('x_0', 'y_0', 10, 10),
-                                         plot=True, output_yaml_name=None):
+def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=None, n_list=None,
+                                         oversample=('x_0', 'y_0', 10, 10), plot=True):
+    """
+    This function generates corrections for Petrosian radii by simulating a galaxy image and measuring its properties.
+    This is done to identify the correct `epsilon` value that, multiplied with `r_petrosian`, would give `r_total_flux`.
+    To achieve this, an image created from a Sersic model and convolved with a PSF (if provided). The Petrosian radii
+    and concentrations are computed using the default `epsilon` = 2. Since the real `r_total_flux` of the simulated galaxy
+    is known, the correct `epsilon` can be determined by `epsilon = r_petrosian / r_total_flux`. The resulting grid will
+    be used to map measured `r_petrosian` and `C2080` to the correct `epsilon` value. After the gird is computed, it
+    will be saved to a yaml file which is readable by `petrofit.petrosian.PetrosianCorrection`.
+
+    Parameters
+    ----------
+    output_yaml_name : str
+        Name of output file, must be .yaml or .yml
+
+    psf : numpy.array
+        2D PSF image to pass to `petrofit.fitting.models.PSFModel`
+
+    r_eff_list : list, (optional)
+        List of `r_eff` (half light radii) in pixels to evaluate.
+
+    n_list : list, (optional)
+        List of Sersic indices to evaluate.
+
+    oversample : int or tuple
+        oversampling to pass to `petrofit.fitting.models.PSFModel`
+
+    plot : bool
+        Shows plot of photometry and Petrosian
+
+    Returns
+    -------
+    petrosian_grid : dict
+        Dictionary that is readable by `petrofit.petrosian.PetrosianCorrection`
+
+    Writes
+    ------
+    petrosian_grid : dict -> output_yaml_name
+        Yaml file that is readable by `petrofit.petrosian.PetrosianCorrection`.
+    """
 
     if r_eff_list is None:
         r_eff_list = np.arange(10, 100, 5)
@@ -26,7 +65,7 @@ def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None,
     if n_list is None:
         n_list = np.arange(1, 6., .5)
 
-    all_n_data = {}
+    petrosian_grid = {}
 
     with ProgressBar(len(r_eff_list) * len(n_list)) as bar:
         for r_eff_idx, r_eff in enumerate(r_eff_list):
@@ -122,7 +161,7 @@ def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None,
                 epsilon_list_output.append(corrected_epsilon)
                 r_p_hl_list_output.append(corrected_p.r_half_light)
 
-            all_n_data[r_eff] = {
+            petrosian_grid[r_eff] = {
                 'c_index': c_pet_list_output,
                 'n': n_list_output,
                 'r_petrosian': r_p_list_output,
@@ -130,9 +169,10 @@ def generate_petrosian_sersic_correction(psf=None, r_eff_list=None, n_list=None,
                 'r_hl_petrosian': r_p_hl_list_output
             }
 
-    if output_yaml_name is None:
-        output_yaml_name = "sersic_correction_grid.yaml"
+    if output_yaml_name is not None:
 
-    with open(output_yaml_name, 'w') as outfile:
-        print(outfile.name)
-        yaml.dump(all_n_data, outfile)
+        with open(output_yaml_name, 'w') as outfile:
+            print(outfile.name)
+            yaml.dump(petrosian_grid, outfile)
+
+    return petrosian_grid
