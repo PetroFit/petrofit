@@ -1,15 +1,15 @@
-Petrosian library
------------------
+.. image:: docs/images/petrofit_full_logo.png
+    :width: 100%
 
-.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-    :target: http://www.astropy.org
-    :alt: Powered by Astropy Badge
+Petrosian Fitter (PetroFit)
+---------------------------
 
+Package for calculating Petrosian properties and fitting galaxy light profiles.
 
 License
 -------
 
-This project is Copyright (c) Robel Geda, Steve Crawford, Lucas Hunt and licensed under
+This project is Copyright (c) The PetroFit Team and licensed under
 the terms of the BSD 3-Clause license. This package is based upon
 the `Astropy package template <https://github.com/astropy/package-template>`_
 which is licensed under the BSD 3-clause license. See the licenses folder for

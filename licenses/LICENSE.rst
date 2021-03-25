@@ -1,4 +1,4 @@
-Copyright 2021 Robel Geda, Steve Crawford, Lucas Hunt
+Copyright 2021 The PetroFit Team
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
