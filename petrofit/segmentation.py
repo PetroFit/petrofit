@@ -5,7 +5,7 @@ import numpy as np
 from photutils import detect_threshold
 from photutils import deblend_sources
 from photutils import detect_sources
-from photutils.segmentation.properties import SourceProperties
+from photutils.segmentation import SourceCatalog
 
 from astropy.convolution import Gaussian2DKernel
 from astropy.stats import gaussian_fwhm_to_sigma
@@ -18,12 +18,13 @@ __all__ = [
     'make_segments', 'deblend_segments'
 ]
 
+
 def plot_segments(segm, image=None, vmin=None, vmax=None, alpha=0.5):
     """
-    Plot segmented areas over an image (if provided)
+    Plot segmented areas over an image (2D array, if provided)
     """
 
-    cmap = segm.make_cmap(random_state=np.random.randint(1000000))
+    cmap = segm.make_cmap(seed=np.random.randint(1000000))
 
     if image is not None:
         plt.imshow(image, vmin=vmin, vmax=vmax, cmap="gist_gray")
@@ -31,6 +32,8 @@ def plot_segments(segm, image=None, vmin=None, vmax=None, alpha=0.5):
     plt.imshow(segm, cmap=cmap, alpha=alpha)
 
     plt.title('Segmentation Image')
+    plt.xlabel("Pixels")
+    plt.ylabel("Pixels")
 
 
 def plot_segment_residual(segm, image, vmin=None, vmax=None):
@@ -42,28 +45,28 @@ def plot_segment_residual(segm, image, vmin=None, vmax=None):
     plt.imshow(temp, vmin=vmin, vmax=vmax)
 
 
-def get_source_position(obj):
-    """Return max x, y value of a SourceProperties or catalog row"""
-    if isinstance(obj, SourceProperties):
-        x, y = obj.maxval_xpos.value, obj.maxval_ypos.value
+def get_source_position(source):
+    """Return max x, y value of a SourceCatalog or catalog row"""
+    if isinstance(source, SourceCatalog):
+        x, y = source.maxval_xindex, source.maxval_yindex
     else:
-        x, y = obj['maxval_xpos'], obj['maxval_ypos']
+        x, y = source['maxval_xindex'], source['maxval_yindex']
     return x, y
 
 
-def get_source_elong(obj):
-    """ Return SourceProperties elongation"""
-    return obj.elongation.value if isinstance(obj, SourceProperties) else obj['elongation']
+def get_source_elong(source):
+    """ Return SourceCatalog elongation"""
+    return source.elongation.value if isinstance(source, SourceCatalog) else source['elongation']
 
 
-def get_source_ellip(obj):
-    """ Return SourceProperties ellipticity"""
-    return obj.ellipticity.value if isinstance(obj, SourceProperties) else obj['ellipticity']
+def get_source_ellip(source):
+    """ Return SourceCatalog ellipticity"""
+    return source.ellipticity.value if isinstance(source, SourceCatalog) else source['ellipticity']
 
 
-def get_source_theta(obj):
-    """ Return SourceProperties orientation in rad"""
-    return obj.orientation.to('rad').value if isinstance(obj, SourceProperties) else np.deg2rad(obj['orientation'])
+def get_source_theta(source):
+    """ Return SourceCatalog orientation in rad"""
+    return source.orientation.to('rad').value if isinstance(source, SourceCatalog) else np.deg2rad(source['orientation'])
 
 
 def make_kernel(fwhm, kernel_size):
@@ -73,16 +76,16 @@ def make_kernel(fwhm, kernel_size):
     return kernel
 
 
-def segm_mask(obj, segm, mask_background=False):
+def segm_mask(source, segm, mask_background=False):
     """
-    Given a segmentation and a target with an ID, returns a mask
+    Given a segmentation and a target with an label, returns a mask
     with all other sources masked in the original image.
 
     Parameters
     ----------
 
-    obj : int or photutils.segmentation.properties.SourceProperties
-        The catalog object for the target or id of target in the segmentation object.
+    source : int or photutils.segmentation.properties.SourceCatalog
+        The catalog object for the target or label of target in the segmentation object.
 
     segm : photutils.segmentation.core.SegmentationImage
         Segmentation image.
@@ -96,23 +99,23 @@ def segm_mask(obj, segm, mask_background=False):
     mask : bool array
     """
 
-    if isinstance(obj, SourceProperties):
-        obj = obj.id
+    if isinstance(source, SourceCatalog):
+        source = source.label
 
-    mask = (segm.data == obj)
+    mask = (segm.data == source)
     if not mask_background:
         mask = ((segm.data == 0) | mask)
     return mask
 
 
-def masked_segm_image(obj, image, segm, fill=None, mask_background=False):
+def masked_segm_image(source, image, segm, fill=None, mask_background=False):
     """
     Returns a masked image of the original image by masking out other sources
     Parameters
     ----------
 
-    obj : int or photutils.segmentation.properties.SourceProperties
-        The catalog object for the target or id of target in the segmentation object.
+    source : int or photutils.segmentation.properties.SourceCatalog
+        The catalog object for the target or label of target in the segmentation object.
 
     image : CCDData or array
         Image to mask.
@@ -133,7 +136,7 @@ def masked_segm_image(obj, image, segm, fill=None, mask_background=False):
     """
 
     fill = np.nan if fill is None else fill
-    mask = segm_mask(obj, segm, mask_background)
+    mask = segm_mask(source, segm, mask_background)
 
     masked_image = deepcopy(image)
 

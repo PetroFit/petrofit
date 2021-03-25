@@ -41,8 +41,6 @@ environment as follows:
 
     python setup.py install
 
-|
-
 Docker
 ******
 

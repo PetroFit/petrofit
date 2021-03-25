@@ -268,16 +268,16 @@ def photometry_step(position, r_list, image, error=None, mask=None, elong=1., th
     return np.array(flux_arr), np.array(area_arr), np.array(error_arr)
 
 
-def object_photometry(obj, image, segm_deblend, r_list, error=None, cutout_size=None,
+def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_size=None,
                       bkg_sub=False, sigma=3.0, sigma_type='clip', method='exact', mask_background=False,
                       plot=False, vmin=0, vmax=None, ):
     """
-    Aperture photometry on a PhotUtils `SourceProperties` object.
+    Aperture photometry on a PhotUtils `SourceProperties`.
 
     Parameters
     ----------
-    obj : `photutils.segmentation.SourceProperties`
-        `SourceProperties` object (an entry in a `SourceCatalog`)
+    source : `photutils.segmentation.SourceProperties`
+        `SourceProperties` (an entry in a `SourceCatalog`)
 
     image : 2D array
         Image to preform photometry on.
@@ -366,11 +366,11 @@ def object_photometry(obj, image, segm_deblend, r_list, error=None, cutout_size=
             * `error_arr`: if error map is provided, error of measurements.
     """
 
-    # Get object geometry
+    # Get source geometry
     # -------------------
-    position = get_source_position(obj)
-    elong = get_source_elong(obj)
-    theta = get_source_theta(obj)
+    position = get_source_position(source)
+    elong = get_source_elong(source)
+    theta = get_source_theta(source)
 
     if cutout_size is None:
         cutout_size = np.ceil(max(r_list) * 3)
@@ -387,14 +387,14 @@ def object_photometry(obj, image, segm_deblend, r_list, error=None, cutout_size=
 
     # Image Cutout
     # ------------
-    full_masked_image = masked_segm_image(obj, image, segm_deblend, fill=np.nan, mask_background=mask_background).data
+    full_masked_image = masked_segm_image(source, image, segm_deblend, fill=np.nan, mask_background=mask_background).data
     masked_nan_image = Cutout2D(full_masked_image, position, cutout_size, mode='partial', fill_value=np.nan)
     masked_image = masked_nan_image.data
 
     # Cutout for Stats
     # ----------------
     # This cutout has all sources masked
-    stats_cutout_size = cutout_size  # max(obj.bbox.ixmax - obj.bbox.ixmin, obj.bbox.iymax - obj.bbox.iymin) * 2
+    stats_cutout_size = cutout_size  # max(source.bbox.ixmax - source.bbox.ixmin, source.bbox.iymax - source.bbox.iymin) * 2
     full_bg_image = masked_segm_image(0, image, segm_deblend, fill=np.nan, mask_background=False).data
     masked_stats_image = Cutout2D(full_bg_image, position, stats_cutout_size, mode='partial', fill_value=np.nan).data
 
@@ -446,7 +446,7 @@ def object_photometry(obj, image, segm_deblend, r_list, error=None, cutout_size=
     position = np.array(masked_image.data.shape) / 2.
 
     if plot:
-        print(obj.id)
+        print(source.label)
         fig, ax = plt.subplots(1, 2, figsize=[24, 12])
 
     if plot:
@@ -486,3 +486,6 @@ def object_photometry(obj, image, segm_deblend, r_list, error=None, cutout_size=
         plt.ylabel("Flux")
 
     return flux_arr, area_arr, error_arr
+
+
+object_photometry = source_photometry  # Legacy

@@ -13,3 +13,4 @@ and fitting. This documentation is intended to serve as a description and guide 
   :maxdepth: 2
 
   installation
+  photometry
