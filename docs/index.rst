@@ -10,7 +10,7 @@ and fitting. This documentation is intended to serve as a description and guide 
 
 .. toctree::
   :caption: Table of Contents
-  :maxdepth: 2
+  :maxdepth: 3
 
   installation
-  photometry
+  photometry_and_petrosian

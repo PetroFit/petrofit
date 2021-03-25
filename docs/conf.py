@@ -109,7 +109,7 @@ release = package.__version__
 html_theme = "sphinx_rtd_theme"
 
 html_logo = "./images/petrofit_logo_no_bg.png"
-
+html_favicon = './images/petrofit_logo.ico'
 html_theme_options = {
     'style_nav_header_background': 'linear-gradient(90deg, #00B0F0 0%, #8D00ED 100%)',
 }
