@@ -243,7 +243,11 @@ def photometry_step(position, r_list, image, error=None, mask=None, elong=1., th
     area_arr = []
 
     if plot:
+        ax = plt.gca()
         plt.imshow(image, vmin=vmin, vmax=image.mean() * 10 if vmax is None else vmax)
+        ax.set_title("Image and Aperture Radii")
+        ax.set_xlabel("Pixels")
+        ax.set_ylabel("Pixels")
 
     mask = ~mask if mask is not None else None
     for i, r in enumerate(r_list):
@@ -262,6 +266,7 @@ def photometry_step(position, r_list, image, error=None, mask=None, elong=1., th
 
         if plot:
             aperture.plot(plt.gca(), color='w', alpha=0.5)
+
 
         flux_arr.append(photometric_value)
         area_arr.append(aperture_area)
@@ -463,6 +468,9 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
         plt.plot(r_list, flux_arr, c='black', linewidth=3)
         for r in r_list:
             plt.axvline(r, alpha=0.5, c='r')
+        plt.title("Curve of Growth")
+        plt.xlabel("Radius in Pixels")
+        plt.ylabel("Flux Enclosed")
         plt.show()
 
         r = max(r_list)
