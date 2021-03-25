@@ -39,7 +39,7 @@ dependencies:
   - notebook
 
   # Dependencies
-  - photutils
+  - photutils>=1.1.0
   - ipywidgets
 
   # Docs

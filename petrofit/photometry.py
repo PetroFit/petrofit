@@ -48,6 +48,8 @@ def plot_apertures(image=None, apertures=[], vmin=None, vmax=None, color='white'
 
 def flux_to_abmag(flux, header):
     """Convert HST flux to AB Mag"""
+    flux = np.array(flux)
+    flux[np.where(flux <= 0)] = np.nan
 
     PHOTFLAM = header['PHOTFLAM']
     PHOTZPT = header['PHOTZPT']
