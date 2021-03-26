@@ -14,3 +14,4 @@ and fitting. This documentation is intended to serve as a description and guide 
 
   installation
   photometry_and_petrosian
+  fitting
