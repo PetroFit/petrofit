@@ -68,6 +68,8 @@ extensions += [
     'nbsphinx'
 ]
 
+nbsphinx_execute = 'always'
+
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
