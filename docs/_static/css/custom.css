@@ -1,0 +1,60 @@
+@import url("theme.css");
+
+.wy-nav-content {
+    padding: 1.618em 3.236em;
+    height: 100%;
+    max-width: 90%;
+    /*max-width: 800px;*/
+    margin: auto;
+    background-color: #ffffff;
+}
+
+.document{
+    margin: auto;
+    max-width: 850px;
+}
+
+.wy-side-nav-search {
+    /*background color of the top search bar*/
+    background-color: #43B02A;
+}
+
+.section h1 {
+    /*header 1 text color */
+    /*color: #3061f3;*/
+    color: #333333;
+    /*color: #55a5d9;*/
+    font-size: 240%;
+ }
+
+.rst-content .toctree-wrapper p.caption, h2, h3, h4, h5, h6, legend {
+    /*text color of rst content and subheads*/
+    color: #414042;
+}
+
+.wy-nav-content-wrap {
+    /* background color of wrap around main content*/
+    background-color: white;
+}
+
+.section-title {
+    /*text color of section titles*/
+    color: #3061f3;
+}
+
+.rst-content pre.literal-block, .rst-content div[class^='highlight'] pre, .rst-content .linenodiv pre {
+    /*color of code blocks*/
+    background-color: #f8f8f8
+}
+
+h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
+    /*font formats*/
+    /*font-family: "Proxima Nova","Helvetica","Arial",sans-serif;*/
+    font-family: Georgia, serif;
+}
+
+.wy-nav-top {
+    /*color of nav at top when the window is narrow*/
+    background: linear-gradient(90deg, #00B0F0 0%, #8D00ED 100%);
+}
+

@@ -1,14 +1,37 @@
-Documentation
-=============
 
-This is the documentation for petrofit.
+##########################
+PetroFit: Petrosian Fitter
+##########################
+
+PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
+galaxy light profiles. This package includes tools for preforming accurate photometry, segmentations, Petrosian properties
+and fitting. This documentation is intended to serve as a description and guide to the `petrofit` module.
+
+.. image:: ./images/multi_fit.png
+    :width: 100%
+    :align: center
+
+PetroFit is built on the `Photutils packge <https://photutils.readthedocs.io/en/stable/>`.
+    
+    
+.. toctree::
+    :caption: Fundamentals
+    :maxdepth: 3
+
+    installation
+    introduction
+    photometry_and_petrosian
+    fitting
 
 .. toctree::
-  :maxdepth: 2
+    :caption: Advanced
+    :maxdepth: 3
 
-  petrofit/index.rst
+    multi_object
 
-.. note:: The layout of this directory is simply a suggestion.  To follow
-          traditional practice, do *not* edit this page, but instead place
-          all documentation for the package inside ``petrofit/``.
-          You can follow this practice or choose your own layout.
+.. toctree::
+    :caption: Developer
+    :maxdepth: 1
+
+    api_reference
+    correction_grids

@@ -58,16 +58,25 @@ highlight_language = 'python3'
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns.append('_templates')
+exclude_patterns.append('images/*ipynb')
 
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 rst_epilog += """
 """
 
+extensions += [
+    'nbsphinx',
+    'sphinx_automodapi.automodapi',
+    'sphinx_automodapi.smart_resolver'
+]
+
+nbsphinx_execute = 'auto'
+
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = setup_cfg['name']
+project = "PetroFit" #setup_cfg['name']
 author = setup_cfg['author']
 copyright = '{0}, {1}'.format(
     datetime.datetime.now().year, setup_cfg['author'])
@@ -102,14 +111,21 @@ release = package.__version__
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes. To override the custom theme, set this to the
 # name of a builtin theme or the name of a custom theme in html_theme_path.
-#html_theme = None
+html_theme = "sphinx_rtd_theme"
 
-
+html_logo = "./images/petrofit_logo_no_bg.png"
+html_favicon = './images/petrofit_logo.ico'
 html_theme_options = {
-    'logotext1': 'petrofit',  # white,  semi-bold
-    'logotext2': '',  # orange, light
-    'logotext3': ':docs'   # white,  light
-    }
+    'style_nav_header_background': 'linear-gradient(90deg, #00B0F0 0%, #8D00ED 100%)',
+}
+
+html_static_path = ['_static']
+html_css_files = ["css/custom.css"]
+
+#     'logotext1': 'petrofit',  # white,  semi-bold
+#     'logotext2': '',  # orange, light
+#     'logotext3': ':docs'   # white,  light
+#     }
 
 
 # Custom sidebar templates, maps document names to template names.
