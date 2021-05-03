@@ -8,6 +8,7 @@ recursive-include petrofit *.pyx *.c *.pxd
 recursive-include docs *
 recursive-include licenses *
 recursive-include scripts *
+recursive-include petrofit/tests *yaml *yml
 
 prune build
 prune docs/_build
