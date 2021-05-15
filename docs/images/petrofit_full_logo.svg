@@ -70,11 +70,11 @@
      inkscape:document-rotation="0"
      showgrid="false"
      units="px"
-     inkscape:window-width="1920"
+     inkscape:window-width="1373"
      inkscape:window-height="1015"
-     inkscape:window-x="0"
+     inkscape:window-x="546"
      inkscape:window-y="0"
-     inkscape:window-maximized="1"
+     inkscape:window-maximized="0"
      width="467px" />
   <metadata
      id="metadata2046">
@@ -103,6 +103,13 @@
     <g
        id="g892"
        transform="matrix(1.5861238,0,0,1.5861238,-321.37799,573.63812)">
+      <rect
+         style="fill:#ffffff;stroke-width:0.340516"
+         id="rect858"
+         width="41.035706"
+         height="10.008709"
+         x="202.61848"
+         y="-361.6604" />
       <g
          id="g2113"
          transform="matrix(0.07837996,0,0,0.07837996,199.997,-361.2184)">

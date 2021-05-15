@@ -13,7 +13,10 @@
    version="1.1"
    id="svg2049"
    sodipodi:docname="petrofit_logo_no_bg.svg"
-   inkscape:version="1.0.2 (1.0.2+r75+1)">
+   inkscape:version="1.0.2 (1.0.2+r75+1)"
+   inkscape:export-filename="/home/robel/project/repo/petrofit/docs/images/petrofit_logo_no_bg.png"
+   inkscape:export-xdpi="25.4"
+   inkscape:export-ydpi="25.4">
   <defs
      id="defs2043" />
   <sodipodi:namedview
@@ -24,7 +27,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.49497475"
-     inkscape:cx="-219.77086"
+     inkscape:cx="-250.07544"
      inkscape:cy="388.39497"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
@@ -44,7 +47,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -53,7 +56,8 @@
      inkscape:groupmode="layer"
      id="layer1">
     <g
-       id="g2256">
+       id="g2256"
+       transform="matrix(1.1218074,0,0,1.1218074,-1.4073883,0.22501469)">
       <path
          style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.559526"
          d="m 5.0145015,137.03051 1.169607,4.5141 1.0631479,3.0077 24.0793836,0.0206 c 6.532818,0.005 13.14578,0.2147 19.443217,-2.34732 18.858458,-7.67323 29.979937,-33.20357 35.891185,-55.426317 1.730965,-6.508566 3.350221,-13.264227 3.992404,-20.095195 h 0.498506 c 2.433409,19.561392 8.997738,39.661612 18.682418,55.261762 5.47205,8.81366 12.62268,16.69282 21.20111,20.19126 6.63911,2.70783 13.55539,2.41581 20.44029,2.41581 v 0 l -0.49854,-7.53568 v 0 c 0,0 -13.15659,0.29 -19.44321,-2.93324 -9.61341,-4.929 -16.82786,-15.64536 -22.07055,-26.58154 C 98.122097,83.866063 94.143206,55.034099 94.143206,27.769634 c -1.630725,0.0066 -4.052665,-0.415488 -5.397258,1.021829 -1.149637,1.229228 -1.050898,3.547271 -1.075336,5.26263 -0.05751,4.006921 -0.146658,7.932158 -0.424782,11.926785 -1.35654,19.469574 -5.258134,39.116571 -12.443141,56.517732 -5.622569,13.617 -14.56796,27.72132 -26.525535,32.72125 -5.46256,2.28396 -11.282451,1.81736 -16.950514,1.81736 z"
