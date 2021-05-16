@@ -85,11 +85,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="180.09366"
-     inkscape:cy="57.596346"
+     inkscape:zoom="4"
+     inkscape:cx="115.44221"
+     inkscape:cy="53.715247"
      inkscape:document-units="mm"
-     inkscape:current-layer="g1234"
+     inkscape:current-layer="g1377"
      inkscape:document-rotation="0"
      showgrid="false"
      units="px"
@@ -237,14 +237,12 @@
                  id="tspan3860-7-0"
                  x="212.97908"
                  y="-328.1492"
-                 style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;line-height:1.25;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro';fill:#4d4d4d;fill-opacity:1;stroke-width:0.0400437">Powerd by <tspan
-   style="font-weight:bold;font-size:1.77933px"
-   id="tspan1414">Astro</tspan><tspan
-   style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:1.77933px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
+                 style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;line-height:1.25;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro';fill:#4d4d4d;fill-opacity:1;stroke-width:0.0400437">Powerd by Astro<tspan
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
    id="tspan1418">py</tspan> and <tspan
-   style="font-weight:bold;font-size:1.77933px;fill:#084780;fill-opacity:1"
+   style="font-weight:normal;font-size:1.77933px;fill:#084780;fill-opacity:1"
    id="tspan1416">Phot</tspan><tspan
-   style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-size:1.77933px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
    id="tspan1420">utils</tspan></tspan></text>
           </g>
         </g>
