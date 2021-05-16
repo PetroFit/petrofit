@@ -85,11 +85,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="2"
-     inkscape:cx="100.03796"
-     inkscape:cy="62.122121"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="55.53507"
+     inkscape:cy="58.622319"
      inkscape:document-units="mm"
-     inkscape:current-layer="g1234"
+     inkscape:current-layer="g1377"
      inkscape:document-rotation="0"
      showgrid="false"
      units="mm"
@@ -235,19 +235,19 @@
                  x="212.97908"
                  y="-328.8085"
                  id="text3858-9-2"
-                 style="font-size:1.77933px;line-height:0%;stroke-width:0.0400437"><tspan
+                 style="font-size:1.74258px;line-height:0%;stroke-width:0.0400437"><tspan
                    sodipodi:role="line"
                    id="tspan3860-7-0"
                    x="212.97908"
                    y="-328.8085"
-                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;line-height:1.25;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro';fill:#4d4d4d;fill-opacity:1;stroke-width:0.0400437">Powerd by <tspan
-   style="font-weight:bold"
+                   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.74258px;line-height:1.25;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro';fill:#4d4d4d;fill-opacity:1;stroke-width:0.0400437">Powerd by <tspan
+   style="font-weight:bold;font-size:1.74258px"
    id="tspan1014">Astro</tspan><tspan
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.74258px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
    id="tspan1418">py</tspan> and <tspan
-   style="font-weight:bold;font-size:1.77933px;fill:#084780;fill-opacity:1"
+   style="font-weight:bold;font-size:1.74258px;fill:#084780;fill-opacity:1"
    id="tspan1416">Phot</tspan><tspan
-   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.77933px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.74258px;font-family:'Source Sans Pro';-inkscape-font-specification:'Source Sans Pro Light';fill:#ff5000;fill-opacity:1"
    id="tspan1420">utils</tspan></tspan></text>
             </g>
           </g>
