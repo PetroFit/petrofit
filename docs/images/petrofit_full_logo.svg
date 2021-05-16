@@ -60,7 +60,7 @@
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1.0"
-     inkscape:pageopacity="1"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="4"
      inkscape:cx="124.55186"
@@ -103,13 +103,6 @@
     <g
        id="g892"
        transform="matrix(1.5861238,0,0,1.5861238,-321.37799,573.63812)">
-      <rect
-         style="fill:#ffffff;stroke-width:0.340516"
-         id="rect858"
-         width="41.035706"
-         height="10.008709"
-         x="202.61848"
-         y="-361.6604" />
       <g
          id="g2113"
          transform="matrix(0.07837996,0,0,0.07837996,199.997,-361.2184)">
