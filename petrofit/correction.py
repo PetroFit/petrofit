@@ -62,7 +62,7 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
         r_eff_list = np.arange(10, 100 + 5, 5)
 
     if n_list is None:
-        n_list = np.arange(1, 6.0 + 0.5, 0.5)
+        n_list = np.arange(0.5, 6.0 + 0.5, 0.5)
 
     petrosian_grid = {}
 

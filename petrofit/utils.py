@@ -67,6 +67,10 @@ def circle_area_to_r(area):
 
 
 def get_interpolated_values(x, y, num=5000, kind='cubic'):
+
+    if len(x) > num:
+        num = len(x)
+
     f = interp1d(x, y, kind=kind)
     x_new = np.linspace(min(x), max(x), num=num, endpoint=True)
     y_new = f(x_new)

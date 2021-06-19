@@ -91,25 +91,24 @@ def calculate_petrosian(area_list, flux_list):
     petrosian_list = []
 
     last_area = area_list[0]
-    last_I = flux_list[0]
+    last_L = flux_list[0]
     petrosian_value = np.nan
     for i in range(len(area_list)):
         area = area_list[i]
-        I = flux_list[i]
+        L = flux_list[i]
 
         if area != last_area:
             area_of_slice = area - last_area
-            I_at_r = (I - last_I) / area_of_slice
+            I_at_r = (L - last_L) / area_of_slice
 
-            area_within_r = area
-            I_avg_within_r = (I / area_within_r)
+            I_avg_within_r = (L / area)
 
             petrosian_value = I_at_r / I_avg_within_r
 
         petrosian_list.append(petrosian_value)
 
         last_area = area
-        last_I = I
+        last_L = L
 
     return np.array(petrosian_list)
 
