@@ -240,12 +240,13 @@ def sersic_enclosed(
         amplitude,
         r_eff,
         n,
+        ellip=0
 ):
     bn = gammaincinv(2. * n, 0.5)
     x = bn * (r / r_eff) ** (1 / n)
     g = gamma(2. * n) * gammainc(2. * n, x)
 
-    return amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * g
+    return amplitude * (r_eff ** 2) * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * g * (1 - ellip)
 
 
 def sersic_enclosed_inv(
@@ -253,9 +254,10 @@ def sersic_enclosed_inv(
         amplitude,
         r_eff,
         n,
+        ellip=0
 ):
     bn = gammaincinv(2. * n, 0.5)
-    g = f / (amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)))
+    g = f / (amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * (1 - ellip))
 
     x = gammaincinv(2. * n, g / gamma(2. * n))
 
@@ -268,8 +270,9 @@ def sersic_enclosed_model(
         amplitude=1000,
         r_eff=30,
         n=2,
+        ellip=0,
 ):
-    return sersic_enclosed(x, amplitude, r_eff, n)
+    return sersic_enclosed(x, amplitude, r_eff, n, ellip=ellip)
 
 
 def petrosian_profile(r, r_eff, n):

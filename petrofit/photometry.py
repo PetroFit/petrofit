@@ -169,13 +169,15 @@ def calculate_photometic_density(r_list, flux_list, elong=1., theta=0.):
         density.append((flux - last_flux) / (area - last_area))
         last_area, last_flux = area, flux
 
-    return density
+    return np.array(density)
 
 
-def make_radius_list(max_pix, n):
+def make_radius_list(max_pix, n, log=False):
     """Make an array of radii of size n up to max_pix"""
-    r_list = [x * max_pix/n for x in range(1, n+1)]
-    return np.array(r_list)
+    if log:
+        return  np.logspace(0, np.log10(max_pix), num=n, endpoint=True, base=10.0, dtype=float, axis=0)
+    else:
+        return np.array([x * max_pix / n for x in range(1, n + 1)])
 
 
 def photometry_step(position, r_list, image, error=None, mask=None, elong=1., theta=0.,
