@@ -2,6 +2,7 @@ import numpy as np
 
 from astropy.modeling import models, fitting, Parameter
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
+from astropy.stats import sigma_clipped_stats, sigma_clip
 
 from matplotlib import pyplot as plt
 
@@ -114,6 +115,37 @@ def fit_plane(image):
     fitted_plane = fit(model, x_arange, y_arange, z)
 
     return fitted_plane, fit
+
+
+def fit_background(image, model=models.Planar2D(), sigma=3.0):
+    """
+    Fit sigma clipped background image using a user provided model.
+
+    Parameters
+    ----------
+    image : array
+        2D array to fit.
+
+    model : `~astropy.modeling.FittableModel`
+        AstroPy model to sample from. `Planar2D` is used by default.
+
+    sigma : float
+        The sigma value used to determine noise pixels. Once the pixels above this value are masked,
+        the model provided is fit to determine the background.
+
+    Returns
+    -------
+    fitted_model, fitter
+
+        * fitted_model : `~astropy.modeling.FittableModel`
+            A copy of the input model with parameters set by the fitter.
+
+        * fitter : LevMarLSQFitter
+            Fitter used to estimate and set model parameters.
+    """
+
+    fit_bg_image = sigma_clip(image, sigma)
+    return fit_model(fit_bg_image, model)
 
 
 def fit_gaussian2d(image):
