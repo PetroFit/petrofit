@@ -354,7 +354,7 @@ class Petrosian:
     Class that computes and plots Petrosian properties.
     """
 
-    def __init__(self, r_list, area_list, flux_list,
+    def __init__(self, r_list, area_list, flux_list, uncertainties=None,
                  epsilon=2., eta=0.2, verbose=False):
         """
         Initialize Petrosian properties by providing flux information.
@@ -386,6 +386,8 @@ class Petrosian:
         self.r_list = np.array(r_list)
         self.area_list = np.array(area_list)
         self.flux_list = np.array(flux_list)
+
+        self._uncertainties = np.array(uncertainties) if uncertainties is not None else None
 
         assert len(self.r_list) > 2, "At least 3 data points are needed to compute Petrosian."
         assert len(self.r_list.shape), "Input arrays should be one dimensional."
@@ -442,6 +444,17 @@ class Petrosian:
         f = interp1d(self.r_list, self.flux_list, kind='cubic')
         total_flux = f(self.r_total_flux)
         return float(total_flux)
+
+    @property
+    def total_flux_uncertainty(self):
+        """
+        Returns the photometric uncertainty at `r_total_flux` or np.nan if out of range.
+        Note that this does not include errors in estimating `r_total_flux`.
+        """
+        if self._uncertainties is not None and not (min(self.r_list) <= self.r_total_flux <= max(self.r_list)):
+            f = interp1d(self.r_list, self._uncertainties, kind='linear')
+            return f(self.r_total_flux)
+        return np.nan
 
     @property
     def r_half_light(self):
