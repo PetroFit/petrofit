@@ -202,15 +202,41 @@ class PSFModel(FittableModel):
 
 
 @custom_model
-def Nuker2D(x, y, amplitude=1, r_eff=1, x_0=0, y_0=0, a=1, b=2, g=0, ellip=0, theta=0):
+def Nuker2D(x, y, amplitude=1, r_break=1, x_0=0, y_0=0,
+            alpha=2, betta=4, gamma=0):
+
     """Two dimensional Nuker2D model"""
-    A, B = 1 * r_eff, (1 - ellip) * r_eff
+    x_maj = (x - x_0)  + (y - y_0)
+    x_min = -(x - x_0) + (y - y_0)
+    r = np.sqrt((x_maj) ** 2 + (x_min) ** 2)
+
+    r[np.where(r == 0)] = np.nan
+
+    return amplitude *  (2 ** ((betta - gamma) / alpha)) * (r / r_break) ** (- gamma) * (1 + (r / r_break) ** alpha) ** ((gamma - betta) / alpha)
+
+
+@custom_model
+def CoreSersic2D(x, y, amplitude=1, r_eff=1, r_break=1, n=1, x_0=0, y_0=0,
+                 alpha=10, gamma=0.1, ellip=0, theta=0):
+    """
+    Core Sersic model as defined by Graham et al 2003.
+    """
+    bn = gammaincinv(2. * n, 0.5)
+    a, b = r_eff, (1 - ellip) * r_eff
     cos_theta, sin_theta = np.cos(theta), np.sin(theta)
     x_maj = (x - x_0) * cos_theta + (y - y_0) * sin_theta
     x_min = -(x - x_0) * sin_theta + (y - y_0) * cos_theta
-    r = np.sqrt((x_maj / A) ** 2 + (x_min / B) ** 2)
+    r = np.sqrt((x_maj / a) ** 2 + (x_min / b) ** 2)
 
-    return 2 ** ((b - g) / a) * amplitude * (r_eff / r) ** (g) * (1 + (r / r_eff) ** a) ** ((g - b) / a)
+    r[np.where(r == 0)] = np.nan
+
+    I = amplitude * (2 ** -(gamma / alpha)) * np.exp(
+        bn * (2 ** (1 / alpha) * (r_break / r_eff)) ** (1 / n)
+    )
+
+    return I * (1 + (r_break / r) ** (alpha)) ** (gamma / alpha) * np.exp(
+        - bn * ((r ** alpha + r_break ** alpha) / (r_eff) ** alpha) ** (1 / (alpha * n))
+    )
 
 
 @custom_model
