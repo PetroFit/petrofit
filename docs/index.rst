@@ -1,7 +1,7 @@
 
-##########################
-PetroFit: Petrosian Fitter
-##########################
+#########
+PetroFit
+#########
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. This package includes tools for preforming accurate photometry, segmentations, Petrosian properties
