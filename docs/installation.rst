@@ -7,6 +7,13 @@ and install the package. There are two recommended ways to install the requireme
 `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_ and
 `Docker <https://docs.docker.com/get-docker/>`_.
 
+PIP
+****
+Petrofit can be installed using pip as follows:
+
+.. code-block:: bash
+
+    pip install petrofit
 
 Conda
 *****
