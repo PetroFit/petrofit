@@ -5,8 +5,8 @@ import numpy as np
 
 from scipy.ndimage import rotate
 from scipy.special import gammainc, gamma, gammaincinv
+from scipy.signal import convolve
 
-from astropy.convolution import convolve
 from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
@@ -135,7 +135,7 @@ class PSFModel(FittableModel):
             psf = self.psf
             if psf_p[0] != 0:
                 psf = rotate(psf, psf_p[0], reshape=False)
-            return convolve(model_image, psf)[y.astype(int), x.astype(int)]
+            return convolve(model_image, psf, mode='same')[y.astype(int), x.astype(int)]
 
     @property
     def model(self):
