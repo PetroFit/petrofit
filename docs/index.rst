@@ -35,3 +35,4 @@ PetroFit is built on the `Photutils packge <https://photutils.readthedocs.io/en/
 
     api_reference
     correction_grids
+    release_procedure
