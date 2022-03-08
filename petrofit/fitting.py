@@ -7,7 +7,7 @@ from astropy.stats import sigma_clipped_stats, sigma_clip
 from matplotlib import pyplot as plt
 
 __all__ = [
-    'fit_model', 'model_to_image', 'fit_plane',
+    'fit_model', 'model_to_image', 'fit_background',
     'fit_gaussian2d', 'print_model_params', 'plot_fit'
 ]
 
