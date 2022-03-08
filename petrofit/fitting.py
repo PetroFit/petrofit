@@ -84,8 +84,8 @@ def model_to_image(x, y, size, model):
         2D image of the model.
     """
     y_arange, x_arange = np.mgrid[
-                         int(y) - size//2:int(y) + size//2,
-                         int(x) - size//2:int(x) + size//2, ]
+                         int(y) - size//2:int(y) + size//2 + size%2,
+                         int(x) - size//2:int(x) + size//2 + size%2, ]
     return model(x_arange, y_arange)
 
 
