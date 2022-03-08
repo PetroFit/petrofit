@@ -12,7 +12,7 @@ Version 0.4.0
 **PetroFit Improvements**
 
 - Removed kcorrect from Docker file. [:pr:`77`, :user:`robelgeda`]
-
+- Added badges to `README.rst`.
 
 **General bug fixes and small changes**
 
