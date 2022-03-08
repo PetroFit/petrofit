@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from petrofit.segmentation import (
@@ -7,6 +8,7 @@ from petrofit.segmentation import (
     get_source_elong,
     get_source_position,
     get_source_theta,
+    get_amplitude_at_r
 )
 
 
@@ -18,7 +20,7 @@ def test_make_catalog(segm_and_cat):
     assert len(cat) == 3
 
 
-def test_get_functions(segm_and_cat):
+def test_get_functions(sersic_2d_image,segm_and_cat):
     """
     Test the convenience functions that
     get source properties
@@ -33,6 +35,11 @@ def test_get_functions(segm_and_cat):
     assert get_source_elong(source) == base_source.elongation.value
     assert get_source_ellip(source) == base_source.ellipticity.value
     assert get_source_theta(source) == base_source.orientation.to('rad').value
+
+    x0, y0 = get_source_position(source)
+    ellip, theta = get_source_ellip(source), get_source_theta(source)
+
+    assert np.round(get_amplitude_at_r(200, sersic_2d_image.data, x0, y0 , ellip, theta), 6) == 0.036767
 
 
 def test_plot_segments(sersic_2d_image, segm_and_cat):

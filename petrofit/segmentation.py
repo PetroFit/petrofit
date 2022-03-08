@@ -2,20 +2,21 @@ from copy import deepcopy
 
 import numpy as np
 
+from astropy.convolution import Gaussian2DKernel
+from astropy.stats import gaussian_fwhm_to_sigma
+from astropy.nddata import CCDData, Cutout2D
+
 from photutils import detect_threshold
 from photutils import deblend_sources
 from photutils import detect_sources
 from photutils.segmentation import SourceCatalog
-
-from astropy.convolution import Gaussian2DKernel
-from astropy.stats import gaussian_fwhm_to_sigma
-from astropy.nddata import CCDData, Cutout2D
+from photutils.isophote import EllipseGeometry, Ellipse
 
 from matplotlib import pyplot as plt
 
 __all__ = [
     'plot_segments', 'plot_segment_residual', 'get_source_position', 'get_source_elong',
-    'get_source_ellip', 'get_source_theta', 'make_kernel', 'segm_mask', 'masked_segm_image',
+    'get_source_ellip', 'get_source_theta', 'get_amplitude_at_r', 'make_kernel', 'segm_mask', 'masked_segm_image',
     'make_segments', 'deblend_segments'
 ]
 
@@ -70,6 +71,69 @@ def get_source_ellip(source):
 def get_source_theta(source):
     """ Return SourceCatalog orientation in rad"""
     return source.orientation.to('rad').value if isinstance(source, SourceCatalog) else np.deg2rad(source['orientation'])
+
+
+def get_amplitude_at_r(r, image, x0, y0, ellip, theta):
+    """
+    Finds the amplitude at an isophotal radius `r`.
+
+    Parameters
+    ----------
+
+    r : float or int
+        Isophotal radius in pixels.
+
+    image : CCDData or array
+        Image to of the source.
+
+    x0, y0 : float
+        The center pixel coordinate of the ellipse.
+
+    ellip : ellipticity
+        The ellipticity of the ellipse.
+
+    theta : float
+        The position angle (in radians) of the semimajor axis in
+        relation to the positive x axis of the image array (rotating
+        towards the positive y axis). Position angles are defined in the
+        range :math:`0 < PA <= \pi`. Avoid using as starting position
+        angle of 0., since the fit algorithm may not work properly.
+        When the ellipses are such that position angles are near either
+        extreme of the range, noise can make the solution jump back and
+        forth between successive isophotes, by amounts close to 180
+        degrees.
+
+    Returns
+    -------
+
+    amplitude_at_r : float or np.nan
+
+    """
+
+    if isinstance(image, CCDData) or isinstance(image, Cutout2D):
+        image = image.data
+
+    r = float(r)
+
+    try:
+        # Define EllipseGeometry using ellip and theta
+        g = EllipseGeometry(x0, y0, 1., ellip, theta)
+
+        # Create Ellipse model
+        ellipse = Ellipse(image, geometry=g)
+
+        # Fit isophote at r_eff
+        iso = ellipse.fit_isophote(r)
+
+        # Get flux at r_eff
+        amplitude = iso.intens
+
+    except Exception as exception:
+        import warnings
+        warnings.warn("Amplitude could not be computed, returning np.nan. Exception: {}".format(str(exception)), Warning)
+        amplitude = np.nan
+
+    return amplitude
 
 
 def make_kernel(fwhm, kernel_size):
