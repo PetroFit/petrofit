@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from petrofit.segmentation import (
@@ -38,7 +39,7 @@ def test_get_functions(sersic_2d_image,segm_and_cat):
     x0, y0 = get_source_position(source)
     ellip, theta = get_source_ellip(source), get_source_theta(source)
 
-    assert get_amplitude_at_r(200, sersic_2d_image.data, x0, y0 , ellip, theta) == 0.036767338105531996
+    assert np.round(get_amplitude_at_r(200, sersic_2d_image.data, x0, y0 , ellip, theta), 6) == 0.036767
 
 
 def test_plot_segments(sersic_2d_image, segm_and_cat):
