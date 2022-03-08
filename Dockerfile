@@ -18,15 +18,6 @@ USER $NB_USER
 
 ENV PETROFITDIR $HOME/petrofit
 
-# Clone kcorrect @ dcad853
-RUN git clone https://github.com/blanton144/kcorrect.git
-ENV KCORRECT_DIR $HOME/kcorrect
-
-# Clone kcorrect_python @ 8ea0c62
-RUN git clone https://github.com/nirinA/kcorrect_python.git
-ENV KCORRECT_PYTHON_DIR $HOME/kcorrect_python
-
-
 ########################################
 # Setup Conda and Install Requirements #
 ########################################
@@ -37,32 +28,7 @@ RUN echo "source activate petrofit" >> $HOME/.bashrc
 
 ENV CONDA_DEFAULT_ENV petrofit
 
-
-####################
-# Install kcorrect #
-####################
-
-ENV PATH $KCORRECT_DIR/bin:$PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:$KCORRECT_DIR/lib
-ENV IDL_PATH $KCORRECT_DIR/pro
-
-WORKDIR $KCORRECT_DIR
-
-RUN kevilmake -k
-
 WORKDIR $HOME
-
-
-###########################
-# Install kcorrect_python #
-###########################
-
-WORKDIR $KCORRECT_PYTHON_DIR
-
-RUN python setup.py install
-
-WORKDIR $HOME
-
 
 ####################
 # Install PetroFit #
