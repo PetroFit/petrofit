@@ -18,6 +18,7 @@ nbsphinx
 
 # Other
 tox
+skimage
 sklearn
 astropy_helpers
 extension_helpers
