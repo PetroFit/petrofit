@@ -7,7 +7,7 @@ PetroFit
 |circleci tag| |PyPI tag| |astopy tag| |photutils tag| |zonodo tag|
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
-galaxy light profiles. This package includes tools for preforming accurate photometry, segmentations, Petrosian properties
+galaxy light profiles. This package includes tools for performing accurate photometry, segmentations, Petrosian properties
 and fitting. Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for installation instructions and a guide to the `petrofit` module.
 
 .. image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/multi_fit.png
