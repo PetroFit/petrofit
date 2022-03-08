@@ -5,7 +5,7 @@ Release Notes
 Version History and Change Log
 ==============================
 
-Version 0.4.0
+Version 0.3.1
 -------------
 *TBD*
 
