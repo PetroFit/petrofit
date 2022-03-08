@@ -30,6 +30,7 @@ dependencies:
   # Base dependencies
   - pip
   - python==3.9
+  - Pandoc
 
   - pip:
     - -r requirements.txt
