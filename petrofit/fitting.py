@@ -101,7 +101,7 @@ def fit_background(image, model=models.Planar2D(), sigma=3.0):
     model : `~astropy.modeling.FittableModel`
         AstroPy model to sample from. `Planar2D` is used by default.
 
-    sigma : float
+    sigma : float or None
         The sigma value used to determine noise pixels. Once the pixels above this value are masked,
         the model provided is fit to determine the background.
 
@@ -115,8 +115,9 @@ def fit_background(image, model=models.Planar2D(), sigma=3.0):
         * fitter : LevMarLSQFitter
             Fitter used to estimate and set model parameters.
     """
-
-    fit_bg_image = sigma_clip(image, sigma)
+    fit_bg_image = image
+    if sigma is not None:
+        fit_bg_image = sigma_clip(image, sigma)
     return fit_model(fit_bg_image, model)
 
 

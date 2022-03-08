@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 from photutils import  EllipticalAnnulus, EllipticalAperture
 
 from .segmentation import masked_segm_image
-from .fitting import fit_plane, model_to_image
+from .fitting import fit_background, model_to_image
 from .segmentation import get_source_elong,  get_source_theta, get_source_position
 
 __all__ = [
@@ -438,7 +438,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
                 else:
                     raise ("background image masking sigma type not understood, try 'clip' or 'bound'")
 
-                fitted_model, _ = fit_plane(fit_bg_image)
+                fitted_model, _ = fit_background(fit_bg_image, sigma=None)
 
                 # plt.imshow(fit_bg_image, vmax=vmax, vmin=vmin)
                 # plt.show()
