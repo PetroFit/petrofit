@@ -11,11 +11,23 @@ from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
 __all__ = [
-    'make_grid', 'PSFModel',
+    'get_default_sersic_bounds', 'make_grid', 'PSFModel',
     'Nuker2D', 'Moffat2D', 'EllipMoffat2D',
     'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model',
     'petrosian_profile', 'petrosian_model', 
 ]
+
+
+def get_default_sersic_bounds():
+    """Returns the default bounds of the Sersic profile."""
+    bounds = {
+        'amplitude': (0., None),
+        'r_eff': (0, None),
+        'n': (0, 10),
+        'ellip': (0, 1),
+        'theta': (-2 * np.pi, 2 * np.pi),
+    }
+    return bounds
 
 
 def make_grid(size, factor=1):
