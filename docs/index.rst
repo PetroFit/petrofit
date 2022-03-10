@@ -20,6 +20,7 @@ PetroFit is built on the `Photutils package <https://photutils.readthedocs.io/en
 
     installation
     introduction
+    quick_start
     photometry_and_petrosian
     fitting
 
