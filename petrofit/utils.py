@@ -102,45 +102,6 @@ def plot_target(position, image, size, vmin=None, vmax=None):
     plt.ylim(y-size, y+size)
 
 
-def cutout(image, x, y, dx, dy=None, vmin=None, vmax=None):
-    """
-    Clip and make a cutout of an image
-
-    Parameters
-    ----------
-    image : array like
-        Input image.
-    x, y : int
-        Center of cutout. The indexing is array[y, x] and
-        x is the x axis when plotted.
-    dx, dy : int
-        Size of image in x and y direction. The indexing is array[y, x] and
-        x is the x axis when plotted. If dy is not provided it will be set
-        to the same size as dx.
-    vmin, vmax : float
-        max and min values to clip the input image.
-
-
-    Returns
-    -------
-    Copied array
-        Clipped and cropped image.
-    """
-
-    if dy is None:
-        dy = dx
-
-    vmin = vmin if vmin else image.min()
-    vmax = vmax if vmax else image.max()
-    image = np.clip(image, vmin, vmax)
-
-    bounds = np.array([y - dy // 2, y + dy // 2, x - dx // 2, x + dx // 2])
-    bounds[bounds < 0] = 0
-    ymin, ymax, xmin, xmax = bounds
-
-    return image[ymin:ymax, xmin:xmax].copy()
-
-
 def cutout_subtract(image, target, x, y):
     """
     Subtract cutout from image
