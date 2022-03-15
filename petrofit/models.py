@@ -181,6 +181,7 @@ class PSFModel(FittableModel):
         # Prepare class attributes
         members = OrderedDict([
             ('__module__', '__main__'),
+            ('__name__', 'PSFModel'),
             ('__doc__', 'PSF Wrapped Model\n{}'.format(model.__doc__)),
             ('n_inputs', model.n_inputs),
             ('n_outputs', model.n_outputs),
