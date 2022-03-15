@@ -38,7 +38,7 @@ def test_psfmodel():
     )
 
     # Make model image
-    image = model_to_image(imsize // 2, imsize // 2, imsize, sersic_model)
+    image = model_to_image(sersic_model, imsize)
 
     # Make a PSF
     x_grid, y_grid = make_grid(51, 1)
@@ -53,7 +53,7 @@ def test_psfmodel():
     psf_sersic_model.fixed['psf_pa'] = True
 
     # Make a PSFModel image
-    psf_sersic_model_image = model_to_image(imsize // 2, imsize // 2, imsize, psf_sersic_model)
+    psf_sersic_model_image = model_to_image(psf_sersic_model, imsize)
 
     # Compare the PSF image to PSFModel image
     error_arr =  abs(psf_sersic_model_image - psf_sersic_image) / psf_sersic_image
@@ -77,7 +77,7 @@ def test_psfmodel():
     )
 
     # Generate a model image from the fitted model
-    fitted_model_image = model_to_image(imsize // 2, imsize // 2, imsize, model=fitted_model)
+    fitted_model_image = model_to_image(fitted_model, imsize)
 
     # Check if fit is close to actual
     error_arr = abs(fitted_model_image - psf_sersic_image) / psf_sersic_image

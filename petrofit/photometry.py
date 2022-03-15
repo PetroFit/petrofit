@@ -440,16 +440,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
 
                 fitted_model, _ = fit_background(fit_bg_image, sigma=None)
 
-                # plt.imshow(fit_bg_image, vmax=vmax, vmin=vmin)
-                # plt.show()
-                # plt.imshow(model_to_image(cutout_size // 2, cutout_size // 2, cutout_size, fitted_model), vmin=vmin, vmax=vmax)
-                # plt.show()
-                # plt.imshow(masked_image, vmin=vmin, vmax=vmax)
-                # plt.show()
-                # plt.imshow(masked_image-model_to_image(cutout_size // 2, cutout_size // 2, cutout_size, fitted_model), vmin=vmin, vmax=vmax)
-                # plt.show()
-
-                masked_image -= model_to_image(cutout_size // 2, cutout_size // 2, cutout_size, fitted_model)
+                masked_image -= model_to_image(fitted_model, cutout_size)
                 if sigma_type.lower() == 'bound':
                     masked_image = np.clip(masked_image, - sigma, np.inf)
 

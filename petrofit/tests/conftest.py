@@ -77,7 +77,7 @@ def make_image():
         },
     )
 
-    model_image = model_to_image(imsize // 2, imsize // 2, imsize, sersic_model)
+    model_image = model_to_image(sersic_model, imsize)
 
     image_mean, image_median, image_stddev = sigma_clipped_stats(model_image, sigma=3)
 
