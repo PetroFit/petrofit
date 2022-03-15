@@ -16,7 +16,7 @@ from .fitting import fit_gaussian2d, plot_fit
 __all__ = [
     'match_catalogs', 'angular_to_pixel', 'pixel_to_angular',
     'elliptical_area_to_r', 'circle_area_to_r', 'get_interpolated_values',
-    'closest_value_index', 'plot_target', 'cutout', 'cutout_subtract',
+    'closest_value_index', 'plot_target', 'cutout_subtract',
     'measure_fwhm'
 ]
 
