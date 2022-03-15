@@ -11,6 +11,7 @@
 - Removed outdated `fit_plane` function. [:pr:`84`, :user:`robelgeda`]
 - Moved requirements from `environment.yml` to `requirements.txt`. Though both can be used to install PetroFit, `environment.yml` is recommended at this time. [:pr:`72`, :user:`robelgeda`]
 - Upgraded circleci `resource_class` to `medium+`. [:pr:`62`, :user:`robelgeda`]
+- Removed outdated `petrofit.utils.cutout` function. [:pr:`93`, :user:`robelgeda`]
 
 **General bug fixes and small changes**
 
