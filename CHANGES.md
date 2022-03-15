@@ -1,5 +1,17 @@
 # Release Notes
 
+
+## Version 0.4.0
+*Dev*
+
+**PetroFit Improvements**
+
+- Removed outdated `petrofit.utils.cutout` function. [:pr:`93`, :user:`robelgeda`]
+- `model_to_image` function upgraded to use `astropy.convolution.utils.discretize_model`. [:pr:`95`, :user:`robelgeda`]
+
+**General bug fixes and small changes**
+
+
 ## Version 0.3.1
 *March 8th 2022*
 
@@ -11,7 +23,6 @@
 - Removed outdated `fit_plane` function. [:pr:`84`, :user:`robelgeda`]
 - Moved requirements from `environment.yml` to `requirements.txt`. Though both can be used to install PetroFit, `environment.yml` is recommended at this time. [:pr:`72`, :user:`robelgeda`]
 - Upgraded circleci `resource_class` to `medium+`. [:pr:`62`, :user:`robelgeda`]
-- Removed outdated `petrofit.utils.cutout` function. [:pr:`93`, :user:`robelgeda`]
 
 **General bug fixes and small changes**
 
