@@ -128,7 +128,7 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
                 # PSF weap
                 galaxy_model = PSFModel.wrap(galaxy_model, psf=psf, oversample=oversample)
 
-                galaxy_image = model_to_image(x_0, y_0, image_size, galaxy_model)
+                galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 
                 flux_list, area_list, err = photometry_step((image_size // 2, image_size // 2), r_list, galaxy_image,
                                                             plot=plot,
