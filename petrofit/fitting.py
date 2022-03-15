@@ -3,6 +3,7 @@ import numpy as np
 from astropy.modeling import models, fitting, Parameter
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
 from astropy.stats import sigma_clipped_stats, sigma_clip
+from astropy.convolution.utils import discretize_model
 
 from matplotlib import pyplot as plt
 
@@ -60,33 +61,110 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
     return fitted_model, fitter
 
 
-def model_to_image(x, y, size, model):
+def _validate_image_size(size):
     """
-    Construct an image from a model.
+    Helper function to validate image size.
+    Input size (pixels) should be an integers or a tuple of two integers.
+    """
+
+    error_message = "Input size (pixels) should be an integers or a tuple of two integers."
+
+    if type(size) in [list, tuple, np.array]:
+        assert len(size) == 2, error_message
+        x_size, y_size = size
+
+    elif np.issubdtype(type(size), np.number):
+        x_size = y_size = size
+
+    else:
+        raise ValueError(error_message)
+
+    assert not x_size % 1 and not y_size % 1, error_message
+
+    x_size = int(x_size)
+    y_size = int(y_size)
+
+    return x_size, y_size
+
+
+def model_center_to_image_origin(center, size):
+    """
+    Given the center and size of an image, find the origin coordnate of the image.
+    """
+
+    x_size, y_size = _validate_image_size(size)
+
+    center_error_message = "Center should be a tuple of two integers."
+    assert type(center) in [list, tuple, np.array], center_error_message
+    assert len(center) == 2, center_error_message
+
+    origin = np.array(center) - np.floor_divide(np.array([x_size, y_size]), 2)
+
+    return tuple(origin)
+
+
+def model_to_image(model, size, mode='center', factor=1, center=None):
+    """
+    Converts 2D models into images using `astropy.convolution.utils.discretize_model`.
 
     Parameters
     ----------
-    x : int
-        x center of sampling grid.
+    model : `~astropy.modeling.FittableModel` or callable.
+        Analytic model function to be discretized. Callables, which are not an
+        instances of `~astropy.modeling.FittableModel` are passed to
+        `~astropy.modeling.custom_model` and then evaluated.
 
-    y : int
-        y center of sampling grid.
+    size : int or tuple
+        The x and y size (in pixels) of the image in pixels (must be an whole number).
+        If only a single integer is provided, an image of equal x and y size
+        is generated. If tuple is provided (x_size, y_size) is assumed.
 
-    size : int
-        Size of sampling pixel grid.
+    mode : str, optional
+        One of the following modes (`astropy.convolution.utils.discretize_model`):
+            * ``'center'`` (default)
+                Discretize model by taking the value
+                at the center of the bin.
+            * ``'linear_interp'``
+                Discretize model by linearly interpolating
+                between the values at the corners of the bin.
+                For 2D models interpolation is bilinear.
+            * ``'oversample'``
+                Discretize model by taking the average
+                on an oversampled grid.
+            * ``'integrate'``
+                Discretize model by integrating the model
+                over the bin using `scipy.integrate.quad`.
+                Very slow.
 
-    model : `~astropy.modeling.FittableModel`
-        AstroPy model to sample from.
+    factor : float or int
+        Factor of oversampling. Default = 1 (no oversampling).
+
+    center : tuple
+        (x, y) Coordinate of the center of the image (in pixels).
+        The origin of the image is defined as `origin = center - floor_divide(size, 2)`
+        (i.e the image will range from (origin -> origin + size)). If None, the origin
+        of the image is assumed to be at (0, 0) (i.e `center = floor_divide(size, 2)`).
+
 
     Returns
     -------
-    model_image : array
-        2D image of the model.
+    array : `numpy.array`
+        Model image
     """
-    y_arange, x_arange = np.mgrid[
-                         int(y) - size//2:int(y) + size//2 + size%2,
-                         int(x) - size//2:int(x) + size//2 + size%2, ]
-    return model(x_arange, y_arange)
+
+    x_size, y_size = _validate_image_size(size)
+
+    if center is None:
+        x_origin, y_origin = (0, 0)
+    else:
+        x_origin, y_origin = model_center_to_image_origin(center, size)
+
+    return discretize_model(
+        model=model,
+        x_range=[x_origin, x_origin + x_size],
+        y_range=[y_origin, y_origin + y_size],
+        mode=mode,
+        factor=factor)
 
 
 def fit_background(image, model=models.Planar2D(), sigma=3.0):
