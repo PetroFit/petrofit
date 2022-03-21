@@ -296,7 +296,7 @@ class PSFConvolvedImageModel(FittableModel):
         if 'fixed' not in kwargs:
             self.fixed.update(model.fixed)
         if 'bounds' not in kwargs:
-            self.bounds.update(model.bounds
+            self.bounds.update(model.bounds)
 
     def _load_parameters(self):
         """Function to load parameters from the sub-model"""

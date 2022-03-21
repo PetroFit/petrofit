@@ -41,7 +41,7 @@ def test_psfmodel():
     image = model_to_image(sersic_model, imsize)
 
     # Make a PSF
-    x_grid, y_grid = make_grid(51, 1)
+    x_grid, y_grid = make_grid(51, factor=1)
     PSF = Moffat2D(x_0=25.0, y_0=25.0)(x_grid, y_grid)
     PSF /= PSF.sum()
 
