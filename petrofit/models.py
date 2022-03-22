@@ -32,6 +32,20 @@ def get_default_sersic_bounds():
 
 
 def make_grid(size, origin=(0, 0), factor=1):
+    """
+    Function to make image sampling grid.
+
+    Parameters
+    ----------
+    size : int
+        The size of the sampling grid. Sampling grid is a square with each side of size `size`.
+
+    origin : tuple
+        Bottom corner of the sampling grid (x, y).
+
+    factor : int
+        Oversampling factor
+    """
     assert isinstance(factor, int)
     x_arange = (np.arange(0.5, size * factor, 1) / factor) - 0.5
     y_arange = (np.arange(0.5, size * factor, 1) / factor) - 0.5
@@ -443,7 +457,7 @@ class PSFConvolvedImageModel(FittableModel):
                 sub_grid_y0 = sub_model_params[idx][0]
 
             # Compute the corner of the sub-grid
-            sub_grid_origin = (sub_grid_x0 - sub_grid_size // 2, sub_grid_y0 - sub_grid_size // 2)
+            sub_grid_origin = (np.round(sub_grid_x0) - sub_grid_size // 2, np.round(sub_grid_y0) - sub_grid_size // 2)
 
             # Make an oversampled sub-grid for window
             x_sub_grid, y_sub_grid = make_grid(sub_grid_size, origin=sub_grid_origin, factor=sub_grid_factor)
