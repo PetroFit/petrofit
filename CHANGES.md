@@ -11,7 +11,7 @@
 - `PSFModel` has been upgraded to `PSFConvolvedImageModel`.`PSFConvolvedImageModel` uses `__init__` function to wrap models. `PSFModel` class has been deprecated and will be removed in `v0.5`. [:pr:#100]
 - An `origin` parameter has been added to `petrofit.models.make_grid`. [:pr:#100]
 
-## Version 0.3g.1
+## Version 0.3.1
 *March 8th 2022*
 
 **PetroFit Improvements**
