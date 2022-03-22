@@ -194,10 +194,11 @@ def _validate_image_size(size):
 
     if type(size) in [list, tuple, np.array]:
         assert len(size) == 2, error_message
-        x_size, y_size = size
+        y_size, x_size = size
 
     elif np.issubdtype(type(size), np.number):
-        x_size = y_size = size
+        x_size = size
+        y_size = size
 
     else:
         raise ValueError(error_message)
@@ -240,7 +241,7 @@ def model_to_image(model, size, mode='center', factor=1, center=None):
     size : int or tuple
         The x and y size (in pixels) of the image in pixels (must be an whole number).
         If only a single integer is provided, an image of equal x and y size
-        is generated. If tuple is provided (x_size, y_size) is assumed.
+        is generated. If tuple is provided (y_size, x_size) is assumed (same as `numpy.array.shape` output).
 
     mode : str, optional
         One of the following modes (`astropy.convolution.utils.discretize_model`):
