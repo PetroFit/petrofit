@@ -1,13 +1,10 @@
-
-
 import numpy as np
-
 
 from astropy.convolution import convolve
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
-from petrofit.models import Moffat2D, PSFModel, make_grid, PSFConvolvedImageModel
-from petrofit.fitting import model_to_image, fit_model
+from petrofit.modeling.models import Moffat2D, PSFModel, make_grid, PSFConvolvedImageModel
+from petrofit.modeling import model_to_image, fit_model
 from petrofit.segmentation import masked_segm_image
 
 import matplotlib.pyplot as plt

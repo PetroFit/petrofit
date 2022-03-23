@@ -11,7 +11,7 @@ from astropy.coordinates import SkyCoord
 
 from matplotlib import pyplot as plt
 
-from .fitting import fit_gaussian2d, plot_fit
+from .modeling.fitting import fit_gaussian2d, plot_fit
 
 __all__ = [
     'match_catalogs', 'angular_to_pixel', 'pixel_to_angular',

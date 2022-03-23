@@ -11,10 +11,10 @@ from scipy.special import gammaincinv
 from astropy.utils.console import ProgressBar
 from astropy.modeling import models
 
-from petrofit.models import PSFConvolvedImageModel, sersic_enclosed, sersic_enclosed_inv
-from petrofit.photometry import photometry_step
-from petrofit.fitting import model_to_image
-from petrofit.petrosian import Petrosian
+from .modeling.models import PSFConvolvedImageModel, sersic_enclosed, sersic_enclosed_inv
+from .photometry import photometry_step
+from .modeling.fitting import model_to_image
+from .petrosian import Petrosian
 
 
 __all__ = ['generate_petrosian_sersic_correction']

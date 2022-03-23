@@ -7,9 +7,11 @@ from ._astropy_init import *   # noqa
 # ----------------------------------------------------------------------------
 
 from .correction import *
-from .fitting import *
-from .models import *
+
 from .petrosian import *
 from .photometry import *
 from .segmentation import *
 from .utils import *
+
+from .modeling.fitting import *
+from .modeling.models import *

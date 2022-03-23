@@ -12,7 +12,7 @@ from astropy.wcs import WCS
 
 from petrofit.segmentation import make_catalog
 from petrofit.petrosian import Petrosian
-from petrofit.fitting import model_to_image
+from petrofit.modeling import model_to_image
 from petrofit.photometry import (
     make_radius_list,
     source_photometry,
