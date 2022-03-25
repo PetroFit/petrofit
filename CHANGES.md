@@ -11,6 +11,8 @@
 - `PSFModel` has been upgraded to `PSFConvolvedImageModel`.`PSFConvolvedImageModel` uses `__init__` function to wrap models. `PSFModel` class has been deprecated and will be removed in `v0.5`. [:pr:#100]
 - An `origin` parameter has been added to `petrofit.models.make_grid`. [:pr:#100]
 - `fitting.py` and `models.py` have been moved into a new `modeling` folder. This allows for all modeling functions and classes to be imported as `from petrofit.modeling import ...`. [:pr:#100] 
+- `petrofit.modeling.fitting.fit_model` can now accept fitting weights, so users can pass fitting weights using rms or error images. [:pr:#100]
+- `petrofit.modeling.fitting.plot_fit` now displays 3 panel image of fits (input image, model-image, and residual). [:pr:#100]
 
 ## Version 0.3.1
 *March 8th 2022*
