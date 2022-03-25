@@ -7,10 +7,10 @@ API
 .. automodapi:: petrofit.correction
     :no-inheritance-diagram:
 
-.. automodapi:: petrofit.fitting
+.. automodapi:: petrofit.modeling.fitting
     :no-inheritance-diagram:
 
-.. automodapi:: petrofit.models
+.. automodapi:: petrofit.modeling.models
     :no-inheritance-diagram:
     :skip: Nuker2D
     :skip: Moffat2D
