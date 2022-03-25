@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def get_default_sersic_bounds():
+def get_default_sersic_bounds(override={}):
     """Returns the default bounds of the Sersic profile."""
     bounds = {
         'amplitude': (0., None),
@@ -28,6 +28,7 @@ def get_default_sersic_bounds():
         'ellip': (0, 1),
         'theta': (-2 * np.pi, 2 * np.pi),
     }
+    bounds.update(override)
     return bounds
 
 
