@@ -17,7 +17,8 @@ __all__ = [
 ]
 
 
-def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
+def fit_model(image, model, weights=None, maxiter=5000,
+              epsilon=DEFAULT_EPS, acc=DEFAULT_ACC, estimate_jacobian=False):
     """
     Wrapper function to conveniently fit an image to an input model.
 
@@ -25,6 +26,11 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
     ----------
     image : array
         2D array to fit.
+
+    weights : array
+        Weights for fitting.
+        For data with Gaussian uncertainties, the weights should be
+        1/sigma.
 
     model : `~astropy.modeling.FittableModel`
         AstroPy model to sample from.
@@ -42,6 +48,11 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
     acc : float
         Relative error desired in the approximate solution
 
+    estimate_jacobian : bool
+        If False (default) and if the model has a fit_deriv method,
+        it will be used. Otherwise the Jacobian will be estimated.
+        If True, the Jacobian will be estimated in any case.
+
     Returns
     -------
     fitted_model, fitter
@@ -58,9 +69,12 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
 
     z = image[(y_arange, x_arange)]
 
+    w = None if weights is None else weights[(y_arange, x_arange)]
+
     # Fit model to grid
     fitter = fitting.LevMarLSQFitter()
-    fitted_model= fitter(model, x_arange, y_arange, z, maxiter=maxiter, epsilon=epsilon, acc=acc)
+    fitted_model= fitter(model, x_arange, y_arange, z, weights=w,
+                         maxiter=maxiter, epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
 
     return fitted_model, fitter
 
