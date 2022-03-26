@@ -2,7 +2,9 @@
 
 
 ## Version 0.4.0
-*Dev*
+*March 26th 2022*
+
+Upgrades to fitting sub-module, see below for details.
 
 **PetroFit Enhancements**
 
