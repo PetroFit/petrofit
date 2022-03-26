@@ -3,7 +3,7 @@ import numpy as np
 from astropy.convolution import convolve
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
-from petrofit.modeling.models import Moffat2D, PSFModel, make_grid, PSFConvolvedImageModel
+from petrofit.modeling.models import Moffat2D, PSFModel, make_grid, PSFConvolvedModel2D
 from petrofit.modeling import model_to_image, fit_model
 from petrofit.segmentation import masked_segm_image
 
@@ -116,14 +116,14 @@ def test_psf_convolved_image_model():
         # Make a PSF image using model image and PSF
         psf_sersic_image = convolve(image, PSF)
 
-        # Make a PSFConvolvedImageModel
-        psf_sersic_model = PSFConvolvedImageModel(sersic_model, psf=PSF, oversample=None)
+        # Make a PSFConvolvedModel2D
+        psf_sersic_model = PSFConvolvedModel2D(sersic_model, psf=PSF, oversample=None)
         psf_sersic_model.fixed['psf_pa'] = True
 
-        # Make a PSFConvolvedImageModel image
+        # Make a PSFConvolvedModel2D image
         psf_sersic_model_image = model_to_image(psf_sersic_model, imsize)
 
-        # Compare the PSF image to PSFConvolvedImageModel image
+        # Compare the PSF image to PSFConvolvedModel2D image
         error_arr = abs(psf_sersic_model_image - psf_sersic_image) / psf_sersic_image
         assert np.max(error_arr) < 0.01  # max error less than 1% error
 

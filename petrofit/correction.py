@@ -11,7 +11,7 @@ from scipy.special import gammaincinv
 from astropy.utils.console import ProgressBar
 from astropy.modeling import models
 
-from .modeling.models import PSFConvolvedImageModel, sersic_enclosed, sersic_enclosed_inv
+from .modeling.models import PSFConvolvedModel2D, sersic_enclosed, sersic_enclosed_inv
 from .photometry import photometry_step
 from .modeling.fitting import model_to_image
 from .petrosian import Petrosian
@@ -37,7 +37,7 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
         Name of output file, must be .yaml or .yml
 
     psf : numpy.array
-        2D PSF image to pass to `petrofit.fitting.models.PSFConvolvedImageModel`
+        2D PSF image to pass to `petrofit.fitting.models.PSFConvolvedModel2D`
 
     r_eff_list : list, (optional)
         List of `r_eff` (half light radii) in pixels to evaluate.
@@ -46,7 +46,7 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
         List of Sersic indices to evaluate.
 
     oversample : int or tuple
-        oversampling to pass to `petrofit.fitting.models.PSFConvolvedImageModel`
+        oversampling to pass to `petrofit.fitting.models.PSFConvolvedModel2D`
 
     plot : bool
         Shows plot of photometry and Petrosian
@@ -126,7 +126,7 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
                 )
 
                 # PSF weap
-                galaxy_model = PSFConvolvedImageModel(galaxy_model, psf=psf, oversample=oversample)
+                galaxy_model = PSFConvolvedModel2D(galaxy_model, psf=psf, oversample=oversample)
 
                 galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 

@@ -8,7 +8,7 @@
 
 - Removed outdated `petrofit.utils.cutout` function. [:pr:#93]
 - `model_to_image` function upgraded to use `astropy.convolution.utils.discretize_model`. [:pr:#95]
-- `PSFModel` has been upgraded to `PSFConvolvedImageModel`.`PSFConvolvedImageModel` uses `__init__` function to wrap models. `PSFModel` class has been deprecated and will be removed in `v0.5`. [:pr:#100]
+- `PSFModel` has been upgraded to `PSFConvolvedModel2D`.`PSFConvolvedModel2D` uses `__init__` function to wrap models. `PSFModel` class has been deprecated and will be removed in `v0.5`. [:pr:#100]
 - An `origin` parameter has been added to `petrofit.models.make_grid`. [:pr:#100]
 - `fitting.py` and `models.py` have been moved into a new `modeling` folder. This allows for all modeling functions and classes to be imported as `from petrofit.modeling import ...`. [:pr:#100] 
 - `petrofit.modeling.fitting.fit_model` can now accept fitting weights, so users can pass fitting weights using rms or error images. [:pr:#100]

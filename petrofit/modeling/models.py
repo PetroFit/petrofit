@@ -12,7 +12,7 @@ from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
 __all__ = [
-    'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedImageModel',
+    'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D',
     'Nuker2D', 'Moffat2D', 'EllipMoffat2D',
     'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model',
     'petrosian_profile', 'petrosian_model',
@@ -58,7 +58,7 @@ def make_grid(size, origin=(0, 0), factor=1):
 class PSFModel(FittableModel):
     """
     PSFModel is deprecated as of v0.4.0 and will be
-    removed in the next release, use `PSFConvolvedImageModel` instead.
+    removed in the next release, use `PSFConvolvedModel2D` instead.
     """
     oversample = None
 
@@ -193,7 +193,7 @@ class PSFModel(FittableModel):
     @staticmethod
     def wrap(model, psf=None, oversample=None):
         warnings.warn('''PSFModel is deprecated as of v0.4.0 and will be 
-        removed in the next release, use `PSFConvolvedImageModel` instead.''', DeprecationWarning, stacklevel=2)
+        removed in the next release, use `PSFConvolvedModel2D` instead.''', DeprecationWarning, stacklevel=2)
 
         if isinstance(model, PSFModel):
             raise TypeError("Can not wrap a PSFModel, try: PSFModel.wrap(psf_model.model)")
@@ -240,7 +240,7 @@ class PSFModel(FittableModel):
         return new_model
 
 
-class PSFConvolvedImageModel(FittableModel):
+class PSFConvolvedModel2D(FittableModel):
     """
     Fittable model for converting `FittableModel`s and `CompoundModel`s into 2D images.
     This model takes the input sub-model and adds PSF convolution, as well as PSF convolution.
@@ -262,7 +262,7 @@ class PSFConvolvedImageModel(FittableModel):
          string names of parameters in the input model (for example `"x_0"`).
 
     name : string
-        Name for the `PSFConvolvedImageModel` model instance.
+        Name for the `PSFConvolvedModel2D` model instance.
     """
 
     # Default _param_names list; this will be filled in by the implementation's
@@ -338,7 +338,7 @@ class PSFConvolvedImageModel(FittableModel):
 
     @property
     def model(self):
-        """Returns sub-model with current parameters of the `PSFConvolvedImageModel`"""
+        """Returns sub-model with current parameters of the `PSFConvolvedModel2D`"""
 
         model = self._model.copy()
         for param in model.param_names:
@@ -504,7 +504,7 @@ class PSFConvolvedImageModel(FittableModel):
     @property
     def param_names(self):
         """
-        On most `Model` classes this is a class attribute, but for `PSFConvolvedImageModel`
+        On most `Model` classes this is a class attribute, but for `PSFConvolvedModel2D`
         models it is an instance attribute since each input sub-model
         can have different parameters.
         """
