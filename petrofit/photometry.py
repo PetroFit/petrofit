@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 from photutils import  EllipticalAnnulus, EllipticalAperture
 
 from .segmentation import masked_segm_image
-from .fitting import fit_background, model_to_image
+from .modeling.fitting import fit_background, model_to_image
 from .segmentation import get_source_elong,  get_source_theta, get_source_position
 
 __all__ = [

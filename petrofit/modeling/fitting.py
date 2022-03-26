@@ -4,10 +4,12 @@ from astropy.modeling import models, fitting, Parameter
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
 from astropy.stats import sigma_clipped_stats, sigma_clip
 from astropy.modeling.core import FittableModel, custom_model, Model
+from astropy.nddata import CCDData, Cutout2D
 
 from astropy.convolution.utils import (discretize_center_1D, discretize_center_2D, discretize_linear_1D,
                                        discretize_bilinear_2D, discretize_oversample_1D, discretize_oversample_2D,
                                        discretize_integrate_1D, discretize_integrate_2D, DiscretizationError)
+
 
 from matplotlib import pyplot as plt
 
@@ -17,7 +19,8 @@ __all__ = [
 ]
 
 
-def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
+def fit_model(image, model, weights=None, maxiter=5000,
+              epsilon=DEFAULT_EPS, acc=DEFAULT_ACC, estimate_jacobian=False):
     """
     Wrapper function to conveniently fit an image to an input model.
 
@@ -25,6 +28,11 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
     ----------
     image : array
         2D array to fit.
+
+    weights : array
+        Weights for fitting.
+        For data with Gaussian uncertainties, the weights should be
+        1/sigma.
 
     model : `~astropy.modeling.FittableModel`
         AstroPy model to sample from.
@@ -42,6 +50,11 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
     acc : float
         Relative error desired in the approximate solution
 
+    estimate_jacobian : bool
+        If False (default) and if the model has a fit_deriv method,
+        it will be used. Otherwise the Jacobian will be estimated.
+        If True, the Jacobian will be estimated in any case.
+
     Returns
     -------
     fitted_model, fitter
@@ -58,9 +71,12 @@ def fit_model(image, model, maxiter=5000, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC):
 
     z = image[(y_arange, x_arange)]
 
+    w = None if weights is None else weights[(y_arange, x_arange)]
+
     # Fit model to grid
     fitter = fitting.LevMarLSQFitter()
-    fitted_model= fitter(model, x_arange, y_arange, z, maxiter=maxiter, epsilon=epsilon, acc=acc)
+    fitted_model= fitter(model, x_arange, y_arange, z, weights=w,
+                         maxiter=maxiter, epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
 
     return fitted_model, fitter
 
@@ -194,7 +210,7 @@ def _validate_image_size(size):
 
     if type(size) in [list, tuple, np.array]:
         assert len(size) == 2, error_message
-        y_size, x_size = size
+        x_size, y_size = size
 
     elif np.issubdtype(type(size), np.number):
         x_size = size
@@ -241,7 +257,7 @@ def model_to_image(model, size, mode='center', factor=1, center=None):
     size : int or tuple
         The x and y size (in pixels) of the image in pixels (must be an whole number).
         If only a single integer is provided, an image of equal x and y size
-        is generated. If tuple is provided (y_size, x_size) is assumed (same as `numpy.array.shape` output).
+        is generated. If tuple is provided (x_size, y_size) is assumed (N.B reverse of `numpy.array.shape` output).
 
     mode : str, optional
         One of the following modes (`astropy.convolution.utils.discretize_model`):
@@ -360,99 +376,112 @@ def print_model_params(model):
         print("{:0.4f}\t{}".format(value,param))
 
 
-def plot_fit(image, model, vmin=None, vmax=None):
+def plot_fit(model, image, mode='center', center=None,
+             vmin=None, vmax=None, figsize=None, return_images=False):
     """
     Plot fitted model, its 1D fit profile and residuals.
+    If trying to convert a model to image, use `petrofit.modeling.fitting.model_to_image` instead.
+    This function dose not call `plt.show()`.
 
     Parameters
     ----------
     image : array
         2D array that was fit by the model.
 
+    mode : str, optional
+        One of the following modes (`astropy.convolution.utils.discretize_model`):
+            * ``'center'`` (default)
+                Discretize model by taking the value
+                at the center of the bin.
+            * ``'linear_interp'``
+                Discretize model by linearly interpolating
+                between the values at the corners of the bin.
+                For 2D models interpolation is bilinear.
+            * ``'oversample'``
+                Discretize model by taking the average
+                on an oversampled grid.
+            * ``'integrate'``
+                Discretize model by integrating the model
+                over the bin using `scipy.integrate.quad`.
+                Very slow.
+
     model : `~astropy.modeling.FittableModel`
-        Fitted AstroPy model.
+        Original data that was fitted by the model.
+
+        mode : str, optional
+        One of the following modes (`astropy.convolution.utils.discretize_model`):
+            * ``'center'`` (default)
+                Discretize model by taking the value
+                at the center of the bin.
+            * ``'linear_interp'``
+                Discretize model by linearly interpolating
+                between the values at the corners of the bin.
+                For 2D models interpolation is bilinear.
+            * ``'oversample'``
+                Discretize model by taking the average
+                on an oversampled grid.
+            * ``'integrate'``
+                Discretize model by integrating the model
+                over the bin using `scipy.integrate.quad`.
+                Very slow.
+
+    center : tuple
+        (x, y) Coordinate of the center of the image (in pixels).
+        The origin of the image is defined as `origin = center - floor_divide(size, 2)`
+        (i.e the image will range from (origin -> origin + size)). If None, the origin
+        of the image is assumed to be at (0, 0) (i.e `center = floor_divide(size, 2)`).
 
     vmin : float
         Min plot value
 
     vmax : float
         Max plot value
+
+    figsize : tuple
+        Figure size, should be (3*size, size).
+
+    return_images : bool
+        If true, this function returns a list of subplot Axes,
+        Model-image and the residual (input image - model-image).
+
+    Returns
+    -------
+    axs, model_image, residual_image : (array of `.axes.Axes`, array, array)
+        If `return_images`, this function returns a list of subplot Axes,
+        Model-image and the residual (input image - model-image).
     """
-    if isinstance(model, models.Sersic2D):
-        x_0, y_0 = model.x_0, model.y_0  # Center
-    elif isinstance(model, models.Gaussian2D):
-        x_0, y_0 = [i.value for i in [model.x_mean, model.y_mean]]
-    else:
-        x_0, y_0 = model.x_0, model.y_0  # Center
 
-    if isinstance(x_0, Parameter):
-        x_0, y_0 = [int(i.value) for i in [x_0, y_0]]
+    if isinstance(image, CCDData) or isinstance(image, Cutout2D):
+        image = image.data
+    # Make Model Image
+    # ----------------
 
-    fig = plt.figure(figsize=(12, 12))
+    # Set the size of the model image equal to the fitted image
+    fitted_image_size = (image.shape[1], image.shape[0])
 
-    # Make x and y grid to plot to
-    y_arange, x_arange = np.mgrid[:image.shape[0], :image.shape[1]]
+    # Generate a model image from the model
+    model_image = model_to_image(
+        model=model,
+        size=fitted_image_size,
+        mode=mode,
+        center=center
+    )
 
-    # Plot input image with FWHM and center
-    # -------------------------------------
-    ax0 = fig.add_subplot(221)
+    residual_image = image - model_image
 
-    ax0.imshow(image, vmin=vmin, vmax=vmax)
-    ax0.axvline(x_0, label="Center")
-    ax0.axhline(y_0)
+    # Plot Model Image
+    # ----------------
 
-    ax0.set_title("Image")
-    ax0.set_xlabel("X Pixel")
-    ax0.set_ylabel("Y Pixel")
+    fig, axs = plt.subplots(1, 3, figsize=figsize)
 
-    ax0.legend()
+    axs[0].imshow(image, vmin=vmin, vmax=vmax)
+    axs[0].set_title("Data")
 
-    # Plot residuals
-    # ---------------
+    axs[1].imshow(model_image, vmin=vmin, vmax=vmax)
+    axs[1].set_title("Model")
 
-    residuals = image - model(x_arange, y_arange)
-    # residuals[np.where(residuals < 0)] = 0.
-    ax1 = fig.add_subplot(222)
-    ax1.imshow(residuals, vmin=vmin, vmax=vmax)
+    axs[2].imshow(residual_image, vmin=vmin, vmax=vmax)
+    axs[2].set_title("Residual")
 
-    ax1.set_title("Residual (Image - Fit)")
-    ax1.set_xlabel("X Pixel")
-    ax1.set_ylabel("Y Pixel")
-
-    # Prepare fine grid
-    # -----------------
-
-    # We need a fine grid to fill in inter-pixel values
-    # Oversample by a factor of 10
-
-    y_arange_fine, x_arange_fine = np.mgrid[:image.shape[0] * 10, :image.shape[1] * 10] / 10
-
-    fine_image = model(x_arange_fine, y_arange_fine)
-    x_slice_fine = fine_image[fine_image.shape[0] // 2, :]
-    y_slice_fine = fine_image[:, fine_image.shape[1] // 2]
-
-    # Plot X fit
-    # ----------
-
-    ax2 = fig.add_subplot(223)
-
-    ax2.plot(x_arange_fine[1, :], x_slice_fine, c='r')
-    ax2.scatter(x_arange[1, :], image[int(np.round(y_0)), :], c='black')
-
-    ax2.set_title("X Cross Section")
-    ax2.set_xlabel("X Pixel")
-    ax2.set_ylabel("Flux")
-
-    # Plot Y fit
-    # ----------
-
-    ax3 = fig.add_subplot(224)
-
-    ax3.plot(y_arange_fine[:, 1], y_slice_fine, c='r')
-    ax3.scatter(y_arange[:, 1], image[:, int(np.round(x_0))], c='black')
-
-    ax3.set_title("Y Cross Section")
-    ax3.set_xlabel("Y Pixel")
-    ax3.set_ylabel("Flux")
-
-    return fig, [ax0, ax1, ax2, ax3]
+    if return_images:
+        return axs, model_image, residual_image

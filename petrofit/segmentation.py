@@ -257,7 +257,7 @@ def make_segments(image, npixels=None, threshold=3., fwhm=8., kernel_size=4):
 
     kernel = make_kernel(fwhm, kernel_size) if kernel_size else None
 
-    return detect_sources(image, threshold, npixels=npixels, filter_kernel=kernel)
+    return detect_sources(image, threshold, npixels=npixels, kernel=kernel)
 
 
 def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=30, contrast=1/1000):
@@ -316,7 +316,7 @@ def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=
     kernel = make_kernel(fwhm, kernel_size) if kernel_size else None
 
     segm_deblend = deblend_sources(image, segm,
-                                   npixels=npixels, filter_kernel=kernel,
+                                   npixels=npixels, kernel=kernel,
                                    nlevels=nlevels, contrast=contrast)
 
     return segm_deblend
