@@ -25,3 +25,6 @@ extension_helpers
 sphinx_astropy
 sphinx_rtd_theme
 sphinx-automodapi
+
+# Temp Patch
+jinja2<3.1.0
