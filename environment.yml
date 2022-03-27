@@ -37,5 +37,4 @@ dependencies:
   - pip:
     - -r requirements.txt
 
-  # Temp Patch
-  - Jinja2==3.0.2
+
