@@ -32,8 +32,10 @@ dependencies:
   - python>=3.8
   - Pandoc
 
-  # Temp Patch
-  - Jinja2==3.0.2
+
 
   - pip:
     - -r requirements.txt
+
+  # Temp Patch
+  - Jinja2==3.0.2
