@@ -1,5 +1,11 @@
 # Release Notes
 
+## Version 0.4.1
+*TBD*
+
+**General bug fixes and small changes**
+
+- Bug Fix: Example RMS image in docs was not the same size as the example data image. [:pr:#114]
 
 ## Version 0.4.0
 *March 26th 2022*
