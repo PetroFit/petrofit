@@ -71,7 +71,11 @@ def fit_model(image, model, weights=None, maxiter=5000,
 
     z = image[(y_arange, x_arange)]
 
-    w = None if weights is None else weights[(y_arange, x_arange)]
+    # Prepare weights
+    w = None
+    if weights is not None:
+        assert weights.shape == image.shape, "RMS array does not have the same shape as input image."
+        w = weights[(y_arange, x_arange)]
 
     # Fit model to grid
     fitter = fitting.LevMarLSQFitter()
