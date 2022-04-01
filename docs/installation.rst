@@ -2,8 +2,8 @@
 Installation
 ############
 
-To install the latest dev version of `PetroFit`, please clone the `PetroFit repo <https://github.com/PetroFit/petrofit>`_
-and install the package. There are two recommended ways to install the requirements needed to run the PetroFit package, through
+There are multiple ways to install the PetroFit package. The latest release of PetroFit can be installed from `PyPi <https://pypi.org/project/petrofit>`_ using the ``pip install petrofit`` command (see the `<pip_>`_ section below). To install the latest developer version of `PetroFit`, please clone the `PetroFit GitHub repository <https://github.com/PetroFit/petrofit>`_
+and install the package (see the `<For Developers_>`_ section below). There are two recommended ways to install the requirements needed to run the PetroFit package, through
 `Conda <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_ and
 `Docker <https://docs.docker.com/get-docker/>`_.
 

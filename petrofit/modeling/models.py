@@ -242,7 +242,7 @@ class PSFModel(FittableModel):
 
 class PSFConvolvedModel2D(FittableModel):
     """
-    Fittable model for converting `FittableModel`s and `CompoundModel`s into 2D images.
+    Fittable model for converting `FittableModel` and `CompoundModel` into 2D images.
     This model takes the input sub-model and adds PSF convolution, as well as PSF convolution.
 
     Parameters
@@ -255,11 +255,11 @@ class PSFConvolvedModel2D(FittableModel):
 
     oversample : None or int or tuple
         Oversampling factor. If set to None, no oversampling will be applied to the image.
-         If an integer is provided, the whole image will be oversampled by that factor.
-         If a tuple of `(center_x, center_y, box_length, oversample_factor)` can be used to
-         define an oversampling window. `box_length` and  `oversample_factor` should always be
-         integers. `center_x` and  `center_y` can be either float values of the oversampling window or
-         string names of parameters in the input model (for example `"x_0"`).
+        If an integer is provided, the whole image will be oversampled by that factor.
+        If a tuple of `(center_x, center_y, box_length, oversample_factor)` can be used to
+        define an oversampling window. `box_length` and  `oversample_factor` should always be
+        integers. `center_x` and  `center_y` can be either float values of the oversampling window or
+        string names of parameters in the input model (for example `"x_0"`).
 
     name : string
         Name for the `PSFConvolvedModel2D` model instance.

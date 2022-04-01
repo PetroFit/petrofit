@@ -1,32 +1,32 @@
 
-#########
-PetroFit
-#########
+######################
+PetroFit Documentation
+######################
+|github tag| |astopy tag| |photutils tag| |zonodo tag|
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
-galaxy light profiles. This package includes tools for performing accurate photometry, segmentations, Petrosian properties
-and fitting. This documentation is intended to serve as a description and guide to the `petrofit` module.
+galaxy light profiles. PetroFit includes tools for performing accurate photometry, segmentations, Petrosian properties, and fitting. This documentation is intended to serve as a description and guide to the `petrofit` Python module. See the  `Table of Contents <Table of Contents_>`_ below or use the sidebar to navigate this documentation.
 
 .. image:: ./images/multi_fit.png
     :width: 100%
     :align: center
-
-PetroFit is built on the `Photutils package <https://photutils.readthedocs.io/en/stable/>`.
     
+Table of Contents
+=================
     
 .. toctree::
     :caption: Fundamentals
-    :maxdepth: 3
-
-    installation
+    :maxdepth: 2
+    
     introduction
+    installation
     quick_start
     photometry_and_petrosian
     fitting
 
 .. toctree::
     :caption: Advanced
-    :maxdepth: 3
+    :maxdepth: 2
 
     multi_object
 
@@ -37,3 +37,19 @@ PetroFit is built on the `Photutils package <https://photutils.readthedocs.io/en
     api_reference
     correction_grids
     release_procedure
+ 
+.. |github tag| image:: https://img.shields.io/badge/GitHub-black.svg?style=flat&logo=github
+    :target: https://github.com/PetroFit/petrofit
+    :alt: PetroFit GitHub 
+
+.. |astopy tag| image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+    :target: https://pypi.org/project/astropy
+    :alt: Powered by Astropy
+    
+.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-Photutils-blue.svg?style=flat
+    :target: https://pypi.org/project/photutils/
+    :alt: Powered by Astropy
+
+.. |zonodo tag| image:: http://img.shields.io/badge/zenodo-10.5281/zenodo.6386991-blue.svg?style=flat
+    :target: https://zenodo.org/badge/latestdoi/348478663
+    :alt: PetroFit Zenodo DOI

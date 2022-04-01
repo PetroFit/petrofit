@@ -1,14 +1,10 @@
 import numpy as np
 
-from astropy.modeling import models, fitting, Parameter
+from astropy.modeling import models, fitting
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
-from astropy.stats import sigma_clipped_stats, sigma_clip
-from astropy.modeling.core import FittableModel, custom_model, Model
+from astropy.stats import sigma_clip
 from astropy.nddata import CCDData, Cutout2D
-
-from astropy.convolution.utils import (discretize_center_1D, discretize_center_2D, discretize_linear_1D,
-                                       discretize_bilinear_2D, discretize_oversample_1D, discretize_oversample_2D,
-                                       discretize_integrate_1D, discretize_integrate_2D, DiscretizationError)
+from astropy.convolution.utils import discretize_model
 
 
 from matplotlib import pyplot as plt
@@ -83,125 +79,6 @@ def fit_model(image, model, weights=None, maxiter=5000,
                          maxiter=maxiter, epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
 
     return fitted_model, fitter
-
-
-def discretize_model(model, x_range, y_range=None, mode='center', factor=10):
-    """
-    NOTE: This a modified version of astropy's `astropy.convolution.utils.discretize_model`.
-    There is a bookkeeping bug that does not allow CompoundModels to to be used in this function.
-    A fix PR has been submitted to Astropy and this function will be removed once that PR is released.
-
-    Function to evaluate analytical model functions on a grid.
-
-    So far the function can only deal with pixel coordinates.
-
-    Parameters
-    ----------
-    model : `~astropy.modeling.Model` or callable.
-        Analytic model function to be discretized. Callables, which are not an
-        instances of `~astropy.modeling.Model` are passed to
-        `~astropy.modeling.custom_model` and then evaluated.
-    x_range : tuple
-        x range in which the model is evaluated. The difference between the
-        upper an lower limit must be a whole number, so that the output array
-        size is well defined.
-    y_range : tuple, optional
-        y range in which the model is evaluated. The difference between the
-        upper an lower limit must be a whole number, so that the output array
-        size is well defined. Necessary only for 2D models.
-    mode : str, optional
-        One of the following modes:
-            * ``'center'`` (default)
-                Discretize model by taking the value
-                at the center of the bin.
-            * ``'linear_interp'``
-                Discretize model by linearly interpolating
-                between the values at the corners of the bin.
-                For 2D models interpolation is bilinear.
-            * ``'oversample'``
-                Discretize model by taking the average
-                on an oversampled grid.
-            * ``'integrate'``
-                Discretize model by integrating the model
-                over the bin using `scipy.integrate.quad`.
-                Very slow.
-    factor : float or int
-        Factor of oversampling. Default = 10.
-
-    Returns
-    -------
-    array : `numpy.array`
-        Model value array
-
-    Notes
-    -----
-    The ``oversample`` mode allows to conserve the integral on a subpixel
-    scale. Here is the example of a normalized Gaussian1D:
-
-    .. plot::
-        :include-source:
-
-        import matplotlib.pyplot as plt
-        import numpy as np
-        from astropy.modeling.models import Gaussian1D
-        from astropy.convolution.utils import discretize_model
-        gauss_1D = Gaussian1D(1 / (0.5 * np.sqrt(2 * np.pi)), 0, 0.5)
-        y_center = discretize_model(gauss_1D, (-2, 3), mode='center')
-        y_corner = discretize_model(gauss_1D, (-2, 3), mode='linear_interp')
-        y_oversample = discretize_model(gauss_1D, (-2, 3), mode='oversample')
-        plt.plot(y_center, label='center sum = {0:3f}'.format(y_center.sum()))
-        plt.plot(y_corner, label='linear_interp sum = {0:3f}'.format(y_corner.sum()))
-        plt.plot(y_oversample, label='oversample sum = {0:3f}'.format(y_oversample.sum()))
-        plt.xlabel('pixels')
-        plt.ylabel('value')
-        plt.legend()
-        plt.show()
-
-
-    """
-    if not callable(model):
-        raise TypeError('Model must be callable.')
-    if not isinstance(model, Model):
-        model = custom_model(model)()
-    ndim = model.n_inputs
-    if ndim > 2:
-        raise ValueError('discretize_model only supports 1-d and 2-d models.')
-
-    if not float(np.diff(x_range)).is_integer():
-        raise ValueError("The difference between the upper and lower limit of"
-                         " 'x_range' must be a whole number.")
-
-    if y_range:
-        if not float(np.diff(y_range)).is_integer():
-            raise ValueError("The difference between the upper and lower limit of"
-                             " 'y_range' must be a whole number.")
-
-    if ndim == 2 and y_range is None:
-        raise ValueError("y range not specified, but model is 2-d")
-    if ndim == 1 and y_range is not None:
-        raise ValueError("y range specified, but model is only 1-d.")
-    if mode == "center":
-        if ndim == 1:
-            return discretize_center_1D(model, x_range)
-        elif ndim == 2:
-            return discretize_center_2D(model, x_range, y_range)
-    elif mode == "linear_interp":
-        if ndim == 1:
-            return discretize_linear_1D(model, x_range)
-        if ndim == 2:
-            return discretize_bilinear_2D(model, x_range, y_range)
-    elif mode == "oversample":
-        if ndim == 1:
-            return discretize_oversample_1D(model, x_range, factor)
-        if ndim == 2:
-            return discretize_oversample_2D(model, x_range, y_range, factor)
-    elif mode == "integrate":
-        if ndim == 1:
-            return discretize_integrate_1D(model, x_range)
-        if ndim == 2:
-            return discretize_integrate_2D(model, x_range, y_range)
-    else:
-        raise DiscretizationError('Invalid mode.')
 
 
 def _validate_image_size(size):
@@ -412,7 +289,7 @@ def plot_fit(model, image, mode='center', center=None,
     model : `~astropy.modeling.FittableModel`
         Original data that was fitted by the model.
 
-        mode : str, optional
+    mode : str, optional
         One of the following modes (`astropy.convolution.utils.discretize_model`):
             * ``'center'`` (default)
                 Discretize model by taking the value
