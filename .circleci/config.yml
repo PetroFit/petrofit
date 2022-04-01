@@ -37,13 +37,11 @@ jobs:
           command: conda env create -f environment.yml
 
       - run:
-          name: Activate petrofit
+          name: Run Tests
           # This assumes pytest is installed via the install-package step above
           command: |
             conda init bash
             source ~/.bashrc
-            conda activate petrofit 
-
-      - run:
-          name: Run tox Tests
-          command: tox
+            conda activate petrofit
+            pip install tox
+            tox
