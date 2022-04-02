@@ -44,4 +44,5 @@ jobs:
             source ~/.bashrc
             conda activate petrofit
             pip install tox
+            pip install cython
             tox
