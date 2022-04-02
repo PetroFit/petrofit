@@ -1,11 +1,13 @@
+.. meta::
+    :keywords: petrofit, sersic fitting, python sersic fitting, sersic profile, petrosian, petrosian radius, galaxy sizes, astropy, photutils, python
 
 ######################
 PetroFit Documentation
 ######################
 |github tag| |astopy tag| |photutils tag| |zonodo tag|
 
-PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
-galaxy light profiles. PetroFit includes tools for performing accurate photometry, segmentations, Petrosian properties, and fitting. This documentation is intended to serve as a description and guide to the `petrofit` Python module. See the  `Table of Contents <Table of Contents_>`_ below or use the sidebar to navigate this documentation.
+PetroFit is a Python package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
+galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations, Petrosian profiling, and Sérsic fitting. This documentation is intended to serve as a description and guide to the `petrofit` Python module. See the  `Table of Contents <Table of Contents_>`_ below or use the sidebar to navigate this documentation.
 
 .. image:: ./images/cd_galaxy_demo.png
     :width: 100%
