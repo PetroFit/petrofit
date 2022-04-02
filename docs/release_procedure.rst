@@ -32,3 +32,10 @@ via:
 .. code-block:: bash
 
     twine upload petrofit-0.3.2.tar.gz
+
+Things to Check
+***************
+
+- Check if `tox` Python version should be upgraded.
+- Check if `requirements.txt` needs to be changed.
+- Make sure release date is in `CHANGES.md`.
