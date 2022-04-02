@@ -48,7 +48,7 @@ Table of Contents
     
 .. |photutils tag| image:: http://img.shields.io/badge/powered%20by-Photutils-blue.svg?style=flat
     :target: https://pypi.org/project/photutils/
-    :alt: Powered by Astropy
+    :alt: Powered by Photutils
 
 .. |zonodo tag| image:: http://img.shields.io/badge/zenodo-10.5281/zenodo.6386991-blue.svg?style=flat
     :target: https://zenodo.org/badge/latestdoi/348478663
