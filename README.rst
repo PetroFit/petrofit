@@ -69,9 +69,9 @@ petrofit based on its use in the README file for the
     :target: https://pypi.org/project/astropy
     :alt: Powered by Astropy
     
-.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-PhotUtils-blue.svg?style=flat
+.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-photutils-blue.svg?style=flat
     :target: https://pypi.org/project/photutils/
-    :alt: Powered by Astropy
+    :alt: Powered by photutils
 
 .. |PyPI tag| image:: https://img.shields.io/pypi/v/petrofit?color=blue
     :target: https://pypi.org/project/petrofit/
