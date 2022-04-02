@@ -7,10 +7,12 @@ PetroFit Documentation
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. PetroFit includes tools for performing accurate photometry, segmentations, Petrosian properties, and fitting. This documentation is intended to serve as a description and guide to the `petrofit` Python module. See the  `Table of Contents <Table of Contents_>`_ below or use the sidebar to navigate this documentation.
 
-.. image:: ./images/multi_fit.png
+.. image:: ./images/cd_galaxy_demo.png
     :width: 100%
     :align: center
-    
+
+|
+
 Table of Contents
 =================
     

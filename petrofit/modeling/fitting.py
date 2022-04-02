@@ -25,13 +25,14 @@ def fit_model(image, model, weights=None, maxiter=5000,
     image : array
         2D array to fit.
 
+    model : `~astropy.modeling.FittableModel`
+        Astropy model to sample from. The model must be 2D and the inputs
+        are (x, y) pixel coordinates.
+
     weights : array
         Weights for fitting.
         For data with Gaussian uncertainties, the weights should be
         1/sigma.
-
-    model : `~astropy.modeling.FittableModel`
-        AstroPy model to sample from.
 
     maxiter : int
         maximum number of iterations
@@ -75,8 +76,8 @@ def fit_model(image, model, weights=None, maxiter=5000,
 
     # Fit model to grid
     fitter = fitting.LevMarLSQFitter()
-    fitted_model= fitter(model, x_arange, y_arange, z, weights=w,
-                         maxiter=maxiter, epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
+    fitted_model = fitter(model, x_arange, y_arange, z, weights=w,
+                          maxiter=maxiter, epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
 
     return fitted_model, fitter
 
@@ -85,6 +86,16 @@ def _validate_image_size(size):
     """
     Helper function to validate image size.
     Input size (pixels) should be an integers or a tuple of two integers.
+
+    Parameters
+    ----------
+    size : int or tuple
+        User size input
+
+    Returns
+    -------
+    (x_size, y_size) : tuple
+        Validated size as tuple.
     """
 
     error_message = "Input size (pixels) should be an integers or a tuple of two integers."
@@ -110,7 +121,7 @@ def _validate_image_size(size):
 
 def model_center_to_image_origin(center, size):
     """
-    Given the center and size of an image, find the origin coordnate of the image.
+    Given the center and size of an image, find the origin coordinate of the image.
     """
 
     x_size, y_size = _validate_image_size(size)
@@ -165,7 +176,6 @@ def model_to_image(model, size, mode='center', factor=1, center=None):
         The origin of the image is defined as `origin = center - floor_divide(size, 2)`
         (i.e the image will range from (origin -> origin + size)). If None, the origin
         of the image is assumed to be at (0, 0) (i.e `center = floor_divide(size, 2)`).
-
 
     Returns
     -------

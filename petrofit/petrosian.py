@@ -370,6 +370,9 @@ class Petrosian:
         flux_list : numpy.array
             Array of photometric flux values.
 
+        uncertainties : numpy.array
+            Photometric uncertainties.
+
         epsilon : float
             Epsilon value (used to determine `r_total_flux`).
             N.B: `r_total_flux` = `r_petrosian` * `epsilon`
@@ -413,7 +416,7 @@ class Petrosian:
 
     @property
     def eta(self):
-        """Eta is the petrosian value which defines the `r_petrosian`"""
+        """Eta is the Petrosian value which defines the `r_petrosian`"""
         return self._eta
 
     @eta.setter
@@ -463,10 +466,12 @@ class Petrosian:
 
     @property
     def c2080(self):
+        """``c2080 = 5 * np.log10(r_80 / r_20)``"""
         return self.concentration_index(fraction_1=0.2, fraction_2=0.8)[-1]
 
     @property
     def c5090(self):
+        """``c5090 = 5 * np.log10(r_90 / r_50)``"""
         return self.concentration_index(fraction_1=0.5, fraction_2=0.9)[-1]
 
     def r_half_light_arcsec(self, wcs):
@@ -529,7 +534,7 @@ class Petrosian:
             Plot total flux and half light radii.
 
         plot_normalized_flux:
-            Over-plot the flux curve of growth by normalize the flux axis (max_flux=1).
+            Over-plot the flux curve of growth by normalizing the flux axis (max_flux=1).
         """
         plot_petrosian(self.r_list, self.area_list, self.flux_list, epsilon=self.epsilon, eta=self.eta, plot_r=plot_r)
 
