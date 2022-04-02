@@ -34,10 +34,10 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
     Parameters
     ----------
     output_yaml_name : str
-        Name of output file, must be .yaml or .yml
+        Name of output file, must have .yaml or .yml extension.
 
-    psf : numpy.array
-        2D PSF image to pass to `petrofit.fitting.models.PSFConvolvedModel2D`
+    psf : numpy.array or None
+        2D PSF image to pass to `petrofit.fitting.models.PSFConvolvedModel2D`.
 
     r_eff_list : list, (optional)
         List of `r_eff` (half light radii) in pixels to evaluate.
@@ -46,10 +46,10 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
         List of Sersic indices to evaluate.
 
     oversample : int or tuple
-        oversampling to pass to `petrofit.fitting.models.PSFConvolvedModel2D`
+        oversampling to pass to `petrofit.fitting.models.PSFConvolvedModel2D`.
 
     plot : bool
-        Shows plot of photometry and Petrosian
+        Shows plot of photometry and Petrosian.
 
     Returns
     -------

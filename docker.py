@@ -1,8 +1,10 @@
 import os
 from sys import argv
 
+
 def mount_bind_command(src, dst):
     return "--mount type=bind,src={},dst={}".format(src, dst)
+
 
 if __name__ == '__main__':
     if len(argv) < 2:
