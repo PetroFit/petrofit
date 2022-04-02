@@ -5,7 +5,7 @@ orbs:
   # Orb commands and jobs help you with common scripting around a language/tool
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.2
+  python: circleci/python@2.0.3
 
 workflows:
   pytest-all:  # This is the name of the workflow, feel free to change it to better match your workflow.
