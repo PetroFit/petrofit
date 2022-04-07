@@ -1,5 +1,6 @@
 .. meta::
     :keywords: petrofit, sersic fitting, python sersic fitting, sersic profile, petrosian, petrosian radius, galaxy sizes, astropy, photutils, python
+    :google-site-verification: cGJeqxHDRwD274HDKyUfULiLjCZ5-UTJZK5h_TNMjPg
 
 ######################
 PetroFit Documentation
