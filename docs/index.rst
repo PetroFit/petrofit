@@ -25,14 +25,15 @@ Table of Contents
     
     introduction
     installation
+
+
+.. toctree::
+    :caption: Tutorials
+    :maxdepth: 2
+
     quick_start
     photometry_and_petrosian
     fitting
-
-.. toctree::
-    :caption: Advanced
-    :maxdepth: 2
-
     multi_object
 
 .. toctree::
