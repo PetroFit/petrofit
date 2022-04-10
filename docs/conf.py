@@ -88,11 +88,13 @@ copyright = '{0}, {1}'.format(
 import_module(setup_cfg['name'])
 package = sys.modules[setup_cfg['name']]
 
-# The short X.Y version.
-version = package.__version__.split('-', 1)[0]
 # The full version, including alpha/beta/rc tags.
 release = package.__version__
 
+# The short X.Y version.
+version = release
+if "dev" in release:
+    version = package.__version__.split('dev', 1)[0] + 'dev'
 
 # -- Options for HTML output --------------------------------------------------
 
