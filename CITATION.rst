@@ -77,7 +77,6 @@ HTML:
 .. code-block:: html
 
     <a href="https://github.com/PetroFit/petrofit"><img src="https://img.shields.io/badge/powered%20by-PetroFit-blue.svg?style=flat&color=00B0F0" alt="PetroFit"></a>
-f
 
 .. |ApJ tag| image:: http://img.shields.io/badge/ApJ-10.3847/1538-%2D3881/ac5908-blue.svg?style=flat
     :target: https://doi.org/10.3847/1538-3881/ac5908
