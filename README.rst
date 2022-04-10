@@ -4,7 +4,7 @@
 
 PetroFit
 --------
-|circleci tag| |rtd tag| |PyPI tag| |astopy tag| |photutils tag| |zonodo tag|
+|circleci tag| |rtd tag| |PyPI tag|  |ApJ tag| |astropy tag| |photutils tag|
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations,
@@ -66,20 +66,22 @@ petrofit based on its use in the README file for the
     :target: https://petrofit.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |astopy tag| image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
-    :target: https://pypi.org/project/astropy
-    :alt: Powered by Astropy
-    
-.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-photutils-blue.svg?style=flat
-    :target: https://pypi.org/project/photutils/
-    :alt: Powered by photutils
-
 .. |PyPI tag| image:: https://img.shields.io/pypi/v/petrofit?color=blue
     :target: https://pypi.org/project/petrofit/
     :alt: PetroFit's PyPI Status
+
+.. |ApJ tag| image:: http://img.shields.io/badge/paper-ApJ-blue.svg?style=flat
+    :target: https://doi.org/10.3847/1538-3881/ac5908
+    :alt: PetroFit ApJ
+
+.. |astropy tag| image:: http://img.shields.io/badge/powered%20by-Astropy-orange.svg?style=flat&colorB=D93F0B
+    :target: https://pypi.org/project/astropy
+    :alt: Powered by Astropy
     
-.. |zonodo tag| image:: https://zenodo.org/badge/348478663.svg
-    :target: https://zenodo.org/badge/latestdoi/348478663
-    :alt: PetroFit Zenodo DOI
+.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-Photutils-blue.svg?style=flat&colorB=084680
+    :target: https://pypi.org/project/photutils/
+    :alt: Powered by photutils
+
+
 
 

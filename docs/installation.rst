@@ -49,6 +49,12 @@ environment as follows:
 
     python setup.py install
 
+or if installing from pip:
+
+.. code-block:: bash
+
+    pip install petrofit
+
 Docker
 ******
 

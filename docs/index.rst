@@ -5,7 +5,8 @@
 ######################
 PetroFit Documentation
 ######################
-|github tag| |astopy tag| |photutils tag| |zonodo tag|
+
+|github tag| |rtd tag| |astropy tag| |photutils tag|
 
 PetroFit is a Python package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations, Petrosian profiling, and Sérsic fitting. This documentation is intended to serve as a description and guide to the `petrofit` Python module. See the  `Table of Contents <Table of Contents_>`_ below or use the sidebar to navigate this documentation.
@@ -22,10 +23,10 @@ Table of Contents
 .. toctree::
     :caption: Fundamentals
     :maxdepth: 2
-    
-    introduction
-    installation
 
+    installation
+    introduction
+    citing
 
 .. toctree::
     :caption: Tutorials
@@ -35,27 +36,29 @@ Table of Contents
     photometry_and_petrosian
     fitting
     multi_object
+    correction_grids
 
 .. toctree::
     :caption: Developer
     :maxdepth: 1
 
     api_reference
-    correction_grids
     release_procedure
- 
+
+.. |rtd tag| image:: https://readthedocs.org/projects/petrofit/badge/?version=latest
+    :target: https://readthedocs.org/projects/petrofit/builds/
+    :alt: Documentation Status
+
 .. |github tag| image:: https://img.shields.io/badge/GitHub-black.svg?style=flat&logo=github
     :target: https://github.com/PetroFit/petrofit
-    :alt: PetroFit GitHub 
+    :alt: PetroFit GitHub
 
-.. |astopy tag| image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+.. |astropy tag| image:: http://img.shields.io/badge/powered%20by-Astropy-orange.svg?style=flat&colorB=D93F0B
     :target: https://pypi.org/project/astropy
     :alt: Powered by Astropy
-    
-.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-Photutils-blue.svg?style=flat
+
+.. |photutils tag| image:: http://img.shields.io/badge/powered%20by-Photutils-blue.svg?style=flat&colorB=084680
     :target: https://pypi.org/project/photutils/
     :alt: Powered by Photutils
 
-.. |zonodo tag| image:: http://img.shields.io/badge/zenodo-10.5281/zenodo.6386991-blue.svg?style=flat
-    :target: https://zenodo.org/badge/latestdoi/348478663
-    :alt: PetroFit Zenodo DOI
+
