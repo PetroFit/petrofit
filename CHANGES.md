@@ -3,6 +3,10 @@
 ## Version 0.4.1
 *TBD*
 
+**PetroFit Enhancements**
+
+- `CITATION.rst` added to provide citing and credit information. [:pr:#130]
+
 **General bug fixes and small changes**
 
 - Bug Fix: Example RMS image in docs was not the same size as the example data image. [:pr:#114]
