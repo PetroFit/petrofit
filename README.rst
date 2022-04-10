@@ -4,7 +4,7 @@
 
 PetroFit
 --------
-|circleci tag| |rtd tag| |PyPI tag|  |ApJ tag| |astropy tag| |photutils tag|
+|circleci tag| |rtd tag| |PyPI tag|  |AJ tag| |astropy tag| |photutils tag|
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations,
@@ -70,9 +70,9 @@ petrofit based on its use in the README file for the
     :target: https://pypi.org/project/petrofit/
     :alt: PetroFit's PyPI Status
 
-.. |ApJ tag| image:: http://img.shields.io/badge/paper-ApJ-blue.svg?style=flat
+.. |AJ tag| image:: http://img.shields.io/badge/paper-AJ-blue.svg?style=flat
     :target: https://doi.org/10.3847/1538-3881/ac5908
-    :alt: PetroFit ApJ
+    :alt: PetroFit AJ
 
 .. |astropy tag| image:: http://img.shields.io/badge/powered%20by-Astropy-orange.svg?style=flat&colorB=D93F0B
     :target: https://pypi.org/project/astropy

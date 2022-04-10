@@ -5,7 +5,7 @@ Citing and Credits
 Publications
 ============
 
-|ApJ tag| |zonodo tag| |ascl tag|
+|AJ tag| |zonodo tag| |ascl tag|
 
 If you would like to cite PetroFit for a publication, please use the acknowledgments below.
 Given the intimate relationship between PetroFit and Photutils, we ask that you also cite
@@ -56,31 +56,31 @@ PetroFit Badge:
 
 |petrofit tag|
 
-reStructuredText:
+reStructuredText (.rst):
 
 .. code-block:: rst
-
-    |petrofit tag|
 
     .. |petrofit tag| image:: https://img.shields.io/badge/powered%20by-PetroFit-blue.svg?style=flat&color=00B0F0
         :target: https://github.com/PetroFit/petrofit
         :alt: PetroFit
 
-Markdown:
+    |petrofit tag|
+
+Markdown (.md):
 
 .. code-block:: text
 
     [![PetroFit](https://img.shields.io/badge/powered%20by-PetroFit-blue.svg?style=flat&color=00B0F0)](https://github.com/PetroFit/petrofit)
 
-HTML:
+HTML (.html):
 
 .. code-block:: html
 
     <a href="https://github.com/PetroFit/petrofit"><img src="https://img.shields.io/badge/powered%20by-PetroFit-blue.svg?style=flat&color=00B0F0" alt="PetroFit"></a>
 
-.. |ApJ tag| image:: http://img.shields.io/badge/ApJ-10.3847/1538-%2D3881/ac5908-blue.svg?style=flat
+.. |AJ tag| image:: http://img.shields.io/badge/AJ-10.3847/1538-%2D3881/ac5908-blue.svg?style=flat
     :target: https://doi.org/10.3847/1538-3881/ac5908
-    :alt: PetroFit ApJ
+    :alt: PetroFit AJ
 
 .. |ads tag| image:: http://img.shields.io/badge/ADS-2022arXiv220213493G-blue.svg?style=flat
     :target: https://ui.adsabs.harvard.edu/abs/2022arXiv220213493G/abstract
