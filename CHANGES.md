@@ -6,6 +6,7 @@
 **PetroFit Enhancements**
 
 - `CITATION.rst` added to provide citing and credit information. [:pr:#130]
+- `segm_mask` can now take a list of labels which means it is possible to get multiple unmasked sources using `masked_segm_image` [:pr:#143]
 
 **General bug fixes and small changes**
 
