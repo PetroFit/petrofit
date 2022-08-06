@@ -23,9 +23,9 @@ def get_default_sersic_bounds(override={}):
     """Returns the default bounds of the Sersic profile."""
     bounds = {
         'amplitude': (0., None),
-        'r_eff': (0, None),
-        'n': (0, 10),
-        'ellip': (0, 1),
+        'r_eff': (1e-3, None),
+        'n': (0.1, 10),
+        'ellip': (0, 0.99),
         'theta': (-2 * np.pi, 2 * np.pi),
     }
     bounds.update(override)
