@@ -151,7 +151,7 @@ def segm_mask(source, segm, mask_background=False):
     Parameters
     ----------
 
-    source : int or photutils.segmentation.properties.SourceCatalog
+    source : list or int or photutils.segmentation.properties.SourceCatalog
         The catalog object for the target or label of target in the segmentation object.
 
     segm : photutils.segmentation.core.SegmentationImage
@@ -166,12 +166,25 @@ def segm_mask(source, segm, mask_background=False):
     mask : bool array
     """
 
-    if isinstance(source, SourceCatalog):
-        source = source.label
+    if isinstance(source, int) or isinstance(source, SourceCatalog):
+        sources = [source]
+    elif isinstance(source, list):
+        sources = source
+    else:
+        raise TypeError('Input should be a label (int or photutils SourceCatalog) or a list of such items')
 
-    mask = (segm.data == source)
     if not mask_background:
-        mask = ((segm.data == 0) | mask)
+        sources.append(0)
+
+    mask = None
+    for source in sources:
+        if isinstance(source, SourceCatalog):
+            source = [source.label]
+
+        if mask is None:
+            mask = (segm.data == source)
+        else:
+            mask = ((segm.data == source) | mask)
     return mask
 
 
@@ -182,7 +195,7 @@ def masked_segm_image(source, image, segm, fill=None, mask_background=False):
     Parameters
     ----------
 
-    source : int or photutils.segmentation.properties.SourceCatalog
+    source : list or int or photutils.segmentation.properties.SourceCatalog
         The catalog object for the target or label of target in the segmentation object.
 
     image : CCDData or array
