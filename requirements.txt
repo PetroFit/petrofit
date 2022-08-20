@@ -6,6 +6,7 @@ matplotlib>=3.1.1
 astropy>=5.0.3
 jupyter
 notebook
+regions
 
 # Dependencies
 photutils>=1.1.0
