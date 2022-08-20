@@ -1,5 +1,5 @@
 import os
-from copy import copy 
+from copy import copy
 from collections import OrderedDict
 import warnings
 
