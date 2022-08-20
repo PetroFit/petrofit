@@ -19,6 +19,7 @@
 - Bug Fix: Example RMS image in docs was not the same size as the example data image. [:pr:#114]
 - Bug Fix: Model attribute bug fix in  `PSFConvolvedModel2D`.  [:pr:#145]
 - Print out PSF sum if it is not equal to 1. [:pr:#145]
+- Bug Fix: Change `make_catalog` `kernel_size` parameter to odd number. [:pr:#148]
 
 ## Version 0.4.0
 *March 26th 2022*
