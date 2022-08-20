@@ -336,7 +336,7 @@ def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=
 
 
 def make_catalog(image, threshold, wcs=None, deblend=True,
-                 npixels=None, fwhm=8., kernel_size=4,
+                 npixels=None, fwhm=8., kernel_size=5,
                  nlevels=30, contrast=1/1000,
                  plot=True, vmax=None, vmin=None):
     """
