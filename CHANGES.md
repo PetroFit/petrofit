@@ -12,6 +12,7 @@
     - `n` min bound set to `0.1`.
     - `ellip` max bound set to `0.99`.
 - Add `GenSersic2D` model, which is a Sersic model with generalized ellipse isophot (boxy) parameter. [:pr:#145]
+- Implement `PetroApprox` which is a class with no-PSF polynomials which relate profile paramters such as C2080 and Sersic n.  [:pr:#146]
 
 **General bug fixes and small changes**
 

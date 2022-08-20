@@ -15,7 +15,7 @@ from astropy.modeling import FittableModel, Parameter, custom_model, models
 __all__ = [
     'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D',
     'Nuker2D', 'Moffat2D', 'EllipMoffat2D',
-    'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model',
+    'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model', 'PetroApprox',
     'petrosian_profile', 'petrosian_model', 'get_default_gen_sersic_bounds', 'GenSersic2D'
 ]
 
@@ -739,3 +739,41 @@ def petrosian_model(
 
 ):
     return petrosian_profile(x, r_eff, n)
+
+
+class PetroApprox:
+    """
+    This class contains approximations of various Pertorisian and
+    Sersic parameters. These approximations do not take into account
+    PSF smearing but can be used to approximate initial guesses.
+    """
+
+    @staticmethod
+    def u2080_to_c2080(u2080):
+        """Uncorrected C2080 to epsilon corrected C2080"""
+        return models.Polynomial1D(6, c0=2.26194802, c1=-3.61130833,
+                                   c2=3.8219758, c3=-1.6414660, c4=0.38059409,
+                                   c5=-0.0450384, c6=0.00221922)(u2080)
+
+    @staticmethod
+    def c2080_to_n(c2080):
+        """Corrected C2080 to Sersic index n"""
+
+        return models.Polynomial1D(5, c0=-0.41844073, c1=0.20487513, c2=0.08626531,
+                                   c3=0.0106707, c4=-0.00082523, c5=0.00002486)(c2080)
+
+    @staticmethod
+    def n_to_epsilon(n):
+        """Sersic index n to epsilon"""
+        approx_model = models.Polynomial1D(5, c0=-6.54870813,
+                                           c1=-2.15040843, c2=-0.28993623, c3=-0.04099376, c4=-0.00046837,
+                                           c5=-0.00022305) + models.Exponential1D(amplitude=7.48787292, tau=2.6876055)
+        return approx_model(n)
+
+    @staticmethod
+    def p0502_to_epsilon(p0502):
+        """Petrosian concentration index P0502 (uncorrected quantity) to epsilon"""
+        approx_model = models.Polynomial1D(6, c0=1.09339566, c1=-0.14524911,
+                                           c2=0.50361697, c3=-0.1215809, c4=0.02533795, c5=-0.00196243,
+                                           c6=0.00009081) + models.Exponential1D(amplitude=0.03312881, tau=1.83616642)
+        return approx_model(p0502)
