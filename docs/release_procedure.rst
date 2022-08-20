@@ -33,6 +33,12 @@ via:
 
     twine upload petrofit-0.3.2.tar.gz
 
+6 Upload a frozen conda environment file to the `petrofit_environments repository <https://github.com/PetroFit/petrofit_environments>`_:
+
+.. code-block:: bash
+
+    conda env export | grep -v "^prefix: " > v0.3.2_environment.yml
+
 Things to Check
 ***************
 
