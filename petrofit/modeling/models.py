@@ -371,7 +371,7 @@ class PSFConvolvedModel2D(FittableModel):
     @psf.setter
     def psf(self, psf):
         if psf is not None and psf.sum() != 1:
-            warnings.warn("Input PSF not normalized to 1")
+            warnings.warn("Input PSF not normalized to 1, current sum = {}".format(psf.sum()))
         self._psf = psf
 
     def clear_cached_grid(self):
