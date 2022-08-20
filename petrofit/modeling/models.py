@@ -1,4 +1,5 @@
 import os
+from copy import copy 
 from collections import OrderedDict
 import warnings
 
@@ -351,10 +352,10 @@ class PSFConvolvedModel2D(FittableModel):
         for param in model.param_names:
             setattr(model, param, getattr(self, param).value)
 
-        fixed = self.fixed
+        fixed = copy(self.fixed)
         del fixed['psf_pa']
 
-        bounds = self.bounds
+        bounds = copy(self.bounds)
         del bounds['psf_pa']
 
         model.fixed.update(fixed)
