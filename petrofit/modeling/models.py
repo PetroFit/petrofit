@@ -15,7 +15,7 @@ __all__ = [
     'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D',
     'Nuker2D', 'Moffat2D', 'EllipMoffat2D',
     'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model',
-    'petrosian_profile', 'petrosian_model',
+    'petrosian_profile', 'petrosian_model', 'get_default_gen_sersic_bounds', 'GenSersic2D'
 ]
 
 
@@ -28,6 +28,13 @@ def get_default_sersic_bounds(override={}):
         'ellip': (0, 0.99),
         'theta': (-2 * np.pi, 2 * np.pi),
     }
+    bounds.update(override)
+    return bounds
+
+
+def get_default_gen_sersic_bounds(override={}):
+    bounds = get_default_sersic_bounds()
+    bounds['c_0'] = (-1.0, 1.0)
     bounds.update(override)
     return bounds
 
@@ -509,6 +516,108 @@ class PSFConvolvedModel2D(FittableModel):
         can have different parameters.
         """
         return self._param_names
+
+
+class GenSersic2D(models.Sersic2D):
+    r"""
+    Two dimensional Sersic surface brightness profile with
+    Generalized Ellipses described in Peng et al. 2010.
+
+
+    Parameters
+    ----------
+    amplitude : float
+        Surface brightness at r_eff.
+    r_eff : float
+        Effective (half-light) radius
+    n : float
+        Sersic Index.
+    x_0 : float, optional
+        x position of the center.
+    y_0 : float, optional
+        y position of the center.
+    ellip : float, optional
+        Ellipticity.
+    theta : float or `~astropy.units.Quantity`, optional
+        The rotation angle as an angular quantity
+        (`~astropy.units.Quantity` or `~astropy.coordinates.Angle`)
+        or a value in radians (as a float). The rotation angle
+        increases counterclockwise from the positive x axis.
+    c_0 : float
+        Boxiness of elliptical isophote.
+
+    See Also
+    --------
+    Gaussian2D, Moffat2D
+
+    Notes
+    -----
+    Model formula:
+
+    .. math::
+
+        I(x,y) = I(r) = I_e\exp\left\{
+                -b_n\left[\left(\frac{r}{r_{e}}\right)^{(1/n)}-1\right]
+            \right\}
+
+    The constant :math:`b_n` is defined such that :math:`r_e` contains half the total
+    luminosity, and can be solved for numerically.
+
+    .. math::
+
+        \Gamma(2n) = 2\gamma (2n,b_n)
+
+    Examples
+    --------
+    .. plot::
+        :include-source:
+
+        import numpy as np
+        from astropy.modeling.models import Sersic2D
+        import matplotlib.pyplot as plt
+
+        x,y = np.meshgrid(np.arange(100), np.arange(100))
+
+        mod = Sersic2D(amplitude = 1, r_eff = 25, n=4, x_0=50, y_0=50,
+                       ellip=.5, theta=-1)
+        img = mod(x, y)
+        log_img = np.log10(img)
+
+
+        plt.figure()
+        plt.imshow(log_img, origin='lower', interpolation='nearest',
+                   vmin=-1, vmax=2)
+        plt.xlabel('x')
+        plt.ylabel('y')
+        cbar = plt.colorbar()
+        cbar.set_label('Log Brightness', rotation=270, labelpad=25)
+        cbar.set_ticks([-1, 0, 1, 2], update_ticks=True)
+        plt.show()
+
+    References
+    ----------
+    .. [1] http://ned.ipac.caltech.edu/level5/March05/Graham/Graham2.html
+    """
+
+    c_0 = Parameter(default=0, description="General boxiness of isophote")
+
+    @classmethod
+    def evaluate(cls, x, y, amplitude, r_eff, n, x_0, y_0, ellip, theta, c_0):
+        """Two dimensional Sersic profile function."""
+
+        if cls._gammaincinv is None:
+            from scipy.special import gammaincinv
+            cls._gammaincinv = gammaincinv
+
+        bn = cls._gammaincinv(2. * n, 0.5)
+        a, b = r_eff, (1 - ellip) * r_eff
+        cos_theta, sin_theta = np.cos(theta), np.sin(theta)
+        x_maj = (x - x_0) * cos_theta + (y - y_0) * sin_theta
+        x_min = -(x - x_0) * sin_theta + (y - y_0) * cos_theta
+
+        z = (abs(x_maj / a) ** (c_0 + 2) + abs(x_min / b)  ** (c_0 + 2)) ** (1 / (c_0 + 2))
+
+        return amplitude * np.exp(-bn * (z ** (1 / n) - 1))
 
 
 @custom_model
