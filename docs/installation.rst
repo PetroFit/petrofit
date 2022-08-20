@@ -120,4 +120,7 @@ For developers, we recommend setting up a conda environment and then using the f
 
 
 If you will be contributing to the software, we recommend forking the repository on GitHub first, cloning your forked repository,
-and then installing the developer version.  
+and then installing the developer version.
+
+Frozen versions of conda environment files are provided via the `petrofit_environments repository <https://github.com/PetroFit/petrofit_environments>`_.
+
