@@ -35,7 +35,7 @@ def get_default_sersic_bounds(override={}):
 
 def get_default_gen_sersic_bounds(override={}):
     bounds = get_default_sersic_bounds()
-    bounds['c_0'] = (-1.0, 1.0)
+    bounds['c_0'] = (0, 2.0)
     bounds.update(override)
     return bounds
 
