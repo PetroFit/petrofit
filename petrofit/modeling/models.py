@@ -35,7 +35,7 @@ def get_default_sersic_bounds(override={}):
 
 def get_default_gen_sersic_bounds(override={}):
     bounds = get_default_sersic_bounds()
-    bounds['c_0'] = (-1.0, 1.0)
+    bounds['c_0'] = (0, 2.0)
     bounds.update(override)
     return bounds
 
@@ -598,6 +598,7 @@ class GenSersic2D(models.Sersic2D):
     References
     ----------
     .. [1] http://ned.ipac.caltech.edu/level5/March05/Graham/Graham2.html
+    .. [2] https://ui.adsabs.harvard.edu/abs/2010AJ....139.2097P/abstract
     """
 
     c_0 = Parameter(default=0, description="General boxiness of isophote")
