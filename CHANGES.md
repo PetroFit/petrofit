@@ -1,7 +1,7 @@
 # Release Notes
 
 ## Version 0.4.1
-*TBD*
+*August 22nd 2022*
 
 **PetroFit Enhancements**
 
