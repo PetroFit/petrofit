@@ -105,11 +105,10 @@ def test_source_photometry(sersic_2d_image, segm_and_cat):
 
         # Options
         cutout_size=max(r_list)*2, # Cutout out size, set to double the max radius
-        bkg_sub=True, # Subtract background
+        bg_sub=True, # Subtract background
         sigma=1, sigma_type='clip', # Fit a 2D plane to pixels within 1 sigma of the mean
         plot=True, vmax=0, vmin=1, # Show plot with max and min defined above
     )
-
 
 
 def test_order_cat(segm_and_cat):
