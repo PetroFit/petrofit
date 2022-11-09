@@ -20,7 +20,7 @@ nbsphinx
 # Other
 tox
 scikit-image
-sklearn
+scikit-learn
 astropy_helpers
 extension_helpers
 sphinx_astropy
