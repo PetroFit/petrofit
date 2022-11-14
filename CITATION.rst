@@ -27,7 +27,7 @@ If you need to cite a specific version of PetroFit, please use
 `PetroFit's Zonodo record <https://zenodo.org/badge/latestdoi/348478663>`_
 in addition to the acknowledgments above.
 
-*Geda et al. 2022* BibTeX (`download .bib file <https://iopscience.iop.org/export?articleId=1538-3881/163/5/202&doi=10.3847/1538-3881/ac5908&exportFormat=iopexport_bib&exportType=abs&navsubmit=Export+abstract>`_):
+*Geda et al. 2022* BibTeX (`download .bib file <https://iopscience.iop.org/export?type=article&doi=10.3847/1538-3881/ac5908&exportFormat=iopexport_bib&exportType=abs&navsubmit=Export+abstract>`_):
 
 .. code-block:: text
 
