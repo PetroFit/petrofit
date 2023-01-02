@@ -12,7 +12,7 @@ jobs:
   build-and-test:
     resource_class: medium+
     docker:
-      - image: jupyter/scipy-notebook:4d9c9bd9ced0
+      - image: jupyter/scipy-notebook:python-3.10
     steps:
       - checkout
       - run:
