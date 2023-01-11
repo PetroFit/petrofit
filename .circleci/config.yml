@@ -12,12 +12,12 @@ jobs:
   build-and-test:
     resource_class: medium+
     docker:
-      - image: jupyter/scipy-notebook:4d9c9bd9ced0
+      - image: jupyter/scipy-notebook:python-3.10
     steps:
       - checkout
       - run:
           name: Install tox
-          command: pip install tox
+          command: pip install tox==3.25.1
       - run:
           name: Run Tests
           command: tox
