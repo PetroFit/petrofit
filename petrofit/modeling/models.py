@@ -520,7 +520,7 @@ class PSFConvolvedModel2D(FittableModel):
 
 
 class GenSersic2D(models.Sersic2D):
-    r"""
+    """
     Two dimensional Sersic surface brightness profile with
     Generalized Ellipses described in Peng et al. 2010.
 
@@ -546,32 +546,6 @@ class GenSersic2D(models.Sersic2D):
         increases counterclockwise from the positive x axis.
     c_0 : float
         Boxiness of elliptical isophote.
-
-    See Also
-    --------
-    Gaussian2D, Moffat2D
-
-    Notes
-    -----
-    Model formula:
-
-    .. math::
-
-        I(x,y) = I(r) = I_e\exp\left\{
-                -b_n\left[\left(\frac{r}{r_{e}}\right)^{(1/n)}-1\right]
-            \right\}
-
-    The constant :math:`b_n` is defined such that :math:`r_e` contains half the total
-    luminosity, and can be solved for numerically.
-
-    .. math::
-
-        \Gamma(2n) = 2\gamma (2n,b_n)
-
-    References
-    ----------
-    .. [1] http://ned.ipac.caltech.edu/level5/March05/Graham/Graham2.html
-    .. [2] https://ui.adsabs.harvard.edu/abs/2010AJ....139.2097P/abstract
     """
 
     c_0 = Parameter(default=0, description="General boxiness of isophote")
