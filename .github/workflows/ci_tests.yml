@@ -1,0 +1,64 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: ci_tests
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+
+jobs:
+  tests:
+    name: ${{ matrix.prefix }} ${{ matrix.os }}, ${{ matrix.tox_env }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.allow_failure }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'py310-test-alldeps'
+            allow_failure: false
+            prefix: ''
+
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'py310-test-astropy50'
+            allow_failure: false
+            prefix: ''
+
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'py310-test-numpy122'
+            allow_failure: false
+            prefix: ''
+
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'build_docs'
+            allow_failure: false
+            prefix: ''
+            
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install Pandoc for build_docs
+      if: matrix.tox_env == 'build_docs'
+      run: sudo apt-get install -y pandoc
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install tox
+    - name: Test with Tox
+      run: |
+        export PY_COLORS=1
+        tox -e ${{ matrix.tox_env }}
+      env:
+        PY_COLORS: '1'

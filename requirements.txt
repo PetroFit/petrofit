@@ -9,13 +9,14 @@ notebook
 regions
 
 # Dependencies
-photutils>=1.1.0
+photutils==1.5.0
 ipywidgets
 
 # Docs
 sphinx
 docutils
 nbsphinx
+nbconvert
 
 # Other
 tox
