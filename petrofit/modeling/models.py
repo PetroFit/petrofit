@@ -13,8 +13,7 @@ from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
 __all__ = [
-    'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D',
-    'Nuker2D', 'Moffat2D', 'EllipMoffat2D',
+    'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D', 'Nuker2D',
     'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model', 'PetroApprox',
     'petrosian_profile', 'petrosian_model', 'get_default_gen_sersic_bounds', 'GenSersic2D'
 ]
@@ -605,28 +604,6 @@ def CoreSersic2D(x, y, amplitude=1, r_eff=1, r_break=1, n=1, x_0=0, y_0=0,
     return I * (1 + (r_break / r) ** (alpha)) ** (gamma / alpha) * np.exp(
         - bn * ((r ** alpha + r_break ** alpha) / (r_eff) ** alpha) ** (1 / (alpha * n))
     )
-
-
-@custom_model
-def Moffat2D(x, y, amplitude=1.0, x_0=0.0, y_0=0.0, gamma=1.0, alpha=1.0):
-    """Two dimensional Moffat function."""
-    rr_gg = ((x - x_0) ** 2 + (y - y_0) ** 2) / gamma ** 2
-    return amplitude * (1 + rr_gg) ** (-alpha)
-
-
-@custom_model
-def EllipMoffat2D(x, y, amplitude=1.0, x_0=0.0, y_0=0.0, gamma=1.0, alpha=1.0, ellip=0, theta=0, r=1):
-    """Two dimensional Moffat function."""
-
-    a, b = 1 * r, (1 - ellip) * r
-    cos_theta, sin_theta = np.cos(theta), np.sin(theta)
-    x_maj = (x - x_0) * cos_theta + (y - y_0) * sin_theta
-    x_min = -(x - x_0) * sin_theta + (y - y_0) * cos_theta
-    z = np.sqrt((x_maj / a) ** 2 + (x_min / b) ** 2)
-
-    rr_gg = (z) / gamma ** 2
-
-    return amplitude * (1 + rr_gg) ** (-alpha)
 
 
 def sersic_enclosed(
