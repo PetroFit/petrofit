@@ -50,8 +50,8 @@ jobs:
       with:
         python-version: ${{ matrix.python }}
     - name: Install Pandoc for build_docs
-        if: matrix.tox_env == 'build_docs'
-        run: sudo apt-get install -y pandoc
+      if: matrix.tox_env == 'build_docs'
+      run: sudo apt-get install -y pandoc
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
