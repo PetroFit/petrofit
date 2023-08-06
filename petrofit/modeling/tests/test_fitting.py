@@ -3,7 +3,7 @@ import numpy as np
 from astropy.convolution import convolve
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
-from petrofit.modeling.models import Moffat2D, PSFModel, make_grid, PSFConvolvedModel2D
+from petrofit.modeling.models import PSFModel, make_grid, PSFConvolvedModel2D
 from petrofit.modeling import model_to_image, fit_model
 from petrofit.segmentation import masked_segm_image
 
@@ -39,7 +39,7 @@ def test_psfmodel():
 
     # Make a PSF
     x_grid, y_grid = make_grid(51, factor=1)
-    PSF = Moffat2D(x_0=25.0, y_0=25.0)(x_grid, y_grid)
+    PSF = models.Moffat2D(x_0=25.0, y_0=25.0)(x_grid, y_grid)
     PSF /= PSF.sum()
 
     # Make a PSF image using model image and PSF
@@ -110,7 +110,7 @@ def test_psf_convolved_image_model():
 
         # Make a PSF
         x_grid, y_grid = make_grid(51, factor=1)
-        PSF = Moffat2D(x_0=25.0, y_0=25.0)(x_grid, y_grid)
+        PSF = models.Moffat2D(x_0=25.0, y_0=25.0)(x_grid, y_grid)
         PSF /= PSF.sum()
 
         # Make a PSF image using model image and PSF

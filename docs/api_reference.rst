@@ -13,8 +13,6 @@ API
 .. automodapi:: petrofit.modeling.models
     :no-inheritance-diagram:
     :skip: Nuker2D
-    :skip: Moffat2D
-    :skip: EllipMoffat2D
     :skip: sersic_enclosed_model
     :skip: petrosian_model
 
