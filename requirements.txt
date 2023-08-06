@@ -16,6 +16,7 @@ ipywidgets
 sphinx
 docutils
 nbsphinx
+pandoc
 
 # Other
 tox
