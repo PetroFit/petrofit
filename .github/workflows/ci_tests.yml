@@ -24,6 +24,25 @@ jobs:
             tox_env: 'py310-test-alldeps'
             allow_failure: false
             prefix: ''
+
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'py310-test-astropy50'
+            allow_failure: false
+            prefix: ''
+
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'py310-test-numpy122'
+            allow_failure: false
+            prefix: ''
+
+          - os: ubuntu-latest
+            python: '3.10'
+            tox_env: 'build_docs'
+            allow_failure: false
+            prefix: ''
+            
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python }}
@@ -36,4 +55,4 @@ jobs:
         python -m pip install tox
     - name: Test with Tox
       run: |
-        tox -e ${{ matrix.tox_env }} -- ${{ matrix.toxposargs }}
+        tox -e ${{ matrix.tox_env }}
