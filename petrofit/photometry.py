@@ -288,7 +288,7 @@ def photometry_step(position, r_list, image, error=None, mask=None, elong=1., th
 
 
 def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_size=None,
-                      bkg_sub=False, sigma=3.0, sigma_type='clip', method='exact', mask_background=False,
+                      bg_sub=False, sigma=3.0, sigma_type='clip', method='exact', mask_background=False,
                       plot=False, vmin=0, vmax=None, ):
     """
     Aperture photometry on a PhotUtils `SourceProperties`.
@@ -313,7 +313,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
     cutout_size : int
         Size of cutout.
 
-    bkg_sub : bool
+    bg_sub : bool
         If the code should subtract the background using the `sigma` provided.
 
     sigma : float
@@ -419,7 +419,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
 
     # Subtract Mean Plane
     # -------------------
-    if bkg_sub:
+    if bg_sub:
         if len(np.where(~np.isnan(masked_stats_image))[0]) > 10:
             with warnings.catch_warnings():
 
@@ -445,7 +445,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
                     masked_image = np.clip(masked_image, - sigma, np.inf)
 
         elif plot:
-            print("bkg_sub: Not enough datapoints, did not subtract.")
+            print("bg_sub: Not enough datapoints, did not subtract.")
 
     # Make mask
     # ---------
