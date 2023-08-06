@@ -16,7 +16,7 @@ ipywidgets
 sphinx
 docutils
 nbsphinx
-pandoc
+nbconvert
 
 # Other
 tox
