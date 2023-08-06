@@ -5,29 +5,36 @@ name: CI Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    tags:
+      - '*'
   pull_request:
 
 jobs:
-  build:
-  
-    runs-on: ubuntu-latest
+  tests:
+    name: ${{ matrix.prefix }} ${{ matrix.os }}, ${{ matrix.tox_env }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.allow_failure }}
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
-
+        include:
+          - os: ubuntu-latest
+            python: '3.9'
+            tox_env: 'pypython3.10-test-alldeps'
+            allow_failure: false
+            prefix: ''
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python }}
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ matrix.python }}
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest tox
+        python -m pip install tox
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with Tox
       run: |
-        tox
+        tox -e ${{ matrix.tox_env }} -- ${{ matrix.toxposargs }}
