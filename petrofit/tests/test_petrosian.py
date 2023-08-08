@@ -37,7 +37,7 @@ def test_petrosian(sersic_petrosian):
 
 
 def test_corrections(sersic_petrosian):
-    return 
+    return
     p = sersic_petrosian
 
     pc = PetrosianCorrection.read(

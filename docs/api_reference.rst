@@ -4,9 +4,6 @@
 API
 ===
 
-.. automodapi:: petrofit.correction
-    :no-inheritance-diagram:
-
 .. automodapi:: petrofit.modeling.fitting
     :no-inheritance-diagram:
 
