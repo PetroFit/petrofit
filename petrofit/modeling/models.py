@@ -16,7 +16,7 @@ __all__ = [
     'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D', 'Nuker2D',
     'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model', 'PetroApprox',
     'petrosian_profile', 'petrosian_model', 'get_default_gen_sersic_bounds', 'GenSersic2D',
-    'Ie_to_I0',
+    'Ie_to_I0', 'I0_to_Ie'
 ]
 
 
@@ -38,6 +38,26 @@ def Ie_to_I0(I_e, n):
         Intensity at the 0 radius (I_0)
     """
     return I_e * np.exp(gammaincinv(2. * n, 0.5))
+
+
+def I0_to_Ie(I_0, n):
+    """
+    Converts the intensity at the 0 radius (I_0) to the Sersic intensity at the effective radius (I_e)
+    based on the Sersic index (n).
+
+    Parameters
+    ----------
+    I_0 : float
+        Intensity at the 0 radius (I_0).
+    n : float
+        Sersic index.
+
+    Returns
+    -------
+    float
+        Sersic intensity at the effective radius (I_e).
+    """
+    return I_0 / np.exp(gammaincinv(2. * n, 0.5))
 
 
 def get_default_sersic_bounds(override={}):

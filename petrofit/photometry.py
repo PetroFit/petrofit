@@ -15,8 +15,8 @@ from .modeling.fitting import fit_background, model_to_image
 from .segmentation import get_source_elong,  get_source_theta, get_source_position
 
 __all__ = [
-    'plot_apertures', 'flux_to_abmag', 'order_cat', 'radial_elliptical_aperture',
-    'radial_elliptical_annulus', 'calculate_photometic_density', 'make_radius_list',
+    'plot_apertures', 'radial_elliptical_aperture',
+    'radial_elliptical_annulus', 'make_radius_list',
     'photometry_step', 'source_photometry'
 ]
 
@@ -50,51 +50,6 @@ def plot_apertures(image=None, apertures=[], vmin=None, vmax=None, color='white'
 
     if image or apertures:
         plt.title('Apertures')
-
-
-def flux_to_abmag(flux, header):
-    """Convert HST flux to AB Mag"""
-    if not type(flux) in [int, float]:
-        flux = np.array(flux)
-        flux[np.where(flux <= 0)] = np.nan
-    elif flux <= 0:
-        return np.nan
-
-    PHOTFLAM = header['PHOTFLAM']
-    PHOTZPT = header['PHOTZPT']
-    PHOTPLAM = header['PHOTPLAM']
-
-    STMAG_ZPT = (-2.5 * np.log10(PHOTFLAM)) + PHOTZPT
-    ABMAG_ZPT = STMAG_ZPT - (5. * np.log10(PHOTPLAM)) + 18.692
-
-    return -2.5 * np.log10(flux) + ABMAG_ZPT
-
-
-def order_cat(cat, key='area', reverse=True):
-    """
-    Sort a catalog by largest area and return the argsort
-
-    Parameters
-    ----------
-    cat : `SourceCatalog` instance
-        A `SourceCatalog` instance containing the properties of each source.
-
-    key : string
-        Key to sort.
-
-    reverse : bool
-        Reverse sorting order. Default is `True` to place largest values on top.
-
-    Returns
-    -------
-    output : list
-        A list of catalog indices ordered by largest area.
-    """
-    table = cat.to_table()[key]
-    order_all = table.argsort()
-    if reverse:
-        return list(reversed(order_all))
-    return order_all
 
 
 def radial_elliptical_aperture(position, r, elong=1., theta=0.):
@@ -155,21 +110,6 @@ def radial_elliptical_annulus(position, r, dr, elong=1., theta=0.):
     a_out, b_out = r + dr, (r + dr) / elong
 
     return EllipticalAnnulus(position, a_in, a_out, b_out, theta=theta)
-
-
-def calculate_photometic_density(r_list, flux_list, elong=1., theta=0.):
-    """Compute value between radii"""
-    density = []
-
-    last_flux = 0
-    last_area = 0
-    for r, flux in zip(r_list, flux_list):
-        aperture = radial_elliptical_aperture((0, 0), r, elong=elong, theta=theta)
-        area = aperture.area
-        density.append((flux - last_flux) / (area - last_area))
-        last_area, last_flux = area, flux
-
-    return np.array(density)
 
 
 def make_radius_list(max_pix, n, log=False):
@@ -499,6 +439,3 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
         plt.ylabel("Flux")
 
     return flux_arr, area_arr, error_arr
-
-
-object_photometry = source_photometry  # Legacy

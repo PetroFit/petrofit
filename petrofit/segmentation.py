@@ -2,11 +2,8 @@ from copy import deepcopy
 
 import numpy as np
 
-from astropy.convolution import Gaussian2DKernel
-from astropy.stats import gaussian_fwhm_to_sigma
 from astropy.nddata import CCDData, Cutout2D
 
-from photutils import detect_threshold
 from photutils import deblend_sources
 from photutils import detect_sources
 from photutils.segmentation import SourceCatalog
@@ -16,8 +13,8 @@ from matplotlib import pyplot as plt
 
 __all__ = [
     'plot_segments', 'plot_segment_residual', 'get_source_position', 'get_source_elong',
-    'get_source_ellip', 'get_source_theta', 'get_amplitude_at_r', 'make_kernel', 'segm_mask', 'masked_segm_image',
-    'make_segments', 'deblend_segments'
+    'get_source_ellip', 'get_source_theta', 'get_amplitude_at_r', 'order_cat', 'segm_mask',
+    'masked_segm_image', 'make_segments', 'deblend_segments', 'make_catalog'
 ]
 
 
@@ -136,11 +133,31 @@ def get_amplitude_at_r(r, image, x0, y0, ellip, theta):
     return amplitude
 
 
-def make_kernel(fwhm, kernel_size):
-    sigma = fwhm * gaussian_fwhm_to_sigma
-    kernel = Gaussian2DKernel(sigma, x_size=kernel_size, y_size=kernel_size)
-    kernel.normalize()
-    return kernel
+def order_cat(cat, key='area', reverse=True):
+    """
+    Sort a catalog by largest area and return the argsort
+
+    Parameters
+    ----------
+    cat : `SourceCatalog` instance
+        A `SourceCatalog` instance containing the properties of each source.
+
+    key : string
+        Key to sort.
+
+    reverse : bool
+        Reverse sorting order. Default is `True` to place largest values on top.
+
+    Returns
+    -------
+    output : list
+        A list of catalog indices ordered by largest area.
+    """
+    table = cat.to_table()[key]
+    order_all = table.argsort()
+    if reverse:
+        return list(reversed(order_all))
+    return order_all
 
 
 def segm_mask(source, segm, mask_background=False):
@@ -229,7 +246,7 @@ def masked_segm_image(source, image, segm, fill=None, mask_background=False):
     return masked_image
 
 
-def make_segments(image, npixels=None, threshold=3., fwhm=8., kernel_size=4):
+def make_segments(image, npixels=None, threshold=3.):
     """
     Segment an image.
 
@@ -249,12 +266,6 @@ def make_segments(image, npixels=None, threshold=3., fwhm=8., kernel_size=4):
         as ``data``. See `~photutils.segmentation.detect_threshold` for
         one way to create a ``threshold`` image.
 
-    fwhm : float
-        FWHM of smoothing gaussian kernel.
-
-    kernel_size : int
-        Size of smoothing kernel.
-
     Returns
     -------
 
@@ -264,16 +275,10 @@ def make_segments(image, npixels=None, threshold=3., fwhm=8., kernel_size=4):
         value of zero is reserved for the background.  If no sources
         are found then `None` is returned.
     """
-
-    if npixels is None:
-        npixels = fwhm ** 2
-
-    kernel = make_kernel(fwhm, kernel_size) if kernel_size else None
-
-    return detect_sources(image, threshold, npixels=npixels, kernel=kernel)
+    return detect_sources(image, threshold, npixels=npixels)
 
 
-def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=30, contrast=1/1000):
+def deblend_segments(image, segm, npixels=None, nlevels=30, contrast=1/1000):
     """
     Deblend overlapping sources labeled in a segmentation image.
 
@@ -292,12 +297,6 @@ def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=
         The number of connected pixels, each greater than ``threshold``,
         that an object must have to be detected.  ``npixels`` must be a
         positive integer.
-
-    fwhm : float
-        FWHM of smoothing gaussian kernel.
-
-    kernel_size : int
-        Size of smoothing kernel.
 
     nlevels : int, optional
         The number of multi-thresholding levels to use.  Each source
@@ -322,22 +321,14 @@ def deblend_segments(image, segm, npixels=None, fwhm=8., kernel_size=4, nlevels=
         sources are marked by different positive integer values.  A
         value of zero is reserved for the background.
     """
-
-    if npixels is None:
-        npixels = fwhm ** 2
-
-    kernel = make_kernel(fwhm, kernel_size) if kernel_size else None
-
-    segm_deblend = deblend_sources(image, segm,
-                                   npixels=npixels, kernel=kernel,
+    segm_deblend = deblend_sources(image, segm, npixels=npixels,
                                    nlevels=nlevels, contrast=contrast)
 
     return segm_deblend
 
 
 def make_catalog(image, threshold, wcs=None, deblend=True,
-                 npixels=None, fwhm=8., kernel_size=5,
-                 nlevels=30, contrast=1/1000,
+                 npixels=None, nlevels=30, contrast=1/1000,
                  plot=True, vmax=None, vmin=None):
     """
     This function constructs a catalog using `PhotUtils`. The `petrofit.segmentation.make_segments` and
@@ -365,12 +356,6 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
         The number of connected pixels, each greater than ``threshold``,
         that an object must have to be detected.  ``npixels`` must be a
         positive integer.
-
-    fwhm : float
-        FWHM of smoothing gaussian kernel.
-
-    kernel_size : int
-        Size of smoothing kernel.
 
     nlevels : int, optional
         The number of multi-thresholding levels to use.  Each source
@@ -413,8 +398,7 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
     # Make segmentation map
     segm = make_segments(image,
                          threshold=threshold,
-                         kernel_size=kernel_size,
-                         fwhm=fwhm, npixels=npixels)
+                         npixels=npixels)
 
     if plot and segm:
         # Make plots
@@ -429,8 +413,7 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
         segm_deblend = deblend_segments(image, segm,
                                         contrast=contrast,
                                         nlevels=nlevels,
-                                        kernel_size=kernel_size,
-                                        fwhm=fwhm, npixels=npixels)
+                                        npixels=npixels)
 
         if plot and segm_deblend:
             # Make plots

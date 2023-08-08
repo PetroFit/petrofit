@@ -17,7 +17,7 @@ __all__ = [
     'match_catalogs', 'angular_to_pixel', 'pixel_to_angular',
     'elliptical_area_to_r', 'circle_area_to_r', 'get_interpolated_values',
     'closest_value_index', 'plot_target', 'cutout_subtract',
-    'measure_fwhm'
+    'measure_fwhm', 'hst_flux_to_abmag', 'natural_sort'
 ]
 
 
@@ -25,6 +25,24 @@ def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
     return sorted(l, key = alphanum_key)
+
+
+def hst_flux_to_abmag(flux, header):
+    """Convert HST flux to AB Mag"""
+    if not type(flux) in [int, float]:
+        flux = np.array(flux)
+        flux[np.where(flux <= 0)] = np.nan
+    elif flux <= 0:
+        return np.nan
+
+    PHOTFLAM = header['PHOTFLAM']
+    PHOTZPT = header['PHOTZPT']
+    PHOTPLAM = header['PHOTPLAM']
+
+    STMAG_ZPT = (-2.5 * np.log10(PHOTFLAM)) + PHOTZPT
+    ABMAG_ZPT = STMAG_ZPT - (5. * np.log10(PHOTPLAM)) + 18.692
+
+    return -2.5 * np.log10(flux) + ABMAG_ZPT
 
 
 def match_catalogs(ra_1, dec_1, ra_2, dec_2, unit='deg'):
@@ -185,7 +203,6 @@ def measure_fwhm(image, plot=True, printout=True):
         print("Center: ({}, {})".format(x_mean, y_mean))
         print("Sigma = ({}, {})".format(fitted_line.x_stddev.value,
                                         fitted_line.y_stddev.value, ))
-
         print("Mean FWHM: {} Pix ".format(mean_fwhm))
         print("FWHM: (x={}, y={}) Pix ".format(x_fwhm, y_fwhm))
 
