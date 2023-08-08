@@ -280,7 +280,7 @@ def _generate_petrosian_correction(args):
     c_r_80 = corrected_p.fraction_flux_to_r(0.8)
 
     row = [n, r_eff, r_20, r_80, r_total_flux, L_total,
-           p02, p03, p04, p05, 5 * np.log(p02 / p05), 5 * np.log(p02 / p03),
+           p02, p03, p04, p05, 5 * np.log10(p02 / p05), 5 * np.log10(p02 / p03),
            p.epsilon, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080,
            corrected_epsilon, corrected_epsilon_80, c_r_eff, corrected_p.r_total_flux, c_r_20, c_r_80,
            corrected_p.c2080, ]

@@ -12,61 +12,9 @@ from petrofit.utils import closest_value_index, get_interpolated_values, pixel_t
 from petrofit.photometry import radial_elliptical_aperture
 
 __all__ = [
-    'plot_petrosian', 'calculate_petrosian', 'calculate_petrosian_r',
+    'calculate_petrosian', 'calculate_petrosian_r',
     'calculate_concentration_index', 'Petrosian', 'fraction_to_r',
 ]
-
-
-def plot_petrosian(r_list, area_list, flux_list, epsilon=2., eta=0.2, plot_r=False):
-    """
-    Given photometric values, plots petrosian profile.
-
-    Parameters
-    ----------
-    r_list : numpy.array
-        Array of radii in pixels.
-
-    area_list : numpy.array
-        Array of aperture areas.
-
-    flux_list : numpy.array
-        Array of photometric flux values.
-
-    epsilon : float
-        Epsilon value (used to determine `r_total_flux`).
-        N.B: `r_total_flux` = `r_petrosian` * `epsilon`
-
-    eta : float, default=0.2
-        Eta is the petrosian value which defines the `r_petrosian`.
-
-    plot_r : bool
-        If set to True, `r_half_light` and `r_total_flux` will be plotted.
-    """
-    petrosian_list = calculate_petrosian(area_list, flux_list)
-
-    r_list_new, petrosian_list_new = get_interpolated_values(r_list[1:], petrosian_list[1:])
-
-    plt.plot(r_list, petrosian_list, marker='o', linestyle='None', label='Data')
-    plt.plot(r_list_new, petrosian_list_new, label='Interpolated [cubic]')
-
-    r_petrosian = calculate_petrosian_r(r_list, area_list, flux_list, eta=eta)
-    if not np.isnan(r_petrosian):
-        plt.axvline(r_petrosian, linestyle='--', label="r_petrosian={:0.4f} pix".format(r_petrosian))
-        plt.axhline(eta, linestyle='--', label='eta={:0.4f}'.format(eta))
-
-    r_total = calculate_r_total_flux(r_list, area_list, flux_list, epsilon, eta)
-    if not np.isnan(r_total) and plot_r:
-        plt.axvline(r_total, linestyle='--', label="r_total={:0.4f} pix".format(r_total), c='black')
-
-    r_half_light = calculate_r_half_light(r_list, flux_list, r_total)
-    if not np.isnan(r_half_light) and plot_r:
-        plt.axvline(r_half_light, linestyle='--', label="r_half_light={:0.4f} pix".format(r_half_light), c='gray')
-
-    plt.legend(loc='best')
-
-    plt.title("Petrosian")
-    plt.xlabel("Aperture Radius [Pix]")
-    plt.ylabel("Petrosian Value")
 
 
 def calculate_petrosian(area_list, flux_list, area_err=None, flux_err=None):
@@ -166,7 +114,7 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
                           interp_kind='cubic', interp_num=5000):
     """
     Calculate petrosian radius from photometric values using interpolation.
-    The petrosian radius is defined as the radius at which the petrosian profile equals eta.
+    The Petrosian radius is defined as the radius at which the petrosian profile equals eta.
 
     Parameters
     ----------
@@ -430,6 +378,11 @@ class Petrosian:
     Class that computes and plots Petrosian properties.
     """
 
+    _epsilon = None
+    _eta = None
+    _epsilon_fraction = None
+    _total_flux_fraction = None
+
     def __init__(self, r_list, area_list, flux_list, area_err=None, flux_err=None,
                  eta=0.2, epsilon=2., epsilon_fraction=0.99, total_flux_fraction=0.99,
                  verbose=False, interp_kind='cubic', interp_num=5000):
@@ -487,22 +440,10 @@ class Petrosian:
         self._area_list = np.array(area_list)
         self._flux_list = np.array(flux_list)
 
-        self.area_err = None if area_err is None else np.array(area_err)
-        self.flux_err = None if flux_err is None else np.array(flux_err)
+        self._area_err = None if area_err is None else np.array(area_err)
+        self._flux_err = None if flux_err is None else np.array(flux_err)
 
-        assert len(self.r_list) > 2, "At least 3 data points are needed to compute Petrosian."
-        assert len(self.r_list.shape), "Input arrays should be one dimensional."
-        assert self.r_list.shape == self.flux_list.shape
-
-        if self.flux_err is not None:
-            assert self.flux_list.shape == self.flux_err.shape
-        if self.area_err is not None:
-            assert self.area_list.shape == self.area_err.shape
-
-        self._epsilon = None
-        self._eta = None
-        self._epsilon_fraction = None
-        self._total_flux_fraction = None
+        self._validate_input_arrays()
 
         self.epsilon = float(epsilon)
         self.eta = float(eta)
@@ -518,13 +459,32 @@ class Petrosian:
 
         self._update_petrosian()
 
+    def _validate_input_arrays(self):
+        """
+        Check if input arrays are equal in size and have at least 3 data points
+        """
+        assert len(self.r_list) > 2, "At least 3 data points are needed to compute Petrosian."
+        assert len(self.r_list.shape) == 1, "Input arrays should be one dimensional."
+        assert self.r_list.shape == self.flux_list.shape
+
+        if self.flux_err is not None:
+            assert self.flux_list.shape == self.flux_err.shape
+        if self.area_err is not None:
+            assert self.area_list.shape == self.area_err.shape
+
     def _update_petrosian(self):
+        """
+        Updates the Petrosian properties based on current parameters.
+        """
         self.petrosian_list, self.petrosian_err = calculate_petrosian(self.area_list, self.flux_list,
                                                                       area_err=self.area_err,
                                                                       flux_err=self.flux_err)
         self.has_petrosian_err = self.petrosian_err is not None
 
     def _calculate_petrosian_r(self):
+        """
+        Calculates the Petrosian radius based on the current Petrosian profile.
+        """
         return calculate_petrosian_r(self.r_list, self.petrosian_list,
                                      petrosian_err=self.petrosian_err,
                                      eta=self.eta,
@@ -532,6 +492,9 @@ class Petrosian:
                                      interp_num=self.interp_num)
 
     def _calculate_fraction_to_r(self, fraction):
+        """
+        Calculates the radius containing a given fraction of the total flux.
+        """
         return fraction_to_r(fraction, self.r_list, self.flux_list, self.r_petrosian,
                              flux_err=self.flux_err, r_petrosian_err=self.r_petrosian_err,
                              epsilon=self.epsilon, epsilon_fraction=self.epsilon_fraction,
@@ -579,8 +542,16 @@ class Petrosian:
         return self._area_list
 
     @property
+    def area_err(self):
+        return self._area_err
+
+    @property
     def flux_list(self):
         return self._flux_list
+
+    @property
+    def flux_err(self):
+        return self._flux_err
 
     @property
     def epsilon(self):
@@ -668,7 +639,7 @@ class Petrosian:
     def total_flux_err(self):
         """
         Returns the photometric uncertainty at `r_total_flux` or np.nan if out of range.
-        Note that this does not include errors in estimating `r_total_flux`.
+        Note that this includes errors in estimating `r_total_flux`.
         """
         r_total_flux = self.r_total_flux
         r_total_flux_err = self.r_total_flux_err
@@ -694,12 +665,12 @@ class Petrosian:
 
     def fraction_flux_to_r(self, fraction=0.5):
         """Given a fraction, compute the radius containing that fraction of the Petrosian total flux"""
-        r_frac, r_frac_err = self._calculate_fraction_to_r(0.5)
+        r_frac, r_frac_err = self._calculate_fraction_to_r(fraction)
         return r_frac
 
     def fraction_flux_to_r_err(self, fraction=0.5):
         """Given a fraction, compute the radius containing that fraction of the Petrosian total flux"""
-        r_frac, r_frac_err = self._calculate_fraction_to_r(0.5)
+        r_frac, r_frac_err = self._calculate_fraction_to_r(fraction)
         return r_frac_err
 
     def r_half_light_arcsec(self, wcs):
@@ -736,7 +707,7 @@ class Petrosian:
         r_petrosian = self.r_petrosian
         if not np.isnan(r_petrosian):
             ax.axvline(r_petrosian, linestyle='--',
-                       label="$r(\eta_{{{}}})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
+                       label="$r_{{p}}(\eta={})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
 
         r_epsilon = self.r_petrosian * self.epsilon
         if not np.isnan(r_epsilon):
@@ -759,15 +730,48 @@ class Petrosian:
              show_legend=True, legend_fontsize=None,
              ax_fontsize=None, tick_fontsize=None):
         """
-        Plots Petrosian profile.
+        Plots the Petrosian profile.
 
         Parameters
         ----------
-        plot_r : bool
-            Plot total flux and half light radii.
+        plot_r : bool, optional
+            If True, plots the total flux and half-light radii. Default is False.
 
-        plot_normalized_flux:
-            Over-plot the flux curve of growth by normalizing the flux axis (max_flux=1).
+        show_normalized_flux : bool, optional
+            If True, over-plots the flux curve of growth by normalizing
+            the flux axis (max_flux=1). Default is False.
+
+        title : str, optional
+            Title for the plot. Default is 'Petrosian Profile'.
+
+        radius_unit : str, optional
+            Unit for the radius. Default is 'pix'.
+
+        ax : matplotlib.axis, optional
+            Matplotlib axis object to plot on. If None, creates a new axis.
+
+        err_alpha : float, optional
+            Transparency for the error region. Default is 0.2.
+
+        err_capsize : int, optional
+            Cap size for the error bars. Default is 3.
+
+        show_legend : bool, optional
+            If True, displays the legend. Default is True.
+
+        legend_fontsize : int or float, optional
+            Font size for the legend. If None, uses default font size.
+
+        ax_fontsize : int or float, optional
+            Font size for the axis labels. If None, uses default font size.
+
+        tick_fontsize : int or float, optional
+            Font size for the tick labels. If None, uses default font size.
+
+        Returns
+        -------
+        ax : matplotlib.axis
+            Matplotlib axis object with the plot.
         """
         radius_unit = '' if radius_unit is None else str(radius_unit)
         if ax is None:
@@ -807,11 +811,53 @@ class Petrosian:
         return ax
 
     def plot_cog(self, plot_r=False, show_normalized_flux=False,
-                 title='Petrosian Profile', radius_unit='pix',
+                 title='Curve of Growth', radius_unit='pix',
                  ax=None, err_alpha=0.2, err_capsize=3,
                  show_legend=True, legend_fontsize=None,
                  ax_fontsize=None, tick_fontsize=None):
         """
+        Plots the Curve of Growth (COG) for the Petrosian profile.
+
+        Parameters
+        ----------
+        plot_r : bool, optional
+            If True, plots radii of interest including Petrosian radius.
+            Default is False.
+
+        show_normalized_flux : bool, optional
+            If True, plots the normalized flux. Default is False.
+
+        title : str, optional
+            Title for the plot. Default is 'Curve of Growth'.
+
+        radius_unit : str, optional
+            Unit for the radius. Default is 'pix'.
+
+        ax : matplotlib.axis, optional
+            Matplotlib axis object to plot on. If None, creates a new axis.
+
+        err_alpha : float, optional
+            Transparency for the error region. Default is 0.2.
+
+        err_capsize : int, optional
+            Cap size for the error bars. Default is 3.
+
+        show_legend : bool, optional
+            If True, displays the legend. Default is True.
+
+        legend_fontsize : int or float, optional
+            Font size for the legend. If None, uses default font size.
+
+        ax_fontsize : int or float, optional
+            Font size for the axis labels. If None, uses default font size.
+
+        tick_fontsize : int or float, optional
+            Font size for the tick labels. If None, uses default font size.
+
+        Returns
+        -------
+        ax : matplotlib.axis
+            Matplotlib axis object with the plot.
         """
         radius_unit = '' if radius_unit is None else str(radius_unit)
         if ax is None:
@@ -841,6 +887,18 @@ class Petrosian:
 
         ax.tick_params(axis='both', which='major', labelsize=tick_fontsize)
         ax.tick_params(axis='both', which='minor', labelsize=tick_fontsize)
+
+        r_epsilon = self.r_petrosian * self.epsilon
+
+        f = interp1d(self.r_list, self.flux_list, kind='cubic')
+
+        # Flux in r_epsilon
+        epsilon_flux = f(r_epsilon)
+
+        # Flux value corrsponding to fraction
+        fractional_flux = epsilon_flux * (self.total_flux_fraction / self.epsilon_fraction)
+
+        ax.axhline(fractional_flux, c='r')
 
         if show_legend:
             ax.legend(fontsize=legend_fontsize)
@@ -874,7 +932,7 @@ class Petrosian:
                  self._calculate_fraction_to_r(.8)[0]]
         colors = ['r', 'r', 'b', 'b']
         linestyles = ['dashed', 'solid', 'dotted', 'dashdot']
-
+        print(radii)
         for label, r, default_color, ls in zip(labels, radii, colors, linestyles):
             if not np.isnan(r) and r > 0:
                 radial_elliptical_aperture(position, r, elong, theta).plot(
