@@ -377,9 +377,8 @@ class Petrosian:
     """
     Class that computes and plots Petrosian properties.
     """
-
-    _epsilon = None
     _eta = None
+    _epsilon = None
     _epsilon_fraction = None
     _total_flux_fraction = None
 
@@ -890,15 +889,16 @@ class Petrosian:
 
         r_epsilon = self.r_petrosian * self.epsilon
 
-        f = interp1d(self.r_list, self.flux_list, kind='cubic')
+        if r_epsilon < self.r_list.max():
+            f = interp1d(self.r_list, self.flux_list, kind='cubic')
 
-        # Flux in r_epsilon
-        epsilon_flux = f(r_epsilon)
+            # Flux in r_epsilon
+            epsilon_flux = f(r_epsilon)
 
-        # Flux value corrsponding to fraction
-        fractional_flux = epsilon_flux * (self.total_flux_fraction / self.epsilon_fraction)
+            # Flux value corrsponding to fraction
+            fractional_flux = epsilon_flux * (self.total_flux_fraction / self.epsilon_fraction)
 
-        ax.axhline(fractional_flux, c='r')
+            ax.axhline(fractional_flux, c='r')
 
         if show_legend:
             ax.legend(fontsize=legend_fontsize)
@@ -932,7 +932,6 @@ class Petrosian:
                  self._calculate_fraction_to_r(.8)[0]]
         colors = ['r', 'r', 'b', 'b']
         linestyles = ['dashed', 'solid', 'dotted', 'dashdot']
-        print(radii)
         for label, r, default_color, ls in zip(labels, radii, colors, linestyles):
             if not np.isnan(r) and r > 0:
                 radial_elliptical_aperture(position, r, elong, theta).plot(

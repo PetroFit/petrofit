@@ -45,7 +45,7 @@ class PetrosianCorrection:
         else:
             raise TypeError('Input grid should be an astropy Table')
 
-        self.x = self.grid['p02'].value
+        self.x = self.grid['p03'].value
         self.y = self.grid['p02'].value / self.grid['p03'].value
         self.z = self.grid['p02'].value / self.grid['p04'].value
         self.r = [self.x, self.y, self.z]
@@ -101,9 +101,9 @@ class PetrosianCorrection:
         p02, p03, p04, p05 = [calculate_petrosian_r(p.r_list, p.petrosian_list,
                                                     petrosian_err=None, eta=i,
                                                     interp_kind='cubic', interp_num=5000)[0] for i in px_list]
-        x0 = p02
-        y0 = p04 / p03
-        z0 = p03 / p04
+        x0 = p03
+        y0 = p02 / p03
+        z0 = p02 / p04
         return [x0, y0, z0]
 
     def _get_corrected_row(self, p):
@@ -146,12 +146,12 @@ class PetrosianCorrection:
 
         ax = axs[0]
         sc = ax.scatter(self.x, self.y, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('p02')
+        ax.set_xlabel('p03')
         ax.set_ylabel('P02 / p03')
 
         ax = axs[1]
         sc = ax.scatter(self.x, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('p02')
+        ax.set_xlabel('p03')
         ax.set_ylabel('P02 / p04')
 
         ax = axs[2]
@@ -280,16 +280,18 @@ def _generate_petrosian_correction(args):
 
     u_r_eff = p.fraction_flux_to_r(0.5)
     u_r_20 = p.fraction_flux_to_r(0.2)
+    u_r_50 = p.fraction_flux_to_r(0.5)
     u_r_80 = p.fraction_flux_to_r(0.8)
 
     c_r_eff = corrected_p.fraction_flux_to_r(0.5)
     c_r_20 = corrected_p.fraction_flux_to_r(0.2)
+    c_r_50 = corrected_p.fraction_flux_to_r(0.5)
     c_r_80 = corrected_p.fraction_flux_to_r(0.8)
 
     row = [n, r_eff, r_20, r_80, r_total_flux, L_total,
            p02, p03, p04, p05, 5 * np.log10(p02 / p05), 5 * np.log10(p02 / p03),
-           p.epsilon, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080,
-           corrected_epsilon, corrected_epsilon_80, c_r_eff, corrected_p.r_total_flux, c_r_20, c_r_80,
+           p.epsilon, u_r_50 / p.r_petrosian, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080,
+           corrected_epsilon, c_r_50 / p.r_petrosian, corrected_epsilon_80, c_r_eff, corrected_p.r_total_flux, c_r_20, c_r_80,
            corrected_p.c2080, ]
     if plot:
         corrected_p.plot(True, True)
@@ -307,7 +309,7 @@ def _generate_petrosian_correction(args):
 
 def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=None, n_list=None,
                                          oversample=('x_0', 'y_0', 10, 10), out_format=None, overwrite=False,
-                                         ipython_widget=True, n_cpu=None, plot=True):
+                                         ipython_widget=False, n_cpu=None, plot=True):
     """
     Generate corrections for Petrosian profiles by simulating a galaxy image (single component sersic) and measuring its
     properties. This is done to identify the correct `epsilon` value that, when multiplied with `r_petrosian`, gives
@@ -391,8 +393,8 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
 
     names = ['n', 'r_eff', 'sersic_r_20', 'sersic_r_80', 'sersic_r_99', 'sersic_L_inf',
              'p02', 'p03', 'p04', 'p05', 'p0502', 'p0302',
-             'u_epsilon', 'u_epsilon_80', 'u_r_eff', 'u_r_99', 'u_r_20', 'u_r_80', 'u_c2080',
-             'c_epsilon', 'c_epsilon_80', 'c_r_eff', 'c_r_99', 'c_r_20', 'c_r_80', 'c_c2080', ]
+             'u_epsilon', 'u_epsilon_50', 'u_epsilon_80', 'u_r_eff', 'u_r_99', 'u_r_20', 'u_r_80', 'u_c2080',
+             'c_epsilon', 'c_epsilon_50', 'c_epsilon_80', 'c_r_eff', 'c_r_99', 'c_r_20', 'c_r_80', 'c_c2080',]
     petrosian_grid = Table(rows=rows, names=names)
 
     if output_yaml_name is not None:
