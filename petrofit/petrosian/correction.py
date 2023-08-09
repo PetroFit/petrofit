@@ -1,4 +1,5 @@
 from copy import copy
+import warnings
 
 import numpy as np
 
@@ -366,6 +367,9 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
 
     if n_list is None:
         n_list = np.arange(0.5, 4.5 + 0.5, 0.5)
+
+    if psf is not None and psf.sum() != 1:
+        warnings.warn("Input PSF not normalized to 1, current sum = {}. This may cause major errors".format(psf.sum()))
 
     r_eff_list = np.array(r_eff_list)
     n_list = np.round(np.array(n_list), 6)
