@@ -244,7 +244,7 @@ def _generate_petrosian_correction(args):
     galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 
     # Do photometry on model galaxy image
-    flux_list, area_list, err = photometry_step((image_size // 2, image_size // 2), r_list, galaxy_image,
+    flux_list, area_list, err = photometry_step((x_0, y_0), r_list, galaxy_image,
                                                 plot=plot,
                                                 vmax=amplitude / 100)
     # Calculate Photometry and petrosian
