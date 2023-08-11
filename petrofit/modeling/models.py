@@ -225,7 +225,7 @@ class PSFConvolvedModel2D(FittableModel):
 
     @psf.setter
     def psf(self, psf):
-        if psf is not None and psf.sum() != 1:
+        if psf is not None and np.round(psf.sum(), 6) != 1:
             warnings.warn("Input PSF not normalized to 1, current sum = {}".format(psf.sum()))
         self._psf = psf
 

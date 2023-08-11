@@ -150,6 +150,12 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
     r_petro_err : float or numpy.nan
         1-sigma error in r_petro. Computed if petrosian_err is provided.
     """
+    # Convert input to array
+    r_list = np.array(r_list)
+    petrosian_list = np.array(petrosian_list)
+    if petrosian_err is not None:
+        petrosian_err = np.array(petrosian_err)
+
     # replace the first element with r=0 and petrosian=1
     # This is because the petrosian for the first radius in r_list can not be
     # computed, we instead replace that value with r=0, since that value is known to equal 0.
@@ -169,6 +175,7 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
 
     # Compute Errors
     # --------------
+    # Convert input to array
     petrosian_err[0] = 0
 
     # Compute upper 1-sigma r_petro
@@ -240,6 +247,14 @@ def fraction_to_r(fraction, r_list, flux_list, r_petrosian,
     r_fraction_flux_error : float or numpy.nan
         Error in `r_fraction_flux`.
     """
+
+    r_list = np.array(r_list)
+    flux_list = np.array(flux_list)
+    if flux_err is not None:
+        flux_err = np.array(flux_err)
+    if r_petrosian_err is not None:
+        r_petrosian_err = np.array(r_petrosian_err)
+
     r_epsilon = r_petrosian * epsilon
 
     if r_epsilon > max(r_list):
@@ -599,7 +614,7 @@ class Petrosian:
     @property
     def r_petrosian(self):
         """
-        The Petrosian radius is defined as the radius at which the petrosian profile equals eta.
+        The Petrosian radius is defined as the radius at which the Petrosian profile equals eta.
         """
         r_p, _ = self._calculate_petrosian_r()
         return r_p
@@ -609,6 +624,16 @@ class Petrosian:
         """Estimated 1-sigma r_petrosian Error."""
         _, r_p_err = self._calculate_petrosian_r()
         return r_p_err
+
+    @property
+    def r_epsilon(self):
+        """r_epsilon = r_petrosian * epsilon"""
+        return self.r_petrosian * self.epsilon
+
+    @property
+    def r_epsilon_in_range(self):
+        """True if `r_epsilon` is in input radii list"""
+        return self.r_list.min() <= self.r_epsilon <= self.r_list.max()
 
     @property
     def r_total_flux(self):
@@ -712,9 +737,9 @@ class Petrosian:
         if not np.isnan(r_epsilon):
             epsilon_fraction = int(self.epsilon_fraction * 100)
             ax.axvline(r_epsilon, linestyle='--', c='green',
-                       label="$r_{{\epsilon}}(L_{{{}}}, \epsilon = {}) = {:0.4f}$ {}".format(epsilon_fraction,
-                                                                                             self.epsilon, r_epsilon,
-                                                                                             radius_unit))
+                       label="$r_{{\epsilon}}(L_{{{}}}, \epsilon={})={:0.4f}$ {}".format(epsilon_fraction,
+                                                                                         self.epsilon, r_epsilon,
+                                                                                         radius_unit))
 
         r_total_flux = self.r_total_flux
         if not np.isnan(r_total_flux):

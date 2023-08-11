@@ -12,7 +12,7 @@ from astropy.table import Table
 
 from ..modeling.models import PSFConvolvedModel2D, sersic_enclosed, sersic_enclosed_inv
 from ..modeling.fitting import model_to_image
-from ..photometry import photometry_step
+from ..photometry import radial_photometry
 from .core import Petrosian, calculate_petrosian_r, calculate_petrosian
 
 from matplotlib import pyplot as plt
@@ -245,9 +245,9 @@ def _generate_petrosian_correction(args):
     galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 
     # Do photometry on model galaxy image
-    flux_list, area_list, err = photometry_step((x_0, y_0), r_list, galaxy_image,
-                                                plot=plot,
-                                                vmax=amplitude / 100)
+    flux_list, area_list, err = radial_photometry(galaxy_image, (x_0, y_0), r_list,
+                                                  plot=plot,
+                                                  vmax=amplitude / 100)
     # Calculate Photometry and petrosian
     # ----------------------------------
     # Petrosian from Photometry
@@ -294,6 +294,7 @@ def _generate_petrosian_correction(args):
            p.epsilon, u_r_50 / p.r_petrosian, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080,
            corrected_epsilon, c_r_50 / p.r_petrosian, corrected_epsilon_80, c_r_eff, corrected_p.r_total_flux, c_r_20, c_r_80,
            corrected_p.c2080, ]
+
     if plot:
         corrected_p.plot(True, True)
         plt.show()

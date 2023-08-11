@@ -17,14 +17,22 @@ __all__ = [
     'match_catalogs', 'angular_to_pixel', 'pixel_to_angular',
     'elliptical_area_to_r', 'circle_area_to_r', 'get_interpolated_values',
     'closest_value_index', 'plot_target', 'cutout_subtract',
-    'measure_fwhm', 'hst_flux_to_abmag', 'natural_sort'
+    'measure_fwhm', 'hst_flux_to_abmag', 'make_radius_list', 'natural_sort'
 ]
 
 
 def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
-    return sorted(l, key = alphanum_key)
+    return sorted(l, key=alphanum_key)
+
+
+def make_radius_list(max_pix, n, log=False):
+    """Make an array of radii of size n up to max_pix"""
+    if log:
+        return np.logspace(0, np.log10(max_pix), num=n, endpoint=True, base=10.0, dtype=float, axis=0)
+    else:
+        return np.array([x * max_pix / n for x in range(1, n + 1)])
 
 
 def hst_flux_to_abmag(flux, header):
@@ -113,14 +121,45 @@ def closest_value_index(value, array, growing=False):
     return idx
 
 
-def plot_target(position, image, size, vmin=None, vmax=None):
+def plot_target(image, position, size=None, c='r', lw=None,
+                vmin=None, vmax=None, marker_base_size=2):
+    """
+    Plot an image with a target marker.
+
+    Parameters
+    ----------
+    image : np.ndarray or object with `data` attribute
+        The image to be displayed.
+    position : tuple of int
+        (x, y) coordinates of the target location.
+    size : int, optional
+        The pixel size around the target to display.
+        If not specified, it defaults to the maximum dimension of the image.
+    c : str, optional
+        Color of the target marker. Default is red (`'r'`).
+    lw : int or float, optional
+        Line width of the target marker.
+    vmin, vmax : int or float, optional
+        Values to anchor the colormap.
+    marker_base_size : int, optional
+        Base size of the marker which gets scaled relative to the image size.
+        Default is 2.
+    Notes
+    -----
+    The target is plotted as a red '+' at the given position. The displayed
+    region is determined by the `size` parameter centered at the target position.
+    """
+
+    if size is None:
+        size = max(image.shape)
     x, y = position
-    if not isinstance(image, np.ndarray):
-        image = image.data
+
+    # Calculate marker size relative to the average size of the image dimensions
+    marker_size = np.mean(image.shape) / 20 * marker_base_size
     plt.imshow(image, vmin=vmin, vmax=vmax)
-    plt.plot(x, y, '+', c='r', label='Target')
-    plt.xlim(x-size, x+size)
-    plt.ylim(y-size, y+size)
+    plt.plot(x, y, '+', c=c, label='Target', markersize=marker_size, markeredgewidth=lw)
+    plt.xlim(x - (size / 2.), x + (size / 2.))
+    plt.ylim(y - (size / 2.), y + (size / 2.))
 
 
 def cutout_subtract(image, target, x, y):
