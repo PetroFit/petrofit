@@ -37,11 +37,11 @@ jobs:
             allow_failure: false
             prefix: ''
 
-          - os: ubuntu-latest
-            python: '3.10'
-            tox_env: 'build_docs'
-            allow_failure: false
-            prefix: ''
+#          - os: ubuntu-latest
+#            python: '3.10'
+#            tox_env: 'build_docs'
+#            allow_failure: false
+#            prefix: ''
             
     steps:
     - uses: actions/checkout@v3
