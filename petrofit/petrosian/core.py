@@ -64,7 +64,9 @@ def calculate_petrosian(area_list, flux_list, area_err=None, flux_err=None):
     I_avg_within_r = flux_list[1:] / area_list[1:]
 
     # Compute the surface brightness at the edge of each aperture
-    I_at_r = flux_diff / area_diff
+    zero_mask = np.where(area_diff > 0)
+    I_at_r = np.zeros_like(area_diff)
+    I_at_r[zero_mask] = flux_diff[zero_mask] / area_diff[zero_mask]
 
     # Compute the Petrosian value at each radius
     petrosian_list = I_at_r / I_avg_within_r
@@ -90,15 +92,20 @@ def calculate_petrosian(area_list, flux_list, area_err=None, flux_err=None):
         flux_diff_err = np.sqrt(flux_err[:-1] ** 2 + flux_err[1:] ** 2)
 
         # Compute the error in the surface brightness at the edge of each aperture
-        I_at_r_err = abs(I_at_r) * np.sqrt((flux_diff_err / flux_diff) ** 2 + (area_diff_err / area_diff) ** 2)
+        I_at_r_err = np.zeros_like(area_diff)
+        I_at_r_err[zero_mask] = abs(I_at_r[zero_mask]) * np.sqrt(
+            (flux_diff_err[zero_mask] / flux_diff[zero_mask]) ** 2\
+            + (area_diff_err[zero_mask] / area_diff[zero_mask]) ** 2)
 
         # Compute the error in the average surface brightness within each aperture
         I_avg_within_r_err = abs(I_avg_within_r) * np.sqrt(
             (flux_err[1:] / flux_list[1:]) ** 2 + (area_err[1:] / area_list[1:]) ** 2)
 
         # Compute the error in the Petrosian value at each radius
-        petrosian_err = abs(petrosian_list[1:]) * np.sqrt(
-            (I_at_r_err / I_at_r) ** 2 + (I_avg_within_r_err / I_avg_within_r) ** 2)
+        petrosian_err = np.zeros_like(area_diff)
+        petrosian_err[zero_mask] = abs(petrosian_list[1:][zero_mask]) * np.sqrt(
+            (I_at_r_err[zero_mask] / I_at_r[zero_mask]) ** 2 + \
+            (I_avg_within_r_err[zero_mask] / I_avg_within_r[zero_mask]) ** 2)
 
         # Append the first Petrosian error to the beginning of the array
         petrosian_err = np.insert(petrosian_err, 0, np.nan)
@@ -731,13 +738,13 @@ class Petrosian:
         r_petrosian = self.r_petrosian
         if not np.isnan(r_petrosian):
             ax.axvline(r_petrosian, linestyle='--',
-                       label="$r_{{p}}(\eta={})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
+                       label=r"$r_{{p}}(\eta={})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
 
         r_epsilon = self.r_petrosian * self.epsilon
         if not np.isnan(r_epsilon):
             epsilon_fraction = int(self.epsilon_fraction * 100)
             ax.axvline(r_epsilon, linestyle='--', c='green',
-                       label="$r_{{\epsilon}}(L_{{{}}}, \epsilon={})={:0.4f}$ {}".format(epsilon_fraction,
+                       label=r"$r_{{\epsilon}}(L_{{{}}}, \epsilon={})={:0.4f}$ {}".format(epsilon_fraction,
                                                                                          self.epsilon, r_epsilon,
                                                                                          radius_unit))
 
@@ -824,7 +831,7 @@ class Petrosian:
 
         ax.set_title(title, fontsize=ax_fontsize)
         ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
-        ax.set_ylabel("Petrosian Value $\eta(r)$", fontsize=ax_fontsize)
+        ax.set_ylabel(r"Petrosian Value $\eta(r)$", fontsize=ax_fontsize)
 
         ax.tick_params(axis='both', which='major', labelsize=tick_fontsize)
         ax.tick_params(axis='both', which='minor', labelsize=tick_fontsize)
@@ -907,7 +914,7 @@ class Petrosian:
 
         ax.set_title(title, fontsize=ax_fontsize)
         ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
-        ax.set_ylabel("Petrosian Value $\eta(r)$", fontsize=ax_fontsize)
+        ax.set_ylabel(r"Petrosian Value $\eta(r)$", fontsize=ax_fontsize)
 
         ax.tick_params(axis='both', which='major', labelsize=tick_fontsize)
         ax.tick_params(axis='both', which='minor', labelsize=tick_fontsize)
