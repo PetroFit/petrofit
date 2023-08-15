@@ -694,6 +694,15 @@ class Petrosian:
         r_e, r_e_err = self._calculate_fraction_to_r(0.5)
         return r_e_err
 
+    # Alias for r_half_light
+    @property
+    def r_50(self):
+        return self.r_half_light
+
+    @property
+    def r_50_err(self):
+        return self.r_half_light_err
+
     def fraction_flux_to_r(self, fraction=0.5):
         """Given a fraction, compute the radius containing that fraction of the Petrosian total flux"""
         r_frac, r_frac_err = self._calculate_fraction_to_r(fraction)
@@ -930,7 +939,7 @@ class Petrosian:
             # Flux value corrsponding to fraction
             fractional_flux = epsilon_flux * (self.total_flux_fraction / self.epsilon_fraction)
 
-            ax.axhline(fractional_flux, c='r')
+            ax.axhline(fractional_flux, c='r', label=r"$\eta$ derived $L_{Total}$")
 
         if show_legend:
             ax.legend(fontsize=legend_fontsize)

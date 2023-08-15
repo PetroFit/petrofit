@@ -576,8 +576,8 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
                                                             mask=np.isnan(masked_stats_image.data))
 
                     fit_bg_image = masked_stats_image
-                    fit_bg_image[np.where(fit_bg_image > mean + sigma)] = np.nan
-                    fit_bg_image[np.where(fit_bg_image < mean - sigma)] = np.nan
+                    fit_bg_image[np.where(fit_bg_image > mean + std * sigma)] = np.nan
+                    fit_bg_image[np.where(fit_bg_image < mean - std * sigma)] = np.nan
                 else:
                     raise ("background image masking sigma type not understood, try 'clip' or 'bound'")
 

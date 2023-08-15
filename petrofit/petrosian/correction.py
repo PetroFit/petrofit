@@ -80,6 +80,7 @@ def _generate_petrosian_correction(args):
     # Make galaxy image from PSFConvolvedModel2D
     galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 
+    galaxy_image += np.random.uniform(0.0, 0.004241256276145577/3)
     # Do photometry on model galaxy image
     flux_list, area_list, err = radial_photometry(galaxy_image, (x_0, y_0), r_list,
                                                   plot=plot,
@@ -130,9 +131,9 @@ def _generate_petrosian_correction(args):
 
     row = [n, r_eff, r_20, r_80, r_total_flux, L_total,
            p02, p03, p04, p05, 5 * np.log10(p02 / p05), 5 * np.log10(p02 / p03),
-           p.epsilon, u_r_50 / p.r_petrosian, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080,
+           p.epsilon, u_r_50 / p.r_petrosian, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080, p.c5090,
            corrected_epsilon, c_r_50 / p.r_petrosian, corrected_epsilon_80, c_r_eff, corrected_p.r_total_flux, c_r_20, c_r_80,
-           corrected_p.c2080, ]
+           corrected_p.c2080, corrected_p.c5090]
 
     if plot:
         corrected_p.plot(True, True)
@@ -237,8 +238,8 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
 
     names = ['n', 'r_eff', 'sersic_r_20', 'sersic_r_80', 'sersic_r_99', 'sersic_L_inf',
              'p02', 'p03', 'p04', 'p05', 'p0502', 'p0302',
-             'u_epsilon', 'u_epsilon_50', 'u_epsilon_80', 'u_r_eff', 'u_r_99', 'u_r_20', 'u_r_80', 'u_c2080',
-             'c_epsilon', 'c_epsilon_50', 'c_epsilon_80', 'c_r_eff', 'c_r_99', 'c_r_20', 'c_r_80', 'c_c2080',]
+             'u_epsilon', 'u_epsilon_50', 'u_epsilon_80', 'u_r_50', 'u_r_99', 'u_r_20', 'u_r_80', 'u_c2080', 'u_c5090',
+             'c_epsilon', 'c_epsilon_50', 'c_epsilon_80', 'c_r_50', 'c_r_99', 'c_r_20', 'c_r_80', 'c_c2080', 'c_c5090']
     petrosian_grid = Table(rows=rows, names=names)
 
     if output_yaml_name is not None:
@@ -279,21 +280,20 @@ class PetrosianCorrection:
         else:
             raise TypeError('Input grid should be an astropy Table')
 
-        self.x = np.log10(self.grid['p02'].value)
-        self.y = 5 * np.log10(self.grid['p02'].value / self.grid['p03'].value)
-        self.z = 5 * np.log10(self.grid['p02'].value / self.grid['p04'].value)
+        self.x = self.grid['p02'].value
+        self.y = self.grid['u_r_50'].value
+        self.z = self.grid['u_c2080'].value
         self.r = [self.x, self.y, self.z]
 
-        self.weights = np.array([200, 100, 100])
+        self.weights = np.array([100, 100, 100])
 
     def _get_xyz_from_p(self, p):
         px_list = (0.2, 0.3, 0.4, 0.5)
         p02, p03, p04, p05 = [calculate_petrosian_r(p.r_list, p.petrosian_list,
-                                                    petrosian_err=None, eta=i,
-                                                    interp_kind='cubic', interp_num=5000)[0] for i in px_list]
-        x0 = np.log10(p02)
-        y0 = 5 * np.log10(p02 / p03)
-        z0 = 5 * np.log10(p02 / p04)
+                                                    petrosian_err=None, eta=i)[0] for i in px_list]
+        x0 = p02
+        y0 = p.r_50
+        z0 = p.c2080
         return [x0, y0, z0]
 
     @staticmethod
@@ -321,7 +321,7 @@ class PetrosianCorrection:
         idx = np.where(self.grid[key] == value)
         return self.grid[idx]
 
-    def _dr(self, x0, y0, z0):
+    def _dr_old(self, x0, y0, z0):
         wx, wy, wz = self.weights
         dx = wx * abs(self.x - x0) / x0
         dy = wy * abs(self.y - y0) / y0
@@ -329,10 +329,26 @@ class PetrosianCorrection:
         dr = dx + dy + dz
         return dr
 
+    def _dr(self, x0, y0, z0):
+        wx, wy, wz = self.weights
+
+        # Standardize the data
+        std_x = np.std(self.x)
+        std_y = np.std(self.y)
+        std_z = np.std(self.z)
+
+        dx = wx * (self.x - x0) / std_x
+        dy = wy * (self.y - y0) / std_y
+        dz = wz * (self.z - z0) / std_z
+
+        dr = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+
+        return dr
+
     def _validate_input(self, x0, y0, z0):
-        assert np.min(self.x) <= x0 <= np.max(self.x), 'np.log10(P02) is outside of the range of the grid'
-        assert np.min(self.y) <= y0 <= np.max(self.y), 'np.log10(P02 / p03) is outside of the range of the grid'
-        assert np.min(self.z) <= z0 <= np.max(self.z), 'np.log10(P02 / p04) is outside of the range of the grid'
+        assert np.min(self.x) <= x0 <= np.max(self.x), 'r_petro(eta=0.2) is outside of the range of the grid'
+        assert np.min(self.y) <= y0 <= np.max(self.y), 'r_50 is outside of the range of the grid'
+        assert np.min(self.z) <= z0 <= np.max(self.z), 'C2080 is outside of the range of the grid'
 
     def _closest_row(self, x0, y0, z0):
         if self.enforce_range:
@@ -397,18 +413,18 @@ class PetrosianCorrection:
 
         ax = axs[0]
         sc = ax.scatter(self.x, self.y, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('$Log_{10}$ $r_{{p}}(\eta=0.2)$')
-        ax.set_ylabel('$P_{{0302}}$')
+        ax.set_xlabel('$r_{{p}}(\eta=0.2)$')
+        ax.set_ylabel('$r_{{50}}$')
 
         ax = axs[1]
         sc = ax.scatter(self.x, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('$Log_{10}$ $r_{{p}}(\eta=0.2)$')
-        ax.set_ylabel('$P_{{0402}}$')
+        ax.set_xlabel('$r_{{p}}(\eta=0.2)$')
+        ax.set_ylabel('$C_{2080}$')
 
         ax = axs[2]
         sc = ax.scatter(self.y, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('$P_{{0302}}$')
-        ax.set_ylabel('$P_{{0402}}$')
+        ax.set_xlabel('$r_{{50}}$')
+        ax.set_ylabel('$C_{2080}$')
 
         if None not in [x0, y0, z0]:
             idx = self._dr(x0, y0, z0).argmin()
