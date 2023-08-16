@@ -264,7 +264,7 @@ def fit_gaussian2d(image):
 def print_model_params(model):
     """Print the params and values of an AstroPy model"""
     for param, value in zip(model.param_names, model.parameters):
-        print("{:0.4f}\t{}".format(value,param))
+        print("{:0.4f}\t{}".format(value, param))
 
 
 def plot_fit(model, image, mode='center', center=None,

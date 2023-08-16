@@ -80,7 +80,6 @@ def _generate_petrosian_correction(args):
     # Make galaxy image from PSFConvolvedModel2D
     galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 
-    galaxy_image += np.random.uniform(0.0, 0.004241256276145577/3)
     # Do photometry on model galaxy image
     flux_list, area_list, err = radial_photometry(galaxy_image, (x_0, y_0), r_list,
                                                   plot=plot,
@@ -149,7 +148,7 @@ def _generate_petrosian_correction(args):
     return row
 
 
-def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=None, n_list=None,
+def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=None, n_list=None,
                                          oversample=('x_0', 'y_0', 10, 50), out_format=None, overwrite=False,
                                          ipython_widget=False, n_cpu=None, plot=False):
     """
@@ -159,12 +158,12 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
     The Petrosian radii and concentrations are computed using the default `epsilon` = 2. Since the real `r_total_flux`
     of the simulated galaxy is known, the correct `epsilon` can be determined by
     `epsilon = r_petrosian / corrceted_r_total_flux`. The resulting grid is used to map measured properties to the
-    correct `epsilon` value. If `output_yaml_name` is provided, the grid is saved to using an astropy table file which
+    correct `epsilon` value. If `output_file_name` is provided, the grid is saved to using an astropy table file which
     is readable by `petrofit.petrosian.PetrosianCorrection`.
 
     Parameters
     ----------
-    output_yaml_name : str
+    output_file_name : str
         Name of output file, must have .yaml or .yml extension.
 
     psf : numpy.array or None
@@ -242,9 +241,9 @@ def generate_petrosian_sersic_correction(output_yaml_name, psf=None, r_eff_list=
              'c_epsilon', 'c_epsilon_50', 'c_epsilon_80', 'c_r_50', 'c_r_99', 'c_r_20', 'c_r_80', 'c_c2080', 'c_c5090']
     petrosian_grid = Table(rows=rows, names=names)
 
-    if output_yaml_name is not None:
+    if output_file_name is not None:
         try:
-            petrosian_grid.write(output_yaml_name, format=out_format, overwrite=overwrite)
+            petrosian_grid.write(output_file_name, format=out_format, overwrite=overwrite)
         except Exception as e:
             print('Could not save to file: {}'.format(e))
             print('You can save the returned table using `petrosian_grid.write`')

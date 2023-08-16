@@ -8,7 +8,7 @@ Publications
 |AJ tag| |zonodo tag| |ascl tag|
 
 If you would like to cite PetroFit for a publication, please use the acknowledgments below.
-Given the intimate relationship between PetroFit and Photutils, we ask that you also cite
+Given the close relationship between PetroFit and Photutils, we ask that you also cite
 Photutils:
 
 .. code-block:: text

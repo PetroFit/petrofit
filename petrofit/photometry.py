@@ -204,4 +204,3 @@ def radial_photometry(image, position, r_list, error=None, mask=None, elong=1., 
         error_arr.append(photometric_err)
 
     return np.array(flux_arr), np.array(area_arr), np.array(error_arr)
-

@@ -120,6 +120,8 @@ def test_corrections(data_dir, photutils_cog):
             )
     )
 
+    pc.enforce_range = False
+
     n = pc.estimate_n(p)
 
     n_err = abs(n - 1) / 1
