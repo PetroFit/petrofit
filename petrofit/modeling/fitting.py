@@ -266,8 +266,8 @@ def print_model_params(model):
         print("{:0.4f}\t{}".format(value, param))
 
 
-def plot_fit(model, image, mode='center', center=None,
-             vmin=None, vmax=None, figsize=None, return_images=False):
+def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None,
+             cbar=True, figsize=None, return_images=False, flux_label='Pixel Value'):
     """
     Plot fitted model, its 1D fit profile and residuals.
     If trying to convert a model to image, use `petrofit.modeling.fitting.model_to_image` instead.
@@ -327,6 +327,9 @@ def plot_fit(model, image, mode='center', center=None,
     vmax : float
         Max plot value
 
+    cbar : bool
+        Show color-bar if True.
+
     figsize : tuple
         Figure size, should be (3*size, size).
 
@@ -334,15 +337,19 @@ def plot_fit(model, image, mode='center', center=None,
         If true, this function returns a list of subplot Axes,
         Model-image and the residual (input image - model-image).
 
+    flux_label : str
+        Label for color-bar.
+
     Returns
     -------
-    axs, model_image, residual_image : (array of `.axes.Axes`, array, array)
+    axs, model_image, residual_image, cbar : (array of `.axes.Axes`, array, array, cbar)
         If `return_images`, this function returns a list of subplot Axes,
         Model-image and the residual (input image - model-image).
     """
 
     if isinstance(image, CCDData) or isinstance(image, Cutout2D):
         image = image.data
+
     # Make Model Image
     # ----------------
 
@@ -364,17 +371,37 @@ def plot_fit(model, image, mode='center', center=None,
 
     fig, axs = plt.subplots(1, 3, figsize=figsize)
 
-    axs[0].imshow(image, vmin=vmin, vmax=vmax)
+    # If vmin and vmax are not provided, compute them
+    if vmin is None:
+        vmin = min(image.min(), model_image.min(), residual_image.min())
+    if vmax is None:
+        vmax = max(image.max(), model_image.max(), residual_image.max())
+
+    im0 = axs[0].imshow(image, vmin=vmin, vmax=vmax)
     axs[0].set_title("Data")
+    axs[0].set_xlabel("Pixels")
+    axs[0].set_ylabel("Pixels")
 
     axs[1].imshow(model_image, vmin=vmin, vmax=vmax)
     axs[1].set_title("Model")
+    axs[1].set_xlabel("Pixels")
+    axs[1].set_ylabel("Pixels")
 
     axs[2].imshow(residual_image, vmin=vmin, vmax=vmax)
     axs[2].set_title("Residual")
+    axs[2].set_xlabel("Pixels")
+    axs[2].set_ylabel("Pixels")
+
+    fig_cbar = None
+    if cbar:
+        # Add a single colorbar at the bottom of the subplots
+        cbar_ax = fig.add_axes([0.12, 0.08, 0.78, 0.05])
+        fig_cbar = fig.colorbar(im0, cax=cbar_ax, aspect=40, orientation='horizontal')
+        fig.subplots_adjust(bottom=0.23)
+        fig_cbar.ax.set_xlabel(flux_label)
 
     if return_images:
-        return axs, model_image, residual_image
+        return axs, model_image, residual_image, fig_cbar
 
 
 def measure_fwhm(image, plot=True, printout=True):
