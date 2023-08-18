@@ -333,7 +333,7 @@ def deblend_segments(image, segm, npixels=None, nlevels=30, contrast=1/1000):
 
 def make_catalog(image, threshold, wcs=None, deblend=True,
                  npixels=None, nlevels=30, contrast=1/1000,
-                 plot=True, vmax=None, vmin=None):
+                 plot=True, vmax=None, vmin=None, figsize=None):
     """
     This function constructs a catalog using `PhotUtils`. The `petrofit.segmentation.make_segments` and
     `petrofit.segmentation.deblend_segments` functions are used to construct segmentation maps and
@@ -383,6 +383,9 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
     vmin, vmax : float
         vmax and vmin values for plot.
 
+    figsize : tuple
+        Figure size.
+
     Returns
     -------
     cat, segm, segm_deblend
@@ -407,8 +410,10 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
     if plot and segm:
         # Make plots
         if deblend:
-            fig, ax = plt.subplots(1, 2)
+            fig, ax = plt.subplots(1, 2, figsize=figsize)
             plt.sca(ax[0])
+        else:
+            fig, ax = plt.subplots(1, 1, figsize=figsize)
         plot_segments(segm, image=image, vmax=vmax, vmin=vmin, title='Segmentation Map')
 
     # Deblend segmentation map

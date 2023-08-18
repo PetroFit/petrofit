@@ -8,8 +8,8 @@ from matplotlib import pyplot as plt
 
 from sklearn.tree import DecisionTreeRegressor
 
-from petrofit.utils import closest_value_index, get_interpolated_values, pixel_to_angular
-from petrofit.photometry import radial_elliptical_aperture
+from ..utils import closest_value_index, get_interpolated_values, pixel_to_angular, mpl_tick_frame
+from ..photometry import radial_elliptical_aperture
 
 __all__ = [
     'calculate_petrosian', 'calculate_petrosian_r',
@@ -446,7 +446,7 @@ class Petrosian:
             signal-to-noise or if the profile extends too far out (for example profiles with high Sersic indices).
 
         verbose : bool
-            Prints info using
+            Prints info
 
         interp_kind : str or int, optional
             Specifies the kind of interpolation used on the curve of growth (i.e `r_list` vs `flux_list`)
@@ -746,16 +746,8 @@ class Petrosian:
 
         r_petrosian = self.r_petrosian
         if not np.isnan(r_petrosian):
-            ax.axvline(r_petrosian, linestyle='--',
+            ax.axvline(r_petrosian, linestyle='--', color='gray',
                        label=r"$r_{{p}}(\eta={})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
-
-        r_epsilon = self.r_petrosian * self.epsilon
-        if not np.isnan(r_epsilon):
-            epsilon_fraction = int(self.epsilon_fraction * 100)
-            ax.axvline(r_epsilon, linestyle='--', c='green',
-                       label=r"$r_{{\epsilon}}(L_{{{}}}, \epsilon={})={:0.4f}$ {}".format(epsilon_fraction,
-                                                                                         self.epsilon, r_epsilon,
-                                                                                         radius_unit))
 
         r_total_flux = self.r_total_flux
         if not np.isnan(r_total_flux):
@@ -764,9 +756,9 @@ class Petrosian:
                        label="$r_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(total_flux_fraction, r_total_flux,
                                                                            radius_unit))
 
-    def plot(self, plot_r=False, show_normalized_flux=False,
-             title='Petrosian Profile', radius_unit='pix',
-             ax=None, err_alpha=0.2, err_capsize=3,
+    def plot(self, plot_r=True, title='Petrosian Profile',
+             radius_unit='pix', ax=None, color='tab:blue',
+             err_alpha=0.2, err_capsize=3,
              show_legend=True, legend_fontsize=None,
              ax_fontsize=None, tick_fontsize=None):
         """
@@ -775,11 +767,7 @@ class Petrosian:
         Parameters
         ----------
         plot_r : bool, optional
-            If True, plots the total flux and half-light radii. Default is False.
-
-        show_normalized_flux : bool, optional
-            If True, over-plots the flux curve of growth by normalizing
-            the flux axis (max_flux=1). Default is False.
+            If True, plots the total flux and half-light radii. Default is True.
 
         title : str, optional
             Title for the plot. Default is 'Petrosian Profile'.
@@ -789,6 +777,9 @@ class Petrosian:
 
         ax : matplotlib.axis, optional
             Matplotlib axis object to plot on. If None, creates a new axis.
+
+        color : string
+            Matplotlib color for profile.
 
         err_alpha : float, optional
             Transparency for the error region. Default is 0.2.
@@ -819,40 +810,46 @@ class Petrosian:
 
         ax.errorbar(self.r_list, self.petrosian_list, yerr=self.petrosian_err,
                     marker='o', capsize=err_capsize,
-                    label="Data")
+                    label="Data", color=color)
 
         if err_alpha is not None and self.has_petrosian_err and err_alpha > 0:
             ax.fill_between(self.r_list,
                             self.petrosian_list - self.petrosian_err,
                             self.petrosian_list + self.petrosian_err,
-                            alpha=err_alpha)
+                            alpha=err_alpha, color=color)
 
         r_petrosian = self.r_petrosian
         r_petrosian_err = self.r_petrosian_err
-        if not np.isnan(r_petrosian) and not np.isnan(r_petrosian_err):
-            ax.errorbar(r_petrosian, self.eta, xerr=r_petrosian_err,
-                        marker='o', capsize=err_capsize)
-        ax.axhline(self.eta, linestyle='--')
+
+        if plot_r:
+            ax.axhline(self.eta, linestyle='--', color='gray')
+            self._plot_radii(ax, radius_unit=radius_unit, err_capsize=err_capsize)
+            if not np.isnan(r_petrosian):
+                if not np.isnan(r_petrosian_err):
+                    ax.errorbar(r_petrosian, self.eta, xerr=r_petrosian_err, zorder=6,
+                                marker='o', capsize=5, lw=3, color='tab:orange')
+                else:
+                    ax.scatter(r_petrosian, self.eta, zorder=6, marker='o', color='tab:orange')
+
 
         ax.axhline(0, c='black')
 
-        self._plot_radii(ax, radius_unit=radius_unit, err_capsize=err_capsize)
-
         ax.set_title(title, fontsize=ax_fontsize)
         ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
-        ax.set_ylabel(r"Petrosian Value $\eta(r)$", fontsize=ax_fontsize)
+        ax.set_ylabel(r"Petrosian Index $\eta(r)$", fontsize=ax_fontsize)
 
-        ax.tick_params(axis='both', which='major', labelsize=tick_fontsize)
-        ax.tick_params(axis='both', which='minor', labelsize=tick_fontsize)
+        mpl_tick_frame(minorticks=True, tick_fontsize=tick_fontsize)
 
+        ax.set_xlim(0, None)
         if show_legend:
             ax.legend(fontsize=legend_fontsize)
 
         return ax
 
-    def plot_cog(self, plot_r=False, show_normalized_flux=False,
-                 title='Curve of Growth', radius_unit='pix',
-                 ax=None, err_alpha=0.2, err_capsize=3,
+    def plot_cog(self, plot_r=True, title='Curve of Growth',
+                 radius_unit='pix', flux_unit='',
+                 ax=None, color='tab:blue',
+                 err_alpha=0.2, err_capsize=3,
                  show_legend=True, legend_fontsize=None,
                  ax_fontsize=None, tick_fontsize=None):
         """
@@ -862,10 +859,7 @@ class Petrosian:
         ----------
         plot_r : bool, optional
             If True, plots radii of interest including Petrosian radius.
-            Default is False.
-
-        show_normalized_flux : bool, optional
-            If True, plots the normalized flux. Default is False.
+            Default is True.
 
         title : str, optional
             Title for the plot. Default is 'Curve of Growth'.
@@ -873,8 +867,14 @@ class Petrosian:
         radius_unit : str, optional
             Unit for the radius. Default is 'pix'.
 
+        flux_unit  : str, optional
+            Unit for the cumulative flux. Default is ''
+
         ax : matplotlib.axis, optional
             Matplotlib axis object to plot on. If None, creates a new axis.
+
+        color : string
+            Matplotlib color for profile.
 
         err_alpha : float, optional
             Transparency for the error region. Default is 0.2.
@@ -904,43 +904,30 @@ class Petrosian:
             ax = plt.gca()
 
         ax.errorbar(self.r_list, self.flux_list, yerr=self.flux_err,
-                    marker='o', capsize=err_capsize,
+                    marker='o', capsize=err_capsize, c=color,
                     label="Data")
 
         if err_alpha is not None and self.has_petrosian_err and err_alpha > 0:
             ax.fill_between(self.r_list,
                             self.flux_list - self.flux_err,
                             self.flux_list + self.flux_err,
-                            alpha=err_alpha)
+                            alpha=err_alpha, color=color)
 
-        self._plot_radii(ax, radius_unit=radius_unit, err_capsize=err_capsize)
+        if plot_r:
+            self._plot_radii(ax, radius_unit=radius_unit, err_capsize=err_capsize)
 
-        total_flux = self.total_flux
-        if not np.isnan(total_flux):
-            ax.axhline(total_flux, linestyle='--', c='black', )
-
-        ax.axhline(0, c='black')
+            total_flux = self.total_flux
+            if not np.isnan(total_flux):
+                ax.axhline(total_flux, linestyle='--', c='black')
 
         ax.set_title(title, fontsize=ax_fontsize)
         ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
-        ax.set_ylabel(r"Petrosian Value $\eta(r)$", fontsize=ax_fontsize)
+        ax.set_ylabel(r"$L(\leq r)$" + (" [{}]".format(flux_unit) if flux_unit else ''), fontsize=ax_fontsize)
 
-        ax.tick_params(axis='both', which='major', labelsize=tick_fontsize)
-        ax.tick_params(axis='both', which='minor', labelsize=tick_fontsize)
+        mpl_tick_frame(minorticks=True, tick_fontsize=tick_fontsize)
 
-        r_epsilon = self.r_petrosian * self.epsilon
-
-        if r_epsilon < self.r_list.max():
-            f = interp1d(self.r_list, self.flux_list, kind='cubic')
-
-            # Flux in r_epsilon
-            epsilon_flux = f(r_epsilon)
-
-            # Flux value corrsponding to fraction
-            fractional_flux = epsilon_flux * (self.total_flux_fraction / self.epsilon_fraction)
-
-            ax.axhline(fractional_flux, c='r', label=r"$\eta$ derived $L_{Total}$")
-
+        ax.set_xlim(0, None)
+        ax.set_ylim(0, None)
         if show_legend:
             ax.legend(fontsize=legend_fontsize)
 

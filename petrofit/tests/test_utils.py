@@ -1,6 +1,8 @@
 import os
 import numpy as np
 
+import pytest
+
 from scipy.interpolate import interp1d
 
 from astropy.io import fits
@@ -135,3 +137,25 @@ def test_closest_value_index():
 
     idx = pf.closest_value_index(100, array, growing=True)
     assert idx is None, "Expected None, but got {}".format(idx)
+
+
+def test_ellipticity_and_elongation_conversion():
+    # Test values
+    ellip_values = [0, 0.25, 0.5, 0.75, 0.999]
+    elong_values = [1, 4 / 3, 2, 4, 1000]
+
+    for e, el in zip(ellip_values, elong_values):
+        # Test ellip_to_elong conversion
+        computed_elong = pf.ellip_to_elong(e)
+        assert computed_elong == pytest.approx(el, 0.01)
+
+        # Test elong_to_ellip conversion
+        computed_ellip = pf.elong_to_ellip(el)
+        assert computed_ellip == pytest.approx(e, 0.01)
+
+    # Add a specific test for the upper boundary of ellip
+    with pytest.raises(ZeroDivisionError):
+        pf.ellip_to_elong(1)
+
+    # Test for the lower boundary of elongation, it should not yield negative ellipticity
+    assert pf.elong_to_ellip(1) == 0

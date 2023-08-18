@@ -4,20 +4,20 @@ import numpy as np
 
 from scipy.interpolate import interp1d
 
-from astropy.stats import gaussian_sigma_to_fwhm
 from astropy.wcs.utils import proj_plane_pixel_scales
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
 from matplotlib import pyplot as plt
 
-from .modeling.fitting import fit_gaussian2d, plot_fit
+
 
 __all__ = [
     'match_catalogs', 'angular_to_pixel', 'pixel_to_angular',
     'elliptical_area_to_r', 'circle_area_to_r', 'get_interpolated_values',
     'closest_value_index', 'plot_target', 'cutout_subtract',
-    'measure_fwhm', 'hst_flux_to_abmag', 'make_radius_list', 'natural_sort'
+    'hst_flux_to_abmag', 'make_radius_list', 'natural_sort', 'mpl_tick_frame',
+    'ellip_to_elong', 'elong_to_ellip'
 ]
 
 
@@ -25,6 +25,14 @@ def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ]
     return sorted(l, key=alphanum_key)
+
+
+def ellip_to_elong(ellip):
+    return 1 / (1 - ellip)
+
+
+def elong_to_ellip(elong):
+    return (elong - 1) / elong
 
 
 def make_radius_list(max_pix, n, log=False):
@@ -90,7 +98,7 @@ def elliptical_area_to_r(area, elong):
 
 
 def circle_area_to_r(area):
-    return np.sqrt(area / (np.pi))
+    return np.sqrt(area / np.pi)
 
 
 def get_interpolated_values(x, y, num=5000, kind='cubic'):
@@ -191,106 +199,12 @@ def cutout_subtract(image, target, x, y):
     return image
 
 
-def measure_fwhm(image, plot=True, printout=True):
-    """
-    Find the 2D FWHM of a background/continuum subtracted cutout image of a target.
-    The target should be centered and cropped in the cutout.
-    Use lcbg.utils.cutout for cropping targets.
-    FWHM is estimated using the sigmas from a 2D gaussian fit of the target's flux.
-    The FWHM is returned as a tuple of the FWHM in the x and y directions.
-
-    Parameters
-    ----------
-    image : array like
-        Input background/continuum subtracted cutout image.
-    printout : bool
-        Print out info.
-    plot : bool
-        To plot fit or not.
-
-    Returns
-    -------
-    tuple : array of floats
-        FWHM in x and y directions.
-    """
-
-    # Find FWHM
-    # ----------
-
-    fitted_line = fit_gaussian2d(image)
-
-    # Find fitted center
-    x_mean, y_mean = [i.value for i in [fitted_line.x_mean, fitted_line.y_mean]]
-
-    # Estimate FWHM using gaussian_sigma_to_fwhm
-    x_fwhm = fitted_line.x_stddev * gaussian_sigma_to_fwhm
-    y_fwhm = fitted_line.y_stddev * gaussian_sigma_to_fwhm
-
-    # Find half max
-    hm = fitted_line(x_mean, y_mean) / 2.
-
-    # Find the mean of the x and y direction
-    mean_fwhm = np.mean([x_fwhm, y_fwhm])
-    mean_fwhm = int(np.round(mean_fwhm))
-
-    # Print info about fit and FWHM
-    # ------------------------------
-
-    if printout:
-        print("Image Max: {}".format(image.max()))
-        print("Amplitude: {}".format(fitted_line.amplitude.value))
-        print("Center: ({}, {})".format(x_mean, y_mean))
-        print("Sigma = ({}, {})".format(fitted_line.x_stddev.value,
-                                        fitted_line.y_stddev.value, ))
-        print("Mean FWHM: {} Pix ".format(mean_fwhm))
-        print("FWHM: (x={}, y={}) Pix ".format(x_fwhm, y_fwhm))
-
-    if plot:
-
-        fig, [ax0, ax1, ax2, ax3] = plot_fit(image, fitted_line)
-
-        # Make x and y grid to plot to
-        y_arange, x_arange = np.mgrid[:image.shape[0], :image.shape[1]]
-
-        # Plot input image with FWHM and center
-        # -------------------------------------
-
-        ax0.imshow(image, cmap='gray_r')
-
-        ax0.axvline(x_mean - x_fwhm / 2, c='c', linestyle="--", label="X FWHM")
-        ax0.axvline(x_mean + x_fwhm / 2, c='c', linestyle="--")
-
-        ax0.axhline(y_mean - y_fwhm / 2, c='g', linestyle="--", label="Y FWHM")
-        ax0.axhline(y_mean + y_fwhm / 2, c='g', linestyle="--")
-
-        ax0.set_title("Center and FWHM Plot")
-        ax0.legend()
-
-        # Plot X fit
-        # ----------
-
-        ax2.axvline(x_mean, linestyle="-", label="Center")
-        ax2.axvline(x_mean - x_fwhm / 2, c='c', linestyle="--", label="X FWHM")
-        ax2.axvline(x_mean + x_fwhm / 2, c='c', linestyle="--")
-        ax2.axhline(hm, c="black", linestyle="--", label="Half Max")
-
-        ax2.legend()
-
-        # Plot Y fit
-        # ----------
-
-        ax3.axvline(y_mean, linestyle="-", label="Center")
-        ax3.axvline(y_mean - y_fwhm / 2, c='g', linestyle="--", label="Y FWHM")
-        ax3.axvline(y_mean + y_fwhm / 2, c='g', linestyle="--")
-        ax3.axhline(hm, c="black", linestyle="--", label="Half Max")
-
-        ax3.legend()
-
-        plt.show()
-
-    return np.array([x_fwhm, y_fwhm])
-
-
-
-
-
+def mpl_tick_frame(ax=None, minorticks=True, tick_fontsize=None):
+    if ax is None:
+        ax = plt.gca()
+    if minorticks:
+        ax.minorticks_on()
+    ax.tick_params(which='minor', direction='in', top=True, right=True,
+                   width=1.5, length=8 / 2, labelsize=tick_fontsize)
+    ax.tick_params(which='major', direction='in', top=True, right=True,
+                   width=1.5, length=8, labelsize=tick_fontsize)

@@ -44,7 +44,7 @@
 
 .rst-content pre.literal-block, .rst-content div[class^='highlight'] pre, .rst-content .linenodiv pre {
     /*color of code blocks*/
-    background-color: #f8f8f8;
+    background-color: #ffffff;
 }
 
 .rst-content code.literal, .rst-content tt.literal {

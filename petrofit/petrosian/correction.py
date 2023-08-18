@@ -13,6 +13,7 @@ from astropy.table import Table
 from ..modeling.models import PSFConvolvedModel2D, sersic_enclosed, sersic_enclosed_inv
 from ..modeling.fitting import model_to_image
 from ..photometry import radial_photometry
+from ..utils import mpl_tick_frame
 from .core import Petrosian, calculate_petrosian_r, calculate_petrosian
 
 from matplotlib import pyplot as plt
@@ -399,7 +400,7 @@ class PetrosianCorrection:
         return epsilon
 
     def _plot_grid(self, x0=None, y0=None, z0=None, cmap='hot', target_c='blue',
-                   cmap_key='n', colorbar_label=None, suptitle=None, axs=None):
+                   cmap_key='n', colorbar_label=None, suptitle=None, axs=None, minorticks=False):
         if axs is None:
             fig, axs = plt.subplots(1, 3, figsize=[5 * 3, 5])
         else:
@@ -414,16 +415,19 @@ class PetrosianCorrection:
         sc = ax.scatter(self.x, self.y, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
         ax.set_xlabel('$r_{{p}}(\eta=0.2)$')
         ax.set_ylabel('$r_{{50}}$')
+        mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         ax = axs[1]
         sc = ax.scatter(self.x, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
         ax.set_xlabel('$r_{{p}}(\eta=0.2)$')
         ax.set_ylabel('$C_{2080}$')
+        mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         ax = axs[2]
         sc = ax.scatter(self.y, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
         ax.set_xlabel('$r_{{50}}$')
         ax.set_ylabel('$C_{2080}$')
+        mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         if None not in [x0, y0, z0]:
             idx = self._dr(x0, y0, z0).argmin()

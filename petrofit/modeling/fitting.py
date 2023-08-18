@@ -2,16 +2,15 @@ import numpy as np
 
 from astropy.modeling import models, fitting
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
-from astropy.stats import sigma_clip
+from astropy.stats import sigma_clip, gaussian_sigma_to_fwhm
 from astropy.nddata import CCDData, Cutout2D
 from astropy.convolution.utils import discretize_model
-
 
 from matplotlib import pyplot as plt
 
 __all__ = [
     'fit_model', 'model_to_image', 'fit_background',
-    'fit_gaussian2d', 'print_model_params', 'plot_fit'
+    'fit_gaussian2d', 'print_model_params', 'plot_fit', 'measure_fwhm'
 ]
 
 
@@ -376,3 +375,103 @@ def plot_fit(model, image, mode='center', center=None,
 
     if return_images:
         return axs, model_image, residual_image
+
+
+def measure_fwhm(image, plot=True, printout=True):
+    """
+    Find the 2D FWHM of a background/continuum subtracted cutout image of a target.
+    The target should be centered and cropped in the cutout.
+    Use lcbg.utils.cutout for cropping targets.
+    FWHM is estimated using the sigmas from a 2D gaussian fit of the target's flux.
+    The FWHM is returned as a tuple of the FWHM in the x and y directions.
+
+    Parameters
+    ----------
+    image : array like
+        Input background/continuum subtracted cutout image.
+    printout : bool
+        Print out info.
+    plot : bool
+        To plot fit or not.
+
+    Returns
+    -------
+    tuple : array of floats
+        FWHM in x and y directions.
+    """
+
+    # Find FWHM
+    # ----------
+
+    fitted_line = fit_gaussian2d(image)
+
+    # Find fitted center
+    x_mean, y_mean = [i.value for i in [fitted_line.x_mean, fitted_line.y_mean]]
+
+    # Estimate FWHM using gaussian_sigma_to_fwhm
+    x_fwhm = fitted_line.x_stddev * gaussian_sigma_to_fwhm
+    y_fwhm = fitted_line.y_stddev * gaussian_sigma_to_fwhm
+
+    # Find half max
+    hm = fitted_line(x_mean, y_mean) / 2.
+
+    # Find the mean of the x and y direction
+    mean_fwhm = np.mean([x_fwhm, y_fwhm])
+    mean_fwhm = int(np.round(mean_fwhm))
+
+    # Print info about fit and FWHM
+    # ------------------------------
+
+    if printout:
+        print("Image Max: {}".format(image.max()))
+        print("Amplitude: {}".format(fitted_line.amplitude.value))
+        print("Center: ({}, {})".format(x_mean, y_mean))
+        print("Sigma = ({}, {})".format(fitted_line.x_stddev.value,
+                                        fitted_line.y_stddev.value, ))
+        print("Mean FWHM: {} Pix ".format(mean_fwhm))
+        print("FWHM: (x={}, y={}) Pix ".format(x_fwhm, y_fwhm))
+
+    if plot:
+
+        fig, [ax0, ax1, ax2, ax3] = plot_fit(image, fitted_line)
+
+        # Make x and y grid to plot to
+        y_arange, x_arange = np.mgrid[:image.shape[0], :image.shape[1]]
+
+        # Plot input image with FWHM and center
+        # -------------------------------------
+
+        ax0.imshow(image, cmap='gray_r')
+
+        ax0.axvline(x_mean - x_fwhm / 2, c='c', linestyle="--", label="X FWHM")
+        ax0.axvline(x_mean + x_fwhm / 2, c='c', linestyle="--")
+
+        ax0.axhline(y_mean - y_fwhm / 2, c='g', linestyle="--", label="Y FWHM")
+        ax0.axhline(y_mean + y_fwhm / 2, c='g', linestyle="--")
+
+        ax0.set_title("Center and FWHM Plot")
+        ax0.legend()
+
+        # Plot X fit
+        # ----------
+
+        ax2.axvline(x_mean, linestyle="-", label="Center")
+        ax2.axvline(x_mean - x_fwhm / 2, c='c', linestyle="--", label="X FWHM")
+        ax2.axvline(x_mean + x_fwhm / 2, c='c', linestyle="--")
+        ax2.axhline(hm, c="black", linestyle="--", label="Half Max")
+
+        ax2.legend()
+
+        # Plot Y fit
+        # ----------
+
+        ax3.axvline(y_mean, linestyle="-", label="Center")
+        ax3.axvline(y_mean - y_fwhm / 2, c='g', linestyle="--", label="Y FWHM")
+        ax3.axvline(y_mean + y_fwhm / 2, c='g', linestyle="--")
+        ax3.axhline(hm, c="black", linestyle="--", label="Half Max")
+
+        ax3.legend()
+
+        plt.show()
+
+    return np.array([x_fwhm, y_fwhm])
