@@ -15,7 +15,7 @@ ipywidgets
 # Docs
 sphinx
 docutils
-nbsphinx
+nbsphinx==0.8.11
 nbconvert
 
 # Tests

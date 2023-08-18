@@ -404,6 +404,8 @@ class Petrosian:
     _epsilon_fraction = None
     _total_flux_fraction = None
 
+    _r_plot_alpha = 0.7
+
     def __init__(self, r_list, area_list, flux_list, area_err=None, flux_err=None,
                  eta=0.2, epsilon=2., epsilon_fraction=0.99, total_flux_fraction=0.99,
                  verbose=False, interp_kind='cubic', interp_num=5000):
@@ -683,6 +685,33 @@ class Petrosian:
         return np.sqrt(flux_err ** 2 + r_total_flux_err ** 2)
 
     @property
+    def half_flux(self):
+        """Returns the flux at `r_half_flux` or np.nan if out of range"""
+        r_half_flux = self.r_half_light
+
+        if not min(self.r_list) <= r_half_flux <= max(self.r_list):
+            return np.nan
+
+        f = interp1d(self.r_list, self.flux_list, kind=self.interp_kind)
+        total_flux = f(r_half_flux)
+        return float(total_flux)
+
+    @property
+    def half_flux_err(self):
+        """
+        Returns the photometric uncertainty at `r_half_flux` or np.nan if out of range.
+        Note that this includes errors in estimating `r_half_flux`.
+        """
+        r_half_flux_err = self.r_half_flux_err
+
+        if self.flux_err is None or np.isnan(self.half_flux):
+            return np.nan
+
+        f = interp1d(self.r_list, self.flux_err, kind='nearest')
+        flux_err = f(self.r_half_flux)
+        return np.sqrt(flux_err ** 2 + r_half_flux_err ** 2)
+
+    @property
     def r_half_light(self):
         """R_e or Radius containing half of the total Petrosian flux"""
         r_e, r_e_err = self._calculate_fraction_to_r(0.5)
@@ -741,20 +770,25 @@ class Petrosian:
         """``c5090 = 5 * np.log10(r_90 / r_50)``"""
         return self.concentration_index(fraction_1=0.5, fraction_2=0.9)[-1]
 
-    def _plot_radii(self, ax, radius_unit='pix', err_capsize=3, ):
+    def _plot_radii(self, ax, radius_unit='pix'):
         radius_unit = '' if radius_unit is None else str(radius_unit)
 
         r_petrosian = self.r_petrosian
         if not np.isnan(r_petrosian):
-            ax.axvline(r_petrosian, linestyle='--', color='gray',
-                       label=r"$r_{{p}}(\eta={})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
+            ax.axvline(r_petrosian, linestyle='--', color='black', alpha=self._r_plot_alpha,
+                       label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
 
         r_total_flux = self.r_total_flux
         if not np.isnan(r_total_flux):
             total_flux_fraction = int(self.total_flux_fraction * 100)
-            ax.axvline(r_total_flux, linestyle='--', c='black',
-                       label="$r_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(total_flux_fraction, r_total_flux,
+            ax.axvline(r_total_flux, linestyle='--', c='tab:red', alpha=self._r_plot_alpha,
+                       label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(total_flux_fraction, r_total_flux,
                                                                            radius_unit))
+
+        r_half_light = self.r_half_light
+        if not np.isnan(r_half_light):
+            ax.axvline(r_half_light, linestyle='--', c='tab:blue', alpha=self._r_plot_alpha,
+                       label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(r_half_light, radius_unit))
 
     def plot(self, plot_r=True, title='Petrosian Profile',
              radius_unit='pix', ax=None, color='tab:blue',
@@ -822,18 +856,18 @@ class Petrosian:
         r_petrosian_err = self.r_petrosian_err
 
         if plot_r:
-            ax.axhline(self.eta, linestyle='--', color='gray')
-            self._plot_radii(ax, radius_unit=radius_unit, err_capsize=err_capsize)
+            r_color = 'black'
+            ax.axhline(self.eta, linestyle='--', color=r_color, alpha=self._r_plot_alpha)
             if not np.isnan(r_petrosian):
+                ax.axvline(r_petrosian, linestyle='--', color=r_color, alpha=self._r_plot_alpha,
+                           label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
                 if not np.isnan(r_petrosian_err):
                     ax.errorbar(r_petrosian, self.eta, xerr=r_petrosian_err, zorder=6,
                                 marker='o', capsize=5, lw=3, color='tab:orange')
                 else:
                     ax.scatter(r_petrosian, self.eta, zorder=6, marker='o', color='tab:orange')
 
-
         ax.axhline(0, c='black')
-
         ax.set_title(title, fontsize=ax_fontsize)
         ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
         ax.set_ylabel(r"Petrosian Index $\eta(r)$", fontsize=ax_fontsize)
@@ -914,11 +948,23 @@ class Petrosian:
                             alpha=err_alpha, color=color)
 
         if plot_r:
-            self._plot_radii(ax, radius_unit=radius_unit, err_capsize=err_capsize)
+            r_half_light = self.r_half_light
+            half_flux = self.half_flux
+            if not np.isnan(r_half_light) and not np.isnan(half_flux):
+                ax.axvline(r_half_light, linestyle='--', c='black', alpha=self._r_plot_alpha,
+                           label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(r_half_light, radius_unit))
+                ax.axhline(half_flux, linestyle='--', c='black', alpha=self._r_plot_alpha)
+                ax.scatter(r_half_light, half_flux, zorder=6, marker='o', color='tab:orange')
 
+            r_total_flux = self.r_total_flux
             total_flux = self.total_flux
-            if not np.isnan(total_flux):
-                ax.axhline(total_flux, linestyle='--', c='black')
+            if not np.isnan(r_total_flux) and not np.isnan(total_flux):
+                total_flux_fraction = int(self.total_flux_fraction * 100)
+                ax.axvline(r_total_flux, linestyle='-', c='black', alpha=self._r_plot_alpha,
+                           label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(total_flux_fraction, r_total_flux,
+                                                                               radius_unit))
+                ax.axhline(total_flux, linestyle='-', c='black', alpha=self._r_plot_alpha)
+                ax.scatter(r_total_flux, total_flux, zorder=6, marker='o', color='tab:orange')
 
         ax.set_title(title, fontsize=ax_fontsize)
         ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
