@@ -6,7 +6,10 @@ from astropy.stats import sigma_clip, gaussian_sigma_to_fwhm
 from astropy.nddata import CCDData, Cutout2D
 from astropy.convolution.utils import discretize_model
 
+from ..utils import mpl_tick_frame
+
 from matplotlib import pyplot as plt
+
 
 __all__ = [
     'fit_model', 'model_to_image', 'fit_background',
@@ -266,8 +269,8 @@ def print_model_params(model):
         print("{:0.4f}\t{}".format(value, param))
 
 
-def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None,
-             cbar=True, figsize=None, return_images=False, flux_label='Pixel Value'):
+def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None, cbar=True,
+             fontsize=18,  figsize=(24, 8), flux_label='Pixel Value'):
     """
     Plot fitted model, its 1D fit profile and residuals.
     If trying to convert a model to image, use `petrofit.modeling.fitting.model_to_image` instead.
@@ -330,24 +333,21 @@ def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None,
     cbar : bool
         Show color-bar if True.
 
+    fontsize : int
+        Font size of labels.
+
     figsize : tuple
         Figure size, should be (3*size, size).
-
-    return_images : bool
-        If true, this function returns a list of subplot Axes,
-        Model-image and the residual (input image - model-image).
 
     flux_label : str
         Label for color-bar.
 
     Returns
     -------
-    axs, model_image, residual_image, cbar : (array of `.axes.Axes`, array, array, cbar)
-        If `return_images`, this function returns a list of subplot Axes,
-        Model-image and the residual (input image - model-image).
+    axs, cbar, model_image, residual_image : (array of `.axes.Axes`, cbar, array, array)
     """
 
-    if isinstance(image, CCDData) or isinstance(image, Cutout2D):
+    if isinstance(image, (CCDData, Cutout2D)):
         image = image.data
 
     # Make Model Image
@@ -368,40 +368,46 @@ def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None,
 
     # Plot Model Image
     # ----------------
-
     fig, axs = plt.subplots(1, 3, figsize=figsize)
 
     # If vmin and vmax are not provided, compute them
-    if vmin is None:
-        vmin = min(image.min(), model_image.min(), residual_image.min())
     if vmax is None:
-        vmax = max(image.max(), model_image.max(), residual_image.max())
+        vmax = max(np.nanstd(image), np.nanstd(model_image)) * 3
+    if vmin is None:
+        vmin = -vmax
 
     im0 = axs[0].imshow(image, vmin=vmin, vmax=vmax)
-    axs[0].set_title("Data")
-    axs[0].set_xlabel("Pixels")
-    axs[0].set_ylabel("Pixels")
+    axs[0].set_title("Data", fontsize=fontsize)
+    axs[0].set_xlabel("Pixels", fontsize=fontsize)
+    axs[0].set_ylabel("Pixels", fontsize=fontsize)
+    axs[0].tick_params(axis='both', labelsize=fontsize)
+    mpl_tick_frame(ax=axs[0])
 
     axs[1].imshow(model_image, vmin=vmin, vmax=vmax)
-    axs[1].set_title("Model")
-    axs[1].set_xlabel("Pixels")
-    axs[1].set_ylabel("Pixels")
+    axs[1].set_title("Model", fontsize=fontsize)
+    axs[1].set_xlabel("Pixels", fontsize=fontsize)
+    axs[1].tick_params(axis='both', labelsize=fontsize)
+    mpl_tick_frame(ax=axs[1])
 
     axs[2].imshow(residual_image, vmin=vmin, vmax=vmax)
-    axs[2].set_title("Residual")
-    axs[2].set_xlabel("Pixels")
-    axs[2].set_ylabel("Pixels")
+    axs[2].set_title("Residual", fontsize=fontsize)
+    axs[2].set_xlabel("Pixels", fontsize=fontsize)
+    axs[2].tick_params(axis='both', labelsize=fontsize)
+    mpl_tick_frame(ax=axs[2])
+
+    fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8,
+                        wspace=0.04, hspace=0.04)
+    axs[1].set_yticklabels([])
+    axs[2].set_yticklabels([])
 
     fig_cbar = None
     if cbar:
-        # Add a single colorbar at the bottom of the subplots
-        cbar_ax = fig.add_axes([0.12, 0.08, 0.78, 0.05])
+        cbar_ax = fig.add_axes([0.1, 0.08, 0.7, 0.05])
         fig_cbar = fig.colorbar(im0, cax=cbar_ax, aspect=40, orientation='horizontal')
         fig.subplots_adjust(bottom=0.23)
-        fig_cbar.ax.set_xlabel(flux_label)
+        fig_cbar.ax.set_xlabel(flux_label, fontsize=fontsize)
 
-    if return_images:
-        return axs, model_image, residual_image, fig_cbar
+    return axs, fig_cbar, model_image, residual_image
 
 
 def measure_fwhm(image, plot=True, printout=True):
