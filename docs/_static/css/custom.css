@@ -44,7 +44,11 @@
 
 .rst-content pre.literal-block, .rst-content div[class^='highlight'] pre, .rst-content .linenodiv pre {
     /*color of code blocks*/
-    background-color: #f8f8f8
+    background-color: #ffffff;
+}
+
+.rst-content code.literal, .rst-content tt.literal {
+    color: #414042;
 }
 
 h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
@@ -57,4 +61,3 @@ h1, h2, .rst-content .toctree-wrapper p.caption, h3, h4, h5, h6, legend {
     /*color of nav at top when the window is narrow*/
     background: linear-gradient(90deg, #00B0F0 0%, #8D00ED 100%);
 }
-

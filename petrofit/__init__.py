@@ -6,8 +6,6 @@
 from ._astropy_init import *   # noqa
 # ----------------------------------------------------------------------------
 
-from .correction import *
-
 from .petrosian import *
 from .photometry import *
 from .segmentation import *

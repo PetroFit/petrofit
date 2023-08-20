@@ -76,7 +76,7 @@ nbsphinx_execute = 'auto'
 # -- Project information ------------------------------------------------------
 
 # This does not *have* to match the package name, but typically does
-project = "PetroFit" #setup_cfg['name']
+project = "PetroFit"
 author = setup_cfg['author']
 copyright = '{0}, {1}'.format(
     datetime.datetime.now().year, setup_cfg['author'])
@@ -123,28 +123,6 @@ html_theme_options = {
 
 html_static_path = ['_static']
 html_css_files = ["css/custom.css"]
-
-#     'logotext1': 'petrofit',  # white,  semi-bold
-#     'logotext2': '',  # orange, light
-#     'logotext3': ':docs'   # white,  light
-#     }
-
-
-# Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-#html_logo = ''
-
-# The name of an image file (within the static path) to use as favicon of the
-# docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
-#html_favicon = ''
-
-# If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
-# using the given strftime format.
-#html_last_updated_fmt = ''
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -196,29 +174,3 @@ linkcheck_ignore = [
 ]
 linkcheck_timeout = 180
 linkcheck_anchors = False
-
-# -- Turn on nitpicky mode for sphinx (to warn about references not found) ----
-#
-# nitpicky = True
-# nitpick_ignore = []
-#
-# Some warnings are impossible to suppress, and you can list specific references
-# that should be ignored in a nitpick-exceptions file which should be inside
-# the docs/ directory. The format of the file should be:
-#
-# <type> <class>
-#
-# for example:
-#
-# py:class astropy.io.votable.tree.Element
-# py:class astropy.io.votable.tree.SimpleElement
-# py:class astropy.io.votable.tree.SimpleElementWithContent
-#
-# Uncomment the following lines to enable the exceptions:
-#
-# for line in open('nitpick-exceptions'):
-#     if line.strip() == "" or line.startswith("#"):
-#         continue
-#     dtype, target = line.split(None, 1)
-#     target = target.strip()
-#     nitpick_ignore.append((dtype, six.u(target)))

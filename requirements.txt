@@ -18,8 +18,11 @@ docutils
 nbsphinx
 nbconvert
 
-# Other
+# Tests
 tox
+pytest-astropy-header
+
+# Other
 scikit-image
 scikit-learn
 astropy_helpers
@@ -27,3 +30,4 @@ extension_helpers
 sphinx_astropy
 sphinx_rtd_theme
 sphinx-automodapi
+

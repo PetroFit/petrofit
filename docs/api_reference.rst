@@ -4,13 +4,7 @@
 API
 ===
 
-.. automodapi:: petrofit.correction
-    :no-inheritance-diagram:
-
-.. automodapi:: petrofit.modeling.fitting
-    :no-inheritance-diagram:
-
-.. automodapi:: petrofit.modeling.models
+.. automodapi:: petrofit.modeling
     :no-inheritance-diagram:
     :skip: Nuker2D
     :skip: sersic_enclosed_model

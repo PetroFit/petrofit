@@ -7,7 +7,10 @@ version: 2
    
 conda:
   environment: environment.yml
-  
+
+sphinx:
+  builder: html
+  configuration: docs/conf.py  # This should point to your conf.py
 
 python:
   version: 3.8

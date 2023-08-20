@@ -46,6 +46,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+*test_output_dir*
 
 # Translations
 *.mo
