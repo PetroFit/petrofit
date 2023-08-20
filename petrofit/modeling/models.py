@@ -144,7 +144,7 @@ class PSFConvolvedModel2D(FittableModel):
     _cached_grid = None  # Cached sampling grid
     _cache_grid_range = None  # Cached sampling grid range (x.min, x.max, y.min, y.max)
 
-    def __init__(self, model, psf=None, oversample=None, name=None, **kwargs):
+    def __init__(self, model, psf=None, oversample=None,  psf_oversample=None, name=None, **kwargs):
         # Reset params
         self._parameters = None
         self._parameters_ = {}
