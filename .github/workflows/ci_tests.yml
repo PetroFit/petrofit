@@ -27,7 +27,7 @@ jobs:
 
           - os: ubuntu-latest
             python: '3.10'
-            tox_env: 'py310-test-astropy50'
+            tox_env: 'py310-test-astropy53'
             allow_failure: false
             prefix: ''
 
