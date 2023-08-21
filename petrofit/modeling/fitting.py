@@ -1,6 +1,7 @@
 import numpy as np
 
 from astropy.modeling import models, fitting
+from astropy.modeling.fitting import LevMarLSQFitter, TRFLSQFitter, LMLSQFitter, LinearLSQFitter
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
 from astropy.stats import sigma_clip, gaussian_sigma_to_fwhm
 from astropy.nddata import CCDData, Cutout2D
@@ -17,8 +18,9 @@ __all__ = [
 ]
 
 
-def fit_model(image, model, weights=None, maxiter=5000,
-              epsilon=DEFAULT_EPS, acc=DEFAULT_ACC, estimate_jacobian=False):
+def fit_model(image, model, weights=None, fitter=TRFLSQFitter, maxiter=5000,
+              calc_uncertainties=False, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC,
+              estimate_jacobian=False):
     """
     Wrapper function to conveniently fit an image to an input model.
 
@@ -36,8 +38,15 @@ def fit_model(image, model, weights=None, maxiter=5000,
         For data with Gaussian uncertainties, the weights should be
         1/sigma.
 
+    fitter : Astropy Fitter Class
+        Astropy fitter class (TRFLSQFitter, LevMarLSQFitter, or LinearLSQFitter)
+
     maxiter : int
         maximum number of iterations
+
+    calc_uncertainties : bool
+        If the covarience matrix should be computed and set in the fit_info.
+        Default: False
 
     epsilon : float
         A suitable step length for the forward-difference
@@ -77,9 +86,13 @@ def fit_model(image, model, weights=None, maxiter=5000,
         w = weights[(y_arange, x_arange)]
 
     # Fit model to grid
-    fitter = fitting.LevMarLSQFitter()
-    fitted_model = fitter(model, x_arange, y_arange, z, weights=w,
-                          maxiter=maxiter, epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
+    fitter_instance = fitter(calc_uncertainties=calc_uncertainties)
+
+    if fitter in [TRFLSQFitter, LevMarLSQFitter, LMLSQFitter]:
+        fitted_model = fitter_instance(model, x_arange, y_arange, z, weights=w, maxiter=maxiter,
+                                       epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
+    else:
+        fitted_model = fitter_instance(model, x_arange, y_arange, z, weights=w)
 
     return fitted_model, fitter
 
@@ -200,7 +213,8 @@ def model_to_image(model, size, mode='center', factor=1, center=None):
         factor=factor)
 
 
-def fit_background(image, model=models.Planar2D(), sigma=3.0):
+def fit_background(image, model=models.Planar2D(), sigma=3.0,
+                   fitter=LinearLSQFitter, calc_uncertainties=False):
     """
     Fit sigma clipped background image using a user provided model.
 
@@ -216,6 +230,13 @@ def fit_background(image, model=models.Planar2D(), sigma=3.0):
         The sigma value used to determine noise pixels. Once the pixels above this value are masked,
         the model provided is fit to determine the background.
 
+    fitter : Astropy Fitter Class
+        Astropy fitter class (TRFLSQFitter, LevMarLSQFitter, or LinearLSQFitter)
+
+    calc_uncertainties : bool
+        If the covarience matrix should be computed and set in the fit_info.
+        Default: False
+
     Returns
     -------
     fitted_model, fitter
@@ -229,7 +250,7 @@ def fit_background(image, model=models.Planar2D(), sigma=3.0):
     fit_bg_image = image
     if sigma is not None:
         fit_bg_image = sigma_clip(image, sigma)
-    return fit_model(fit_bg_image, model)
+    return fit_model(fit_bg_image, model, fitter=fitter, calc_uncertainties=calc_uncertainties)
 
 
 def fit_gaussian2d(image):

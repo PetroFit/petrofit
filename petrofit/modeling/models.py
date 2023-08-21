@@ -124,6 +124,10 @@ class PSFConvolvedModel2D(FittableModel):
         integers. `center_x` and  `center_y` can be either float values of the oversampling window or
         string names of parameters in the input model (for example `"x_0"`).
 
+    psf_oversample : None or int
+        Oversampling factor of the PSF relative to data. The `oversample` factor should be an integer multiple
+        of the PSF oversampling factor (i.e `oversample > psf_oversample`).
+
     name : string
         Name for the `PSFConvolvedModel2D` model instance.
     """
@@ -135,7 +139,8 @@ class PSFConvolvedModel2D(FittableModel):
     n_inputs = 2  # Model has 2 inputs (x, y)
     n_outputs = 1  # Model has 1 output z where z = Z(x, y)
 
-    oversample = None  # Oversampling factor
+    _oversample = None  # Oversampling factor
+    _psf_oversample = None  # PSF oversampling factor relative to image
     _psf = None  # PSF image
 
     _cache_grid = True  # Cache sampling grid?
@@ -144,7 +149,7 @@ class PSFConvolvedModel2D(FittableModel):
     _cached_grid = None  # Cached sampling grid
     _cache_grid_range = None  # Cached sampling grid range (x.min, x.max, y.min, y.max)
 
-    def __init__(self, model, psf=None, oversample=None, name=None, **kwargs):
+    def __init__(self, model, psf=None, oversample=None,  psf_oversample=None, name=None, **kwargs):
         # Reset params
         self._parameters = None
         self._parameters_ = {}
@@ -162,11 +167,8 @@ class PSFConvolvedModel2D(FittableModel):
         self._load_parameters()
 
         # add oversample regions
-        if oversample is not None:
-            if isinstance(oversample, int) or isinstance(oversample, tuple):
-                self.oversample = oversample
-            else:
-                raise ValueError("oversample should be a single int factor or a tuple (x, y, size, factor).")
+        self.oversample = oversample
+        self.psf_oversample = psf_oversample
 
         super().__init__(name=name, **kwargs)
 
@@ -219,6 +221,15 @@ class PSFConvolvedModel2D(FittableModel):
         return model
 
     @property
+    def param_names(self):
+        """
+        On most `Model` classes this is a class attribute, but for `PSFConvolvedModel2D`
+        models it is an instance attribute since each input sub-model
+        can have different parameters.
+        """
+        return self._param_names
+
+    @property
     def psf(self):
         """PSF Image"""
         return self._psf
@@ -228,6 +239,59 @@ class PSFConvolvedModel2D(FittableModel):
         if psf is not None and np.round(psf.sum(), 6) != 1:
             warnings.warn("Input PSF not normalized to 1, current sum = {}".format(psf.sum()))
         self._psf = psf
+
+    @property
+    def oversample(self):
+        """Sampling grid oversample Factor"""
+        return self._oversample
+
+    @oversample.setter
+    def oversample(self, oversample):
+        psf_oversample = self._get_psf_factor()
+        if oversample is not None:
+            if isinstance(oversample, (tuple, list, np.ndarray)):
+                if len(oversample) != 4:
+                    raise ValueError("oversample should be (x, y, size, factor).")
+                if not isinstance(oversample[2], int) or not isinstance(oversample[3], int):
+                    raise ValueError('size and factor should be integers.')
+                grid_factor = oversample[3]
+                oversample = tuple(oversample)  # Important Conversion!
+            elif isinstance(oversample, int):
+                grid_factor = oversample
+            else:
+                raise TypeError("oversample should be a single int factor or a tuple (x, y, size, factor).")
+            if grid_factor <= 0:
+                raise TypeError("oversample should be a positive int factor.")
+            if grid_factor % psf_oversample != 0:
+                raise ValueError('oversample should be equal to or an integer multiple of psf_oversample')
+        self._oversample = oversample
+
+    @property
+    def psf_oversample(self):
+        """PSF oversample factor relative to data"""
+        return self._psf_oversample
+
+    @psf_oversample.setter
+    def psf_oversample(self, psf_oversample):
+        grid_factor = self._get_oversample_factor()
+        if psf_oversample is not None:
+            if self.psf is None:
+                raise ValueError('psf_oversample provided but PSF is None')
+            if not isinstance(psf_oversample, int) or psf_oversample <= 0:
+                raise TypeError("psf_oversample should be a single positive int factor.")
+            if grid_factor % psf_oversample != 0:
+                raise ValueError('oversample should be equal to or an integer multiple of psf_oversample.'
+                                 'Set PSFConvolvedModel2D.oversample value first.')
+        self._psf_oversample = psf_oversample
+
+    def _get_oversample_factor(self):
+        if isinstance(self.oversample, (tuple, list, np.ndarray)):
+            return self.oversample[3]
+        else:
+            return 1 if self.oversample is None else self.oversample
+
+    def _get_psf_factor(self):
+        return 1 if self.psf_oversample is None else self.psf_oversample
 
     def clear_cached_grid(self):
         """Clears cached grid and resets class attributes to default values"""
@@ -246,10 +310,10 @@ class PSFConvolvedModel2D(FittableModel):
     @cache_grid.setter
     def cache_grid(self, value):
         """Sets the cached sampling grid"""
-        if value == False:
+        if value is False:
             self._cache_grid = False
             self.clear_cached_grid()
-        elif value == True:
+        elif value is True:
             self._cache_grid = True
         else:
             raise ValueError("{} is not a bool, use True or False".format(value))
@@ -263,19 +327,34 @@ class PSFConvolvedModel2D(FittableModel):
         i = (x - x.min()).astype(int)
         j = (y - y.min()).astype(int)
 
-        # Compute image size and oversampling factor
-        grid_size = max([i.max(), j.max()]) + 1
-        grid_factor = self.oversample if isinstance(self.oversample, int) else 1
-        grid_range = (x.min(), x.max(), y.min(), y.max())
+        # Is oversampling sub-grid based
+        is_subgrid_oversample = isinstance(self.oversample, tuple)
 
-        # Make the main grid
-        if grid_size == self._cached_grid_size and self._cached_grid_factor == grid_factor and grid_range == self._cache_grid_range:
-            # Check if the gird cached
+        # Compute image size and oversampling factor
+        # ------------------------------------------
+        psf_factor = self._get_psf_factor()  # Oversampling factor of PSF compared to data
+
+        # Grid oversample factor compared to data:
+        # If the oversampling is subgrid, then the main grid is at PSF oversample.
+        # If the oversampling is an int, the main grid is at oversample factor.
+        grid_factor = psf_factor if is_subgrid_oversample else self._get_oversample_factor()
+
+        grid_to_psf_factor = grid_factor // psf_factor  # Oversampling factor of grid compared to PSF
+
+        # Grid size params:
+        grid_size = max([i.max(), j.max()]) + 1  # size = max_index + 1
+        grid_range = (x.min(), x.max(), y.min(), y.max())  # Main grid bounds
+
+        # Make main grid
+        # --------------
+        # Make the main sampling grid
+        if grid_size == self._cached_grid_size and grid_factor == self._cached_grid_factor and grid_range == self._cache_grid_range:
+            # If the sampling gird cached
             main_grid = self._cached_grid
         else:
-            # Else make a gird
+            # Else make a sampling gird
             main_grid = make_grid(grid_size, origin=(x.min(), y.min()), factor=grid_factor)
-
+            # Cache Grid
             if self.cache_grid:
                 self._cached_grid = main_grid
                 self._cached_grid_size = grid_size
@@ -292,86 +371,79 @@ class PSFConvolvedModel2D(FittableModel):
 
         # Oversampling
         # ------------
-        if isinstance(self.oversample, int):
-            # If the oversample factor is an int, block reduce the image
-            model_image = block_reduce(model_image, grid_factor) / grid_factor ** 2
+        if not is_subgrid_oversample and grid_to_psf_factor > 1:
+            # If the oversample factor is an int, block reduce the image to PSF resolution
+            model_image = block_reduce(model_image, grid_to_psf_factor) / grid_to_psf_factor ** 2
 
-        elif isinstance(self.oversample, tuple):
+        elif is_subgrid_oversample:
             # If the oversample is a window, compute pixel values for that window
+            # and block reduce the image to PSF resolution.
 
             # Load the window params
             sub_grid_x0, sub_grid_y0, sub_grid_size, sub_grid_factor = self.oversample
+            sub_grid_to_psf_factor = sub_grid_factor // psf_factor
 
-            assert isinstance(sub_grid_size, int), "Oversampling window size must be an int"
-            assert isinstance(sub_grid_factor, int), "Oversampling factor must be an int"
+            if sub_grid_to_psf_factor > 1:
+                # If the center of the window is a parameter name, extract its value
+                if isinstance(sub_grid_x0, str):
+                    assert sub_grid_x0 in self._model.param_names, \
+                        "oversample param '{}' is not in the wrapped model param list".format(sub_grid_x0)
+                    idx = self._model.param_names.index(sub_grid_x0)
+                    sub_grid_x0 = sub_model_params[idx][0]
 
-            # If the center of the window is a parameter name, extract its value
-            if isinstance(sub_grid_x0, str):
-                assert sub_grid_x0 in self._model.param_names, "oversample param '{}' is not in the wrapped model param list".format(
-                    sub_grid_x0)
+                if isinstance(sub_grid_y0, str):
+                    assert sub_grid_y0 in self._model.param_names, \
+                        "oversample param '{}' is not in the wrapped model param list".format(sub_grid_y0)
+                    idx = self._model.param_names.index(sub_grid_y0)
+                    sub_grid_y0 = sub_model_params[idx][0]
 
-                idx = self._model.param_names.index(sub_grid_x0)
-                sub_grid_x0 = sub_model_params[idx][0]
+                # Compute the corner of the sub-grid
+                sub_grid_origin = (np.round(sub_grid_x0) - sub_grid_size // 2, np.round(sub_grid_y0) - sub_grid_size // 2)
 
-            if isinstance(sub_grid_y0, str):
-                assert sub_grid_y0 in self._model.param_names, "oversample param '{}' is not in the wrapped model param list".format(
-                    sub_grid_y0)
+                # Make an oversampled sub-grid for window
+                x_sub_grid, y_sub_grid = make_grid(sub_grid_size, origin=sub_grid_origin, factor=sub_grid_factor)
 
-                idx = self._model.param_names.index(sub_grid_y0)
-                sub_grid_y0 = sub_model_params[idx][0]
+                # Sample the sub-model onto the sub-grid
+                sub_model_oversampled_image = self._model.evaluate(x_sub_grid, y_sub_grid, *sub_model_params)
 
-            # Compute the corner of the sub-grid
-            sub_grid_origin = (np.round(sub_grid_x0) - sub_grid_size // 2, np.round(sub_grid_y0) - sub_grid_size // 2)
+                # Block reduce the window to the main image resolution
+                sub_model_image = block_reduce(sub_model_oversampled_image, sub_grid_to_psf_factor) / sub_grid_to_psf_factor ** 2
 
-            # Make an oversampled sub-grid for window
-            x_sub_grid, y_sub_grid = make_grid(sub_grid_size, origin=sub_grid_origin, factor=sub_grid_factor)
+                # Compute window indices in main image frame
+                i_sub_min = int(np.round(sub_grid_origin[0]))
+                j_sub_min = int(np.round(sub_grid_origin[1]))
+                i_sub_max = i_sub_min + sub_grid_size
+                j_sub_max = j_sub_min + sub_grid_size
 
-            # Sample the sub-model onto the sub-grid
-            sub_model_oversampled_image = self._model.evaluate(x_sub_grid, y_sub_grid, *sub_model_params)
+                # Clip window indices
+                if i_sub_min < 0:
+                    i_sub_min = 0
+                if j_sub_min < 0:
+                    j_sub_min = 0
+                if i_sub_max > i.max():
+                    i_sub_max = i.max() + 1
+                if j_sub_max > j.max():
+                    j_sub_max = j.max() + 1
 
-            # Block reduce the window to the main image resolution
-            sub_model_image = block_reduce(sub_model_oversampled_image, sub_grid_factor) / sub_grid_factor ** 2
-
-            # Compute window indices in main image frame
-            i_sub_min = int(np.round(sub_grid_origin[0]))
-            j_sub_min = int(np.round(sub_grid_origin[1]))
-            i_sub_max = i_sub_min + sub_grid_size
-            j_sub_max = j_sub_min + sub_grid_size
-
-            # Clip window indices
-            if i_sub_min < 0:
-                i_sub_min = 0
-            if j_sub_min < 0:
-                j_sub_min = 0
-            if i_sub_max > i.max():
-                i_sub_max = i.max() + 1
-            if j_sub_max > j.max():
-                j_sub_max = j.max() + 1
-
-            # Add oversampled window to image
-            model_image[
-            j_sub_min:j_sub_max,
-            i_sub_min:i_sub_max
-            ] = sub_model_image
+                # Add oversampled window to image
+                model_image[
+                    j_sub_min:j_sub_max,
+                    i_sub_min:i_sub_max
+                ] = sub_model_image
 
         # PSF convolve
         # ------------
-        if self.psf is None:
-            return model_image[j, i]
-        else:
+        if self.psf is not None:
             psf = self.psf
             if psf_p[0] != 0:
                 psf = rotate(psf, psf_p[0], reshape=False)
-            return convolve(model_image, psf, mode='same')[j, i]
+            model_image = convolve(model_image, psf, mode='same')
 
-    @property
-    def param_names(self):
-        """
-        On most `Model` classes this is a class attribute, but for `PSFConvolvedModel2D`
-        models it is an instance attribute since each input sub-model
-        can have different parameters.
-        """
-        return self._param_names
+        if psf_factor > 1:
+            # If PSF is oversampled relative to the data, block_reduce to data resolution
+            model_image = block_reduce(model_image, psf_factor) / psf_factor ** 2
+
+        return model_image[j, i]
 
 
 class GenSersic2D(models.Sersic2D):
