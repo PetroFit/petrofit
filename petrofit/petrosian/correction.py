@@ -423,20 +423,20 @@ class PetrosianCorrection:
 
         ax = axs[0]
         sc = ax.scatter(self.x, self.y, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('$r_{{p}}(\eta=0.2)$')
-        ax.set_ylabel('$r_{{50}}$')
+        ax.set_xlabel(r'$r_{{p}}(\eta=0.2)$')
+        ax.set_ylabel(r'$r_{{50}}$')
         mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         ax = axs[1]
         sc = ax.scatter(self.x, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('$r_{{p}}(\eta=0.2)$')
-        ax.set_ylabel('$C_{2080}$')
+        ax.set_xlabel(r'$r_{{p}}(\eta=0.2)$')
+        ax.set_ylabel(r'$C_{2080}$')
         mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         ax = axs[2]
         sc = ax.scatter(self.y, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel('$r_{{50}}$')
-        ax.set_ylabel('$C_{2080}$')
+        ax.set_xlabel(r'$r_{{50}}$')
+        ax.set_ylabel(r'$C_{2080}$')
         mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         if None not in [x0, y0, z0]:
