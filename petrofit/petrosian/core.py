@@ -1,12 +1,8 @@
-import yaml
-
 import numpy as np
 
 from scipy.interpolate import interp1d
 
 from matplotlib import pyplot as plt
-
-from sklearn.tree import DecisionTreeRegressor
 
 from ..utils import closest_value_index, get_interpolated_values, pixel_to_angular, mpl_tick_frame
 from ..photometry import radial_elliptical_aperture
