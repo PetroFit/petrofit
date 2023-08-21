@@ -153,7 +153,7 @@ def test_grid_gen(data_dir, output_dir):
                                                  n_list=[0.5, 1, 4],
                                                  n_cpu=None,
                                                  psf=None,
-                                                 oversample=('x_0', 'y_0', 50, 100),
+                                                 oversample=('x_0', 'y_0', 100, 10),
                                                  ipython_widget=True,
                                                  overwrite=True, plot=False)
 

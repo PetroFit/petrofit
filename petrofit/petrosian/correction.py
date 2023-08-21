@@ -28,7 +28,7 @@ def _generate_petrosian_correction(args):
     `generate_petrosian_sersic_correction` doctring for more information.
     """
     # Unpack params
-    r_eff, n, psf, oversample, plot = args
+    r_eff, n, psf, oversample, psf_oversample, plot = args
     amplitude = 100 / np.exp(gammaincinv(2. * n, 0.5))
 
     # Total flux
@@ -76,7 +76,7 @@ def _generate_petrosian_correction(args):
     )
 
     # Wrap model with PSFConvolvedModel2D
-    galaxy_model = PSFConvolvedModel2D(galaxy_model, psf=psf, oversample=oversample)
+    galaxy_model = PSFConvolvedModel2D(galaxy_model, psf=psf, oversample=oversample, psf_oversample=psf_oversample)
 
     # Make galaxy image from PSFConvolvedModel2D
     galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
@@ -85,9 +85,9 @@ def _generate_petrosian_correction(args):
     flux_list, area_list, err = radial_photometry(galaxy_image, (x_0, y_0), r_list,
                                                   plot=plot,
                                                   vmax=amplitude / 100)
-
     if plot:
         plt.show()
+
     # Calculate Photometry and petrosian
     # ----------------------------------
     # Petrosian from Photometry
@@ -100,6 +100,7 @@ def _generate_petrosian_correction(args):
     _, indices = np.unique(flux_list, return_index=True)
     indices = np.array(indices)
     f = interp1d(flux_list[indices], r_list[indices], kind='linear')
+    print(total_flux, flux_list[indices].min())
     model_r_total_flux = f(total_flux)
 
     # Compute new r_80
@@ -136,7 +137,11 @@ def _generate_petrosian_correction(args):
            corrected_p.c2080, corrected_p.c5090]
 
     if plot:
-        corrected_p.plot(True, True)
+        fig, axs = plt.subplots(1, 2, figsize=[16, 6])
+        plt.sca(axs[0])
+        corrected_p.plot()
+        plt.sca(axs[1])
+        corrected_p.plot_cog()
         plt.show()
         print(corrected_epsilon)
         print(r_eff, p.r_half_light, corrected_p.r_half_light)
@@ -150,7 +155,8 @@ def _generate_petrosian_correction(args):
 
 
 def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=None, n_list=None,
-                                         oversample=('x_0', 'y_0', 10, 50), out_format=None, overwrite=False,
+                                         oversample=('x_0', 'y_0', 10, 50), psf_oversample=None,
+                                         out_format=None, overwrite=False,
                                          ipython_widget=False, n_cpu=None, plot=False):
     """
     Generate corrections for Petrosian profiles by simulating a galaxy image (single component sersic) and measuring its
@@ -178,6 +184,10 @@ def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=
 
     oversample : int or tuple
         oversampling to pass to `petrofit.fitting.models.PSFConvolvedModel2D`.
+
+    psf_oversample : None or int
+        Oversampling factor of the PSF relative to data. The `oversample` factor should be an integer multiple
+        of the PSF oversampling factor (i.e `oversample > psf_oversample`).
 
     out_format : str, optional
         Format passed to the resulting astropy table when writing to file.
@@ -219,7 +229,7 @@ def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=
     args = []
     for n_idx, n in enumerate(n_list):
         for r_eff_idx, r_eff in enumerate(r_eff_list):
-            args.append([r_eff, n, psf, oversample, plot])
+            args.append([r_eff, n, psf, oversample, psf_oversample, plot])
 
     # Call _generate_petrosian_correction
     # either on one thread on using multiprocessing
