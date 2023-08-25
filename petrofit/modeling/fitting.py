@@ -291,7 +291,7 @@ def print_model_params(model):
 
 
 def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None, cbar=True,
-             fontsize=18,  figsize=(24, 8), flux_label='Pixel Value'):
+             fontsize=18,  figsize=[18, 6], flux_label='Pixel Value'):
     """
     Plot fitted model, its 1D fit profile and residuals.
     If trying to convert a model to image, use `petrofit.modeling.fitting.model_to_image` instead.

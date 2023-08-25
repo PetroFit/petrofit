@@ -137,7 +137,7 @@ def _generate_petrosian_correction(args):
            corrected_p.c2080, corrected_p.c5090]
 
     if plot:
-        fig, axs = plt.subplots(1, 2, figsize=[16, 6])
+        fig, axs = plt.subplots(1, 2, figsize=[12, 6])
         plt.sca(axs[0])
         corrected_p.plot()
         plt.sca(axs[1])
@@ -412,7 +412,7 @@ class PetrosianCorrection:
     def _plot_grid(self, x0=None, y0=None, z0=None, cmap='hot', target_c='blue',
                    cmap_key='n', colorbar_label=None, suptitle=None, axs=None, minorticks=False):
         if axs is None:
-            fig, axs = plt.subplots(1, 3, figsize=[5 * 3, 5])
+            fig, axs = plt.subplots(1, 3, figsize=[6 * 3, 6])
         else:
             assert len(axs) == 3, "axs should be a list of 3 axis"
             fig = axs[0].figure
