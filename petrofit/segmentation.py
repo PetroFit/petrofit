@@ -14,6 +14,7 @@ from matplotlib import pyplot as plt
 
 from .modeling.fitting import fit_background, model_to_image
 from .photometry import radial_photometry
+from .utils import mpl_tick_frame
 
 __all__ = [
     'plot_segments', 'plot_segment_residual', 'get_source_position', 'get_source_elong',
@@ -437,7 +438,7 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
 
 def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_size=None,
                       bg_sub=False, sigma=3.0, sigma_type='clip', method='exact', mask_background=False,
-                      plot=False, vmin=0, vmax=None, ):
+                      plot=False, vmin=0, vmax=None, figsize=[12, 6]):
     """
     Aperture photometry on a PhotUtils `SourceProperties`.
 
@@ -519,6 +520,8 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
     vmax : int
         Max value for plot.
 
+    figsize : tuple
+        Figure size.
 
     Returns
     -------
@@ -605,7 +608,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
 
     if plot:
         print(source.label)
-        fig, ax = plt.subplots(1, 2, figsize=[24, 12])
+        fig, ax = plt.subplots(1, 2, figsize=figsize)
 
     if plot:
         plt.sca(ax[0])
@@ -616,34 +619,37 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
 
     if plot:
         plt.sca(ax[1])
-        plt.plot(r_list, flux_arr, c='black', linewidth=3)
+        plt.plot(r_list, flux_arr, c='tab:blue', linewidth=3, zorder=3)
         for r in r_list:
-            plt.axvline(r, alpha=0.5, c='r')
+            plt.axvline(r, alpha=0.5, c='gray')
         plt.title("Curve of Growth")
         plt.xlabel("Radius in Pixels")
         plt.ylabel("Flux Enclosed")
+        mpl_tick_frame(ax=ax[1], minorticks=True)
         plt.show()
 
         r = max(r_list)
-        fig, ax = plt.subplots(1, 1, figsize=[24, 6])
-        plt.plot(masked_image[:, int(position[0])], c='black', linewidth=3)
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+
+        plt.plot(masked_image[int(position[1]), :], c='tab:blue', linewidth=3, zorder=3)
         plt.axhline(0, c='black')
         # plt.axhline(noise_sigma, c='b')
-        plt.axvline(position[0], linestyle='--')
-        plt.axvline(position[0] + r, alpha=0.5, c='r')
-        plt.axvline(position[0] - r, alpha=0.5, c='r')
-        plt.xlabel("Slice Along Y [pix]")
-        plt.ylabel("Flux")
-
-        fig, ax = plt.subplots(1, 1, figsize=[24, 6])
-
-        plt.plot(masked_image[int(position[1]), :], c='black', linewidth=3)
-        plt.axhline(0, c='black')
-        # plt.axhline(noise_sigma, c='b')
-        plt.axvline(position[0], linestyle='--')
-        plt.axvline(position[0] + r, alpha=0.5, c='r')
-        plt.axvline(position[0] - r, alpha=0.5, c='r')
+        plt.axvline(position[0], linestyle='--', c='gray')
+        plt.axvline(position[0] + r, alpha=0.5, c='gray')
+        plt.axvline(position[0] - r, alpha=0.5, c='gray')
         plt.xlabel("Slice Along X [pix]")
-        plt.ylabel("Flux")
+        plt.ylabel("Pixel Value")
+        mpl_tick_frame(ax=ax, minorticks=True)
+
+        fig, ax = plt.subplots(1, 1, figsize=figsize)
+        plt.plot(masked_image[:, int(position[0])], c='tab:blue', linewidth=3, zorder=3)
+        plt.axhline(0, c='black')
+        # plt.axhline(noise_sigma, c='b')
+        plt.axvline(position[0], linestyle='--', c='gray')
+        plt.axvline(position[0] + r, alpha=0.5, c='gray')
+        plt.axvline(position[0] - r, alpha=0.5, c='gray')
+        plt.xlabel("Slice Along Y [pix]")
+        plt.ylabel("Pixel Value")
+        mpl_tick_frame(ax=ax, minorticks=True)
 
     return flux_arr, area_arr, error_arr
