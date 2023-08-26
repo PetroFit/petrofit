@@ -42,6 +42,13 @@ Table of Contents
     fitting
 
 .. toctree::
+    :caption: Tutorials
+    :maxdepth: 1
+
+    fitting_workflow
+    multi_object
+
+.. toctree::
     :caption: Developer
     :maxdepth: 1
 
