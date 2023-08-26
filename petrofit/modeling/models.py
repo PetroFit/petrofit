@@ -406,14 +406,14 @@ class PSFConvolvedModel2D(FittableModel):
                 # Sample the sub-model onto the sub-grid
                 sub_model_oversampled_image = self._model.evaluate(x_sub_grid, y_sub_grid, *sub_model_params)
 
-                # Block reduce the window to the main image resolution
+                # Block reduce the window to the psf resolution
                 sub_model_image = block_reduce(sub_model_oversampled_image, sub_grid_to_psf_factor) / sub_grid_to_psf_factor ** 2
 
-                # Compute window indices in main image frame
+                # Compute window indices in main image frame at data resolution first
                 i_sub_min = int(np.round(sub_grid_origin[0]))
                 j_sub_min = int(np.round(sub_grid_origin[1]))
-                i_sub_max = i_sub_min + sub_grid_size
-                j_sub_max = j_sub_min + sub_grid_size
+                i_sub_max = (i_sub_min + sub_grid_size)
+                j_sub_max = (j_sub_min + sub_grid_size)
 
                 # Clip window indices
                 if i_sub_min < 0:
@@ -424,6 +424,12 @@ class PSFConvolvedModel2D(FittableModel):
                     i_sub_max = i.max() + 1
                 if j_sub_max > j.max():
                     j_sub_max = j.max() + 1
+
+                # Convert to PSF resolution
+                i_sub_min *= psf_factor
+                j_sub_min *= psf_factor
+                i_sub_max *= psf_factor
+                j_sub_max *= psf_factor
 
                 # Add oversampled window to image
                 model_image[
