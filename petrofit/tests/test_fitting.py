@@ -6,6 +6,8 @@ from astropy.modeling import models
 
 import petrofit as pf
 
+from matplotlib import pyplot as plt
+
 
 def test_psf_convolved_image_model():
     """Test fitting and PSF convolution"""
@@ -200,3 +202,33 @@ def test_psf_convolved_model_2d_init():
     assert psf_model._get_oversample_factor() == 3
     psf_model.oversample = None
     assert psf_model._get_psf_factor() == psf_model._get_oversample_factor() == 1
+
+
+def test_psf_sampling(galfit_psf_images, psf_image):
+    for psf_index, image in galfit_psf_images.items():
+        base_model = models.Sersic2D(
+            amplitude=0.020625826413226116,
+            r_eff=30,
+            n=4,
+            x_0=99.,
+            y_0=99.,
+            ellip=0,
+            theta=0.0,
+            bounds=pf.get_default_sersic_bounds(),
+            fixed={'x_0': False, 'y_0': False, 'n': True, 'r_eff': True, 'ellip': True, 'theta': True}
+        )
+
+        PSF = psf_image if psf_index > 0 else None
+        psf_oversample = psf_index if psf_index > 0 else None
+        model = pf.PSFConvolvedModel2D(base_model, psf=PSF,
+                                       oversample=('x_0', 'y_0', 100, psf_oversample * 5 if PSF is not None else 50),
+                                       psf_oversample=psf_oversample if PSF is not None else None
+                                       )
+        model.fixed.update({'psf_pa': True})
+
+        fitted_model, fit = pf.fit_model(image, model, acc=1e-12, )
+
+        *_, residual = pf.plot_fit(fitted_model, image, vmax=0.039)
+        assert abs(residual).max() < 0.05
+        pf.print_model_params(fitted_model)
+        plt.show()
