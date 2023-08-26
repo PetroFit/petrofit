@@ -261,7 +261,7 @@ class PSFConvolvedModel2D(FittableModel):
             else:
                 raise TypeError("oversample should be a single int factor or a tuple (x, y, size, factor).")
             if grid_factor <= 0:
-                raise TypeError("oversample should be a positive int factor.")
+                raise ValueError("oversample should be a positive int factor.")
             if grid_factor % psf_oversample != 0:
                 raise ValueError('oversample should be equal to or an integer multiple of psf_oversample')
         self._oversample = oversample
@@ -280,7 +280,7 @@ class PSFConvolvedModel2D(FittableModel):
             if not isinstance(psf_oversample, int) or psf_oversample <= 0:
                 raise TypeError("psf_oversample should be a single positive int factor.")
             if grid_factor % psf_oversample != 0:
-                raise ValueError('oversample should be equal to or an integer multiple of psf_oversample.'
+                raise ValueError('oversample should be equal to or an integer multiple of psf_oversample. ' 
                                  'Set PSFConvolvedModel2D.oversample value first.')
         self._psf_oversample = psf_oversample
 
