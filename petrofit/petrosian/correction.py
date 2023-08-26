@@ -100,7 +100,6 @@ def _generate_petrosian_correction(args):
     _, indices = np.unique(flux_list, return_index=True)
     indices = np.array(indices)
     f = interp1d(flux_list[indices], r_list[indices], kind='linear')
-    print(total_flux, flux_list[indices].min())
     model_r_total_flux = f(total_flux)
 
     # Compute new r_80
