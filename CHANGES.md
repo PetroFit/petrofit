@@ -1,5 +1,41 @@
 # Release Notes
 
+## Version 0.5.0
+*August 28th 2023*
+
+**PetroFit Enhancements**
+
+- Allow users to choose fitters in `fit_model`. #187
+- Introduce `TRFLSQFitter` as the default fitter. #187 
+- Enable `calc_uncertainties` for fitting. This allows users to get paramter errors on fits. #187
+- Oversampled PSF in `PSFConvolvedModel2D`. #187
+- Remove CircleCI and add GitHub CI workflow. #181
+- A new option to address low signal-to-noise ratio issues when measuring `r_99` by allowing the use of `r_80`. 
+  While `r_80` provides good estimates of `r_50` (`r_e`),  it can sometimes result in an overestimation of `r_99`. 
+  To ensure accuracy, correction grids can be utilized to estimate `r_99` from `r_80`. However, we maintain the 
+  Petrosian measurement philosophy that correction grids should be reserved for high-precision measurements. 
+- Error estimates for all Petrosian Radii according to [Strauss et. al 2002](https://ui.adsabs.harvard.edu/abs/2002AJ....124.1810S/abstract) Appendix A.3. #169
+- Saving/reading profiles to/from file. #169
+- Grid generation now has multi-processing support. #169
+- `Moffat2D` and `EllipMoffat2D` Deprecated. #157
+- `PSFModel` has been depreciated and replaced by `PSFConvolvedModel2D`. #156
+
+**General bug fixes and small changes**
+
+- Remove `DecisionTreeRegressor`. #192
+- Change `sklearn` to `scikit-learn`. #174 by @astro-nova
+- Remove `kernel` key word from segmentation functions since PhotUtils no longer accepts them. #169
+- `order_cat` moved to segmentation sub-module. #169 
+- `source_photometry` moved to segmentation sub-module. #169 
+- `make_radius_list` moved to utils sub-module. #169 
+- Refactor: `photometry.flux_to_abmag` -> `utils.hst_flux_to_abmag`. #169
+- Refactor: Move `measure_fwhm` from `utils` to `modeling.fitting`. #169 
+- Depreciate `calculate_photometic_density`. #169
+- Depreciate `object_photometry`, now its called `radial_photometry`. #169
+- Depreciate `measure_fwhm`. #169
+- Change the `bkg_sub` keywords to `bg_sub` to match PhotUtils. #158
+- Recenter example PSF #159
+
 ## Version 0.4.1
 *August 22nd 2022*
 
