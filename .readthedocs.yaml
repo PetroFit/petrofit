@@ -4,7 +4,12 @@
 
 # Required
 version: 2
-   
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "mambaforge-4.10"
+
 conda:
   environment: environment.yml
 
@@ -13,7 +18,6 @@ sphinx:
   configuration: docs/conf.py  # This should point to your conf.py
 
 python:
-  version: 3.8
   install:
     - method: pip
       path: .
