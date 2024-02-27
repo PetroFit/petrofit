@@ -14,6 +14,11 @@ for installation instructions and a guide to the ``petrofit`` module.
 .. image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/multi_fit.png
     :width: 100%
 
+Installation
+------------
+You can install PetroFit using ``pip install petrofit``. Please see
+the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for detailed installation instructions.
+
 License
 -------
 

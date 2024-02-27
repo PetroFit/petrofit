@@ -15,14 +15,6 @@ PetroFit can be installed using pip as follows:
 
     pip install petrofit
 
-Before installing PetroFit, you may need to install the required dependencies.
-You can do this using the requirements file located in the top directory of the repository. To do so, navigate to the
-top directory of the PetroFit repository (where the requirements.txt file is located). Then run:
-
-.. code-block:: bash
-
-    pip install -r requirements.txt
-
 Conda
 *****
 
@@ -129,6 +121,14 @@ For developers, we recommend setting up a conda environment and then using the f
 
 If you will be contributing to the software, we recommend forking the repository on GitHub first, cloning your forked repository,
 and then installing the developer version.
+
+Before installing PetroFit, you may need to install the required dependencies.
+You can do this using the requirements file located in the top directory of the repository. To do so, navigate to the
+top directory of the PetroFit repository (where the requirements.txt file is located). Then run:
+
+.. code-block:: bash
+
+    pip install -r requirements.txt
 
 Frozen versions of conda environment files are provided via the `petrofit_environments repository <https://github.com/PetroFit/petrofit_environments>`_.
 
