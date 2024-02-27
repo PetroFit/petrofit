@@ -29,7 +29,7 @@ channels:
 dependencies:
   # Base dependencies
   - pip
-  - python>=3.8
+  - python==3.11.8
   - Pandoc
   - pip:
     - -r requirements.txt
