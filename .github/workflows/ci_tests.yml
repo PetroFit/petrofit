@@ -15,33 +15,29 @@ jobs:
   tests:
     name: ${{ matrix.prefix }} ${{ matrix.os }}, ${{ matrix.tox_env }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.allow_failure }}
+    continue-on-error: false
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             python: '3.10'
             tox_env: 'py310-test-alldeps'
-            allow_failure: false
-            prefix: ''
+            prefix: 'py310-test-alldeps'
 
           - os: ubuntu-latest
             python: '3.10'
             tox_env: 'py310-test-astropy53'
-            allow_failure: false
-            prefix: ''
+            prefix: 'py310-test-astropy53'
 
           - os: ubuntu-latest
             python: '3.10'
             tox_env: 'py310-test-numpy122'
-            allow_failure: false
-            prefix: ''
+            prefix: 'py310-test-numpy122'
 
           - os: ubuntu-latest
             python: '3.10'
             tox_env: 'build_docs'
-            allow_failure: false
-            prefix: ''
+            prefix: 'build_docs'
             
     steps:
     - uses: actions/checkout@v3
