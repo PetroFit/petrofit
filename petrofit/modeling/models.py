@@ -74,6 +74,10 @@ def get_default_sersic_bounds(override={}):
 
 
 def get_default_gen_sersic_bounds(override={}):
+    """
+    Returns the default bounds of a Generalized Sersic profile.
+    This is identical to `get_default_sersic_bounds` but adds a `c_0` bound.
+    """
     bounds = get_default_sersic_bounds()
     bounds['c_0'] = (0, 2.0)
     bounds.update(override)
@@ -540,13 +544,8 @@ def CoreSersic2D(x, y, amplitude=1, r_eff=1, r_break=1, n=1, x_0=0, y_0=0,
     )
 
 
-def sersic_enclosed(
-        r,
-        amplitude,
-        r_eff,
-        n,
-        ellip=0
-):
+def sersic_enclosed(r, amplitude, r_eff, n, ellip=0):
+    """Total Sersic flux enclosed within a radius."""
     bn = gammaincinv(2. * n, 0.5)
     x = bn * (r / r_eff) ** (1 / n)
     g = gamma(2. * n) * gammainc(2. * n, x)
@@ -554,13 +553,8 @@ def sersic_enclosed(
     return amplitude * (r_eff ** 2) * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * g * (1 - ellip)
 
 
-def sersic_enclosed_inv(
-        f,
-        amplitude,
-        r_eff,
-        n,
-        ellip=0
-):
+def sersic_enclosed_inv(f, amplitude, r_eff, n, ellip=0):
+    """Radius that would enclose the input flux."""
     bn = gammaincinv(2. * n, 0.5)
     g = f / (amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * (1 - ellip))
 
@@ -570,17 +564,13 @@ def sersic_enclosed_inv(
 
 
 @custom_model
-def sersic_enclosed_model(
-        x,
-        amplitude=1000,
-        r_eff=30,
-        n=2,
-        ellip=0,
-):
+def sersic_enclosed_model(x, amplitude=1000, r_eff=30, n=2, ellip=0):
+    """Model for total Sersic flux enclosed within a radius."""
     return sersic_enclosed(x, amplitude, r_eff, n, ellip=ellip)
 
 
 def petrosian_profile(r, r_eff, n):
+    """Ideal Sersic Petrosian profile evaluated at input radii."""
     bn = gammaincinv(2. * n, 0.5)
 
     x = bn * (r / r_eff) ** (1 / n)
@@ -591,12 +581,8 @@ def petrosian_profile(r, r_eff, n):
 
 
 @custom_model
-def petrosian_model(
-    x, 
-    r_eff=1, 
-    n=4
-
-):
+def petrosian_model(x, r_eff=1, n=4):
+    """Ideal Sersic Petrosian model."""
     return petrosian_profile(x, r_eff, n)
 
 
