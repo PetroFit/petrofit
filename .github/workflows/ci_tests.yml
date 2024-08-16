@@ -20,22 +20,22 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: '3.10'
-            tox_env: 'py310-test-alldeps'
-            prefix: 'py310-test-alldeps'
+            python: '3.12'
+            tox_env: 'py312-test-alldeps'
+            prefix: 'py312-test-alldeps'
 
           - os: ubuntu-latest
-            python: '3.10'
-            tox_env: 'py310-test-astropy53'
-            prefix: 'py310-test-astropy53'
+            python: '3.12'
+            tox_env: 'py312-test-astropy61'
+            prefix: 'py312-test-astropy61'
 
           - os: ubuntu-latest
-            python: '3.10'
-            tox_env: 'py310-test-numpy122'
-            prefix: 'py310-test-numpy122'
+            python: '3.12'
+            tox_env: 'py312-test-numpy122'
+            prefix: 'py312-test-numpy122'
 
           - os: ubuntu-latest
-            python: '3.10'
+            python: '3.12'
             tox_env: 'build_docs'
             prefix: 'build_docs'
             
