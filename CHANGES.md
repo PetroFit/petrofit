@@ -1,5 +1,20 @@
 # Release Notes
 
+## Version 0.5.1
+*TBD*
+
+**PetroFit Enhancements**
+
+- Update installation requiements for use with `python 3.12`. #209
+
+**General bug fixes and small changes**
+
+- Update rtd to use `ubuntu-22.04`. #200
+- `update_default_config` removed since `astropy` no longer needs it. #205
+- Update rtd to Use Python 3.11.8. #206
+- Update installation requiements for use with `python 3.12`. #209
+- Remove `astropy_helpers` from requirements. #209
+
 ## Version 0.5.0
 *August 28th 2023*
 
