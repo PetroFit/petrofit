@@ -7,27 +7,21 @@ astropy>=5.2
 jupyter
 notebook
 regions
-
-# Dependencies
-photutils>=1.8
+photutils>=1.13
 ipywidgets
+scikit-image
+scikit-learn
+extension_helpers
 
-# Docs
+# docs
 sphinx
 docutils
 nbsphinx
 nbconvert
-
-# Tests
-tox
-pytest-astropy-header
-
-# Other
-scikit-image
-scikit-learn
-astropy_helpers
-extension_helpers
 sphinx_astropy
 sphinx_rtd_theme
 sphinx-automodapi
 
+# Tests
+tox
+pytest-astropy-header
