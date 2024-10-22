@@ -435,7 +435,7 @@ def measure_fwhm(image, plot=True, printout=True):
     """
     Find the 2D FWHM of a background/continuum subtracted cutout image of a target.
     The target should be centered and cropped in the cutout.
-    Use lcbg.utils.cutout for cropping targets.
+    Use `lcbg.utils.cutout` for cropping targets.
     FWHM is estimated using the sigmas from a 2D gaussian fit of the target's flux.
     The FWHM is returned as a tuple of the FWHM in the x and y directions.
 
