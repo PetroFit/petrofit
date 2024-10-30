@@ -136,11 +136,11 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
     interp_kind : str or int, optional
         Specifies the kind of interpolation as a string or as an integer specifying the
         order of the spline interpolator to use. If set to `None`, the radius is computed descretely.
-        The string has to be one of ‘linear’, ‘nearest’, ‘nearest-up’, ‘zero’, ‘slinear’, ‘quadratic’,
-        ‘cubic’, ‘previous’, or ‘next’. ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline
-        interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the
-        previous or next value of the point; ‘nearest-up’ and ‘nearest’ differ when interpolating half-integers
-        (e.g. 0.5, 1.5) in that ‘nearest-up’ rounds up and ‘nearest’ rounds down. Default is ‘linear’.
+        The string has to be one of `'linear'`, `'nearest'`, `'nearest-up'`, `'zero'`, `'slinear'`, `'quadratic'`,
+        `'cubic'`, `'previous'`, or `'next'`. `'zero'`, `'slinear'`, `'quadratic'` and `'cubic'` refer to a spline
+        interpolation of zeroth, first, second or third order; `'previous'` and `'next'` simply return the
+        previous or next value of the point; `'nearest-up'` and `'nearest'` differ when interpolating half-integers
+        (e.g. 0.5, 1.5) in that `'nearest-up'` rounds up and `'nearest'` rounds down. Default is `'linear'`.
 
     interp_num : int
         Number of interpolation function sampling radii.
@@ -151,7 +151,7 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
         Petrosian radius
 
     r_petro_err : float or numpy.nan
-        1-sigma error in r_petro. Computed if petrosian_err is provided.
+        1-sigma error in r_petro. Computed if `petrosian_err` is provided.
     """
     # Convert input to array
     r_list = np.array(r_list)

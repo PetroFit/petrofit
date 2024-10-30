@@ -70,7 +70,7 @@ def radial_elliptical_aperture(position, r, elong=1., theta=0.):
 def radial_elliptical_annulus(position, r, dr, elong=1., theta=0.):
     """
     Helper function given a radius, elongation and theta,
-    will make an elliptical aperture.
+    will make an elliptical annulus.
 
     Parameters
     ----------
