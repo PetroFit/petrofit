@@ -1,4 +1,10 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
+try:
+    from ._version import __version__
+except ImportError:
+    __version__ = "unknown"
+
+
 from .petrosian import *
 from .photometry import *
 from .segmentation import *

@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install hatch
         uses: pypa/hatch@install
 
@@ -30,6 +31,27 @@ jobs:
       - name: Check docstrings
         run: hatch run style:docstrings
         continue-on-error: true
+
+  docs:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Install Pandoc
+        run: sudo apt-get install pandoc
+
+      - name: Install hatch
+        uses: pypa/hatch@install
 
       - name: Build documentation
         run: hatch run docs:build
