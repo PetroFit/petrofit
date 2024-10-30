@@ -19,6 +19,12 @@ Installation
 You can install PetroFit using ``pip install petrofit``. Please see
 the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for detailed installation instructions.
 
+Citation
+--------
+Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_
+for citation instructions. This information is also available in the `CITATION.rst`` 
+file in the PetroFit repo.
+
 License
 -------
 
@@ -97,4 +103,3 @@ petrofit based on its use in the README file for the
 .. |python version tag| image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fpetrofit%2Fpetrofit%2Fmain%2Fpyproject.toml
    :alt: Python Version from PEP 621 TOML
    :target: https://www.python.org/downloads/
-
