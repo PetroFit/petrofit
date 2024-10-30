@@ -27,11 +27,15 @@ body:
         Code run:
 
         ```python
+
+
         ```
 
         Traceback:
 
         ```text
+
+        
         ```
     validations:
       required: false
