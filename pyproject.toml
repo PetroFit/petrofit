@@ -33,7 +33,7 @@ readme = {"file" = "README.rst", "content-type" = "text/x-rst"}
 requires-python = ">=3.12"
 # Please consult https://pypi.org/classifiers/ for a full list.
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
@@ -47,10 +47,8 @@ classifiers = [
 
 keywords = ["fitting", "galaxy", "light", "profile", "petrosian", "photometry"]
 dependencies = [
-    "pyyaml",
-    "photutils",
-    
     # Core Dependencies
+    "pyyaml",
     'Cython',
     'numpy>=1.13',
     'scipy',
@@ -64,7 +62,6 @@ dependencies = [
     'scikit-image',
     'scikit-learn',
     'extension_helpers',
-
     'pytest-astropy-header',
 ]
 
