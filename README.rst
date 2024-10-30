@@ -4,7 +4,7 @@
 
 PetroFit
 --------
-|CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |astropy tag| |photutils tag|
+|CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |python version tag| |repostatus tag| |astropy tag| |photutils tag| 
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations,
@@ -62,7 +62,6 @@ petrofit based on its use in the README file for the
 `MetPy project <https://github.com/Unidata/MetPy>`_.
 
 
-
 .. |CI tag| image:: https://github.com/PetroFit/petrofit/actions/workflows/ci_tests.yml/badge.svg?branch=main
     :target: https://github.com/PetroFit/petrofit/actions/workflows/ci_tests.yml
     :alt: PetroFit CI status
@@ -90,3 +89,11 @@ petrofit based on its use in the README file for the
 .. |zonodo tag| image:: http://img.shields.io/badge/zenodo-10.5281/zenodo.6386991-blue.svg?style=flat
     :target: https://zenodo.org/badge/latestdoi/348478663
     :alt: PetroFit Zenodo DOI
+
+.. |repostatus tag| image:: https://www.repostatus.org/badges/latest/active.svg
+   :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
+   :target: https://www.repostatus.org/#active
+
+.. |python version tag| image:: https://img.shields.io/badge/python-3.12+-blue.svg
+    :alt: Python version 3.12 or later
+    :target: https://www.python.org/downloads/
