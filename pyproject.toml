@@ -13,7 +13,7 @@
 
 [build-system]
 build-backend = "hatchling.build"
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "setuptools", "setuptools_scm", "wheel"]
 
 ################################################################################
 # Project Configuration
@@ -26,7 +26,7 @@ dynamic = ["version"]
 
 description = "Python package for calculating Petrosian properties and fitting galaxy light profiles."
 authors = [
-    { name = "The PetroFit Team", email = "" },
+    { name = "The PetroFit Team"},
 ]
 license = "BSD-3-Clause"
 readme = {"file" = "README.rst", "content-type" = "text/x-rst"}
@@ -47,15 +47,25 @@ classifiers = [
 
 keywords = ["fitting", "galaxy", "light", "profile", "petrosian", "photometry"]
 dependencies = [
-    "Cython",
-    "numpy",
-    "matplotlib",
-    "astropy",
-    "scipy",
     "pyyaml",
-    "scikit-learn",
-    "scikit-image",
     "photutils",
+    
+    # Core Dependencies
+    'Cython',
+    'numpy>=1.13',
+    'scipy',
+    'matplotlib>=3.1.1',
+    'astropy>=5.2',
+    'jupyter',
+    'notebook',
+    'regions',
+    'photutils>=1.13',
+    'ipywidgets',
+    'scikit-image',
+    'scikit-learn',
+    'extension_helpers',
+
+    'pytest-astropy-header',
 ]
 
 [project.urls]
@@ -73,14 +83,16 @@ dev = [
 ################################################################################
 # Tool Configuration
 ################################################################################
+[tool.setuptools_scm]
+write_to = "petrofit/_version.py"
 
 [tool.hatch.build]
 only-packages = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/petrofit"]
+packages = ["petrofit"]
 [tool.hatch.build.hooks.vcs]
-version-file = "src/petrofit/_version.py"
+version-file = "petrofit/_version.py"
 
 [tool.hatch.version]
 source = "vcs"
@@ -94,7 +106,7 @@ addopts = "--doctest-rst"
 
 [tool.coverage.paths]
 source = [
-    "src/petrofit",
+    "petrofit",
     "*/site-packages/petrofit",
 ]
 
@@ -102,7 +114,7 @@ source = [
 branch = true
 parallel = true
 omit = [
-    "src/petrofit/_version.py",
+    "petrofit/_version.py",
 ]
 
 [tool.coverage.report]
@@ -124,7 +136,7 @@ ignore = [
     "ANN102",  # 'Missing type annotation for {cls} in classmethod'.
 ]
 exclude = [
-    "src/petrofit/_version.py",
+    "petrofit/_version.py",
     "docs/conf.py",
 ]
 
@@ -201,7 +213,7 @@ dependencies = [
 ]
 
 [tool.hatch.envs.types.scripts]
-check = "mypy src/petrofit"
+check = "mypy petrofit"
 [tool.hatch.envs.docs]
 description = """Build or serve the documentation."""
 dependencies = [
@@ -214,11 +226,16 @@ dependencies = [
     "nbsphinx",
     "sphinx_rtd_theme",
     "ipywidgets",
+    'docutils',
+    'nbconvert',
+    'sphinx_astropy',
+    'sphinx-automodapi',
+
 ]
 
 [tool.hatch.envs.docs.scripts]
 build = ["sphinx-apidoc -o docs/api petrofit", "sphinx-build {args:-W -b html docs docs/_build}"]
-serve = ["sphinx-apidoc -o docs/api petrofit", "sphinx-autobuild docs --watch src/petrofit {args:-b html docs/_build/serve}"]
+serve = ["sphinx-apidoc -o docs/api petrofit", "sphinx-autobuild docs --watch petrofit {args:-b html docs/_build/serve}"]
 
 [tool.hatch.envs.install]
 description = """Test the installation the package."""
