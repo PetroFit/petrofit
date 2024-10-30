@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest an idea for this project
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Problem
+      description: >
+        A clear and concise description of what you are trying to achieve.
+      placeholder: >
+        "I want to be able to [...] but I can't because [...]".
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: >
+        Provide any additional context, screenshots, tracebacks, etc. about the feature here.
+    validations:
+      required: false
