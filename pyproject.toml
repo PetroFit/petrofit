@@ -238,6 +238,7 @@ dependencies = [
 [tool.hatch.envs.docs.scripts]
 build = ["sphinx-build {args:-W -b html docs docs/_build}"]
 serve = ["sphinx-autobuild docs --watch petrofit {args:-b html docs/_build/serve}"]
+buildrtd = ["sphinx-build {args:-W -b html docs $READTHEDOCS_OUTPUT/html/}"]
 
 [tool.hatch.envs.install]
 description = """Test the installation the package."""

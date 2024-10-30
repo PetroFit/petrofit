@@ -18,4 +18,4 @@ build:
   commands:
     - pip install --upgrade pip setuptools wheel
     - pip install hatch
-    - hatch run docs:build
+    - hatch run docs:buildrtd
