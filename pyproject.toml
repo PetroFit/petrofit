@@ -29,7 +29,7 @@ authors = [
     { name = "The PetroFit Team", email = "" },
 ]
 license = "BSD-3-Clause"
-readme = {"file" = "README.md", "content-type" = "text/markdown"}
+readme = {"file" = "README.rst", "content-type" = "text/x-rst"}
 requires-python = ">=3.12"
 # Please consult https://pypi.org/classifiers/ for a full list.
 classifiers = [
