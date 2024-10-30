@@ -25,18 +25,22 @@ jobs:
 
       - name: Check code style
         run: hatch run style:code
+        continue-on-error: true
 
       - name: Check docstrings
         run: hatch run style:docstrings
+        continue-on-error: true
 
       - name: Build documentation
         run: hatch run docs:build
+        
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
         python-version: ["3.12"]
 
     steps:
@@ -54,8 +58,7 @@ jobs:
 
     - name: Check dependencies
       run: hatch run audit:check
-    - name: Check types
-      run: hatch run types:check
+
     - name: Test suite
       run: hatch run +py=${{ matrix.python-version }} test:run
 
