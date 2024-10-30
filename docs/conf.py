@@ -14,8 +14,9 @@ except ImportError:
 
 # Get configuration information from setup.cfg
 import tomllib
-with open("pyproject.toml", "rb") as f:
-    config = tomllib.load(f)
+
+with open(os.path.join(os.path.dirname(__file__), '..', 'pyproject.toml'), "rb") as f:
+    setup_cfg = tomllib.load(f)
 
 # -- General configuration ----------------------------------------------------
 
@@ -34,8 +35,8 @@ nbsphinx_execute = 'auto'
 # -- Project information ------------------------------------------------------
 
 project = "PetroFit"
-author = config["project"]['authors'][0]['name']
-module_name = config["project"]['name']
+author = setup_cfg["project"]['authors'][0]['name']
+module_name = setup_cfg["project"]['name']
 copyright = '{0}, {1}'.format(
     datetime.datetime.now().year, author)
 import_module(module_name)
@@ -71,7 +72,7 @@ man_pages = [('index', project.lower(), project + u' Documentation',
 
 # -- Resolving issue number to links in changelog -----------------------------
 
-github_issues_url = 'https://github.com/{0}/issues/'.format(setup_cfg['github_project'])
+github_issues_url = setup_cfg['project']['urls']['Bug Tracker']
 
 
 # -- Options for linkcheck output -------------------------------------------

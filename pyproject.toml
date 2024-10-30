@@ -98,7 +98,6 @@ markers = ["raises"]
 astropy_header = true
 doctest_plus = "enabled"
 text_file_format = "rst"
-addopts = "--doctest-rst"
 
 [tool.coverage.paths]
 source = [
@@ -216,9 +215,11 @@ dependencies = [
 
 [tool.hatch.envs.types.scripts]
 check = "mypy petrofit"
+
 [tool.hatch.envs.docs]
 description = """Build or serve the documentation."""
 dependencies = [
+    "pypandoc",
     "pydata_sphinx_theme ~=0.16",
     "myst-parser ~=4.0",
     "Sphinx ~=8.0",
@@ -232,12 +233,11 @@ dependencies = [
     'nbconvert',
     'sphinx_astropy',
     'sphinx-automodapi',
-
 ]
 
 [tool.hatch.envs.docs.scripts]
-build = ["sphinx-apidoc -o docs/api petrofit", "sphinx-build {args:-W -b html docs docs/_build}"]
-serve = ["sphinx-apidoc -o docs/api petrofit", "sphinx-autobuild docs --watch petrofit {args:-b html docs/_build/serve}"]
+build = ["sphinx-build {args:-W -b html docs docs/_build}"]
+serve = ["sphinx-autobuild docs --watch petrofit {args:-b html docs/_build/serve}"]
 
 [tool.hatch.envs.install]
 description = """Test the installation the package."""
