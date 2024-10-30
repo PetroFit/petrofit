@@ -94,6 +94,7 @@ petrofit based on its use in the README file for the
    :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
    :target: https://www.repostatus.org/#active
 
-.. |python version tag| image:: https://img.shields.io/badge/python-3.12+-blue.svg
-    :alt: Python version 3.12 or later
-    :target: https://www.python.org/downloads/
+.. |python version tag| image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fpetrofit%2Fpetrofit%2Fmain%2Fpyproject.toml
+   :alt: Python Version from PEP 621 TOML
+   :target: https://www.python.org/downloads/
+
