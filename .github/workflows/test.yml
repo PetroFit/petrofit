@@ -33,7 +33,12 @@ jobs:
         continue-on-error: true
 
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.12"]
     steps:
       - uses: actions/checkout@v4
 
@@ -47,6 +52,9 @@ jobs:
 
       - name: Install dependencies
         run: pip install pytest pytest-cov
+
+      - name: Install petrofit
+        run: pip install .
 
       - name: Run tests
         run: pytest --cov --cov-report=xml
