@@ -5,7 +5,7 @@ Citing and Credits
 Publications
 ============
 
-|AJ tag| |zonodo tag| |ascl tag|
+|AJ tag| |ads tag| |zonodo tag| |ascl tag|
 
 If you would like to cite PetroFit for a publication, please use the acknowledgments below.
 Given the close relationship between PetroFit and Photutils, we ask that you also cite
@@ -94,6 +94,11 @@ HTML (.html):
     :target: https://arxiv.org/abs/2202.13493
     :alt: PetroFit arxiv
 
+
+.. |ads tag| image:: https://img.shields.io/badge/ADS-2022AJ....163..202G-blue.svg?style=flat&color=3484e0
+    :target: https://ui.adsabs.harvard.edu/abs/2022AJ....163..202G/abstract
+    :alt: ADS PetroFit
+
 .. |ascl tag| image:: https://img.shields.io/badge/ascl-2203.013-black.svg?colorB=262255
     :target: https://ascl.net/2203.013
     :alt: ascl:2203.013
@@ -101,3 +106,4 @@ HTML (.html):
 .. |petrofit tag| image:: https://img.shields.io/badge/powered%20by-PetroFit-blue.svg?style=flat&color=00B0F0
     :target: https://github.com/PetroFit/petrofit
     :alt: PetroFit
+
