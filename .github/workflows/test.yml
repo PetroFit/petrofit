@@ -1,4 +1,4 @@
-name: Test Suite
+name: Tests
 
 on:
   workflow_dispatch: {}
@@ -46,7 +46,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          
+
       - name: Install Pandoc
         run: sudo apt-get install pandoc
 
