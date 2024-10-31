@@ -4,7 +4,7 @@
 
 PetroFit
 --------
-|CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |astropy tag| |photutils tag|
+|CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |python version tag| |repostatus tag| |astropy tag| |photutils tag| 
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations,
@@ -16,8 +16,81 @@ for installation instructions and a guide to the ``petrofit`` module.
 
 Installation
 ------------
+
 You can install PetroFit using ``pip install petrofit``. Please see
 the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for detailed installation instructions.
+
+Examples
+--------
+
+Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_
+for detailed examples, a quick stat guide, and instructions.
+
+**Image Fitting**: 
+
+PetroFit can be used with ``astropy`` models to fit psf convolved galaxy light profiles. Given a 2D image (``image``) and a psf (``PSF``), the following code snippet demonstrates how to fit a Sérsic model to the image:
+
+.. code-block:: python
+
+    import petrofit as pf
+    from astropy.modeling import models
+
+    sersic_model = models.Sersic2D(
+            amplitude=1,
+            r_eff=10,
+            n=4,
+            x_0=0, y_0=0,
+            ellip=0.2,
+            theta=25,
+            bounds=pf.get_default_sersic_bounds(),
+    )
+
+    psf_sersic_model = pf.PSFConvolvedModel2D(
+        sersic_model, psf=PSF, oversample=4, psf_oversample=1
+    )
+
+    fitted_model, fit_info = pf.fit_model(
+        image, psf_sersic_model,
+    )
+
+**Photometry and Petrosian**: 
+
+Given a 2D image (``image``) the following code snippet demonstrates how to create a Petrosian profile:
+
+.. code-block:: python
+
+    import petrofit as pf
+    
+    # Make a segmentation map and 
+    # catalog using Photutils wrapper
+    cat, segm, segm_deblend = pf.make_catalog(
+        image,
+        threshold=image.std()*3,
+        wcs=None, deblend=True,
+        npixels=npixels, nlevels=30, contrast=0.001,
+    )
+
+    # Photomerty on first source in catalog
+    r_list = pf.make_radius_list(max_pix=50, n=50)
+    flux_arr, area_arr, error_arr = pf.source_photometry(
+        cat[0], # Source (`photutils.segmentation.catalog.SourceCatalog`)
+        image, # Image as 2D array
+        segm_deblend, # Deblended segmentation map of image
+        r_list, # list of aperture radii
+        cutout_size=max(r_list)*2, # Cutout out size, set to double the max radius
+    )
+
+    # Make a Petrosian profile 
+    p = pf.Petrosian(r_list, area_arr, flux_arr)
+    print("{:0.4f} pix".format(p.r_half_light))
+
+
+Citation
+--------
+
+Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_
+for citation instructions. This information is also available in the `CITATION.rst`` 
+file in the PetroFit repo.
 
 License
 -------
@@ -62,7 +135,6 @@ petrofit based on its use in the README file for the
 `MetPy project <https://github.com/Unidata/MetPy>`_.
 
 
-
 .. |CI tag| image:: https://github.com/PetroFit/petrofit/actions/workflows/ci_tests.yml/badge.svg?branch=main
     :target: https://github.com/PetroFit/petrofit/actions/workflows/ci_tests.yml
     :alt: PetroFit CI status
@@ -90,3 +162,11 @@ petrofit based on its use in the README file for the
 .. |zonodo tag| image:: http://img.shields.io/badge/zenodo-10.5281/zenodo.6386991-blue.svg?style=flat
     :target: https://zenodo.org/badge/latestdoi/348478663
     :alt: PetroFit Zenodo DOI
+
+.. |repostatus tag| image:: https://www.repostatus.org/badges/latest/active.svg
+   :alt: Project Status: Active – The project has reached a stable, usable state and is being actively developed.
+   :target: https://www.repostatus.org/#active
+
+.. |python version tag| image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fpetrofit%2Fpetrofit%2Fmain%2Fpyproject.toml
+   :alt: Python Version from PEP 621 TOML
+   :target: https://www.python.org/downloads/

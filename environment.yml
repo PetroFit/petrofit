@@ -31,5 +31,6 @@ dependencies:
   - pip
   - python>=3.12
   - Pandoc
+  - scikit-image
   - pip:
-    - -r requirements.txt
+    - -e .
