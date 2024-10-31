@@ -1,0 +1,36 @@
+# This file describes a conda environment that can be to install PetroFit
+#
+# Run the following command to set up this environment:
+# $ conda env create -f environment.yml
+#
+# The environment name can be overridden with the following command:
+# $ conda env create -n <custom name> -f environment.yml
+#
+# Run the following command to activate the environment:
+# $ source activate petrofit
+#
+# To deactivate the environment run the following command:
+# $ source deactivate
+#
+# To remove the environment entirely, run the following command:
+# $ conda env remove -n petrofit
+#
+# To update an environment
+# $ conda env update -f environment.yml
+
+name: petrofit
+
+channels:
+  - conda-forge
+  - astropy
+  - http://ssb.stsci.edu/astroconda
+  - defaults
+
+dependencies:
+  # Base dependencies
+  - pip
+  - python>=3.12
+  - Pandoc
+  - scikit-image
+  - pip:
+    - -e .

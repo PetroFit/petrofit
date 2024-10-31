@@ -42,7 +42,7 @@ PetroFit can be used with ``astropy`` models to fit psf convolved galaxy light p
             x_0=0, y_0=0,
             ellip=0.2,
             theta=25,
-            bounds = pf.get_default_sersic_bounds(),
+            bounds=pf.get_default_sersic_bounds(),
     )
 
     psf_sersic_model = pf.PSFConvolvedModel2D(
@@ -61,7 +61,8 @@ Given a 2D image (``image``) the following code snippet demonstrates how to crea
 
     import petrofit as pf
     
-    # Make a segmentation map and catalog using Photutils wrapper
+    # Make a segmentation map and 
+    # catalog using Photutils wrapper
     cat, segm, segm_deblend = pf.make_catalog(
         image,
         threshold=image.std()*3,
@@ -78,7 +79,7 @@ Given a 2D image (``image``) the following code snippet demonstrates how to crea
         r_list, # list of aperture radii
         cutout_size=max(r_list)*2, # Cutout out size, set to double the max radius
     )
-    
+
     # Make a Petrosian profile 
     p = pf.Petrosian(r_list, area_arr, flux_arr)
     print("{:0.4f} pix".format(p.r_half_light))
