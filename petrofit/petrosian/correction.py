@@ -18,7 +18,7 @@ from .core import Petrosian, calculate_petrosian_r, calculate_petrosian
 
 from matplotlib import pyplot as plt
 
-__all__ = ['generate_petrosian_sersic_correction', 'PetrosianCorrection']
+__all__ = ["generate_petrosian_sersic_correction", "PetrosianCorrection"]
 
 
 def _generate_petrosian_correction(args):
@@ -29,22 +29,19 @@ def _generate_petrosian_correction(args):
     """
     # Unpack params
     r_eff, n, psf, oversample, psf_oversample, plot = args
-    amplitude = 100 / np.exp(gammaincinv(2. * n, 0.5))
+    amplitude = 100 / np.exp(gammaincinv(2.0 * n, 0.5))
 
     # Total flux
-    L_total = sersic_enclosed(
-        np.inf,
-        amplitude=amplitude,
-        r_eff=r_eff,
-        n=n)
+    L_total = sersic_enclosed(np.inf, amplitude=amplitude, r_eff=r_eff, n=n)
     total_flux = L_total * 0.99
 
     # Calculate radii
-    r_20, r_80, r_total_flux = [sersic_enclosed_inv(
-        total_flux * fraction,
-        amplitude=amplitude,
-        r_eff=r_eff,
-        n=n) for fraction in [0.2, 0.8, 1.0]]
+    r_20, r_80, r_total_flux = [
+        sersic_enclosed_inv(
+            total_flux * fraction, amplitude=amplitude, r_eff=r_eff, n=n
+        )
+        for fraction in [0.2, 0.8, 1.0]
+    ]
 
     # Make r_list
     max_r = r_total_flux * 3 if n < 2 else r_total_flux * 1.3
@@ -71,20 +68,22 @@ def _generate_petrosian_correction(args):
         n=n,
         x_0=x_0,
         y_0=y_0,
-        ellip=0.,
-        theta=0.,
+        ellip=0.0,
+        theta=0.0,
     )
 
     # Wrap model with PSFConvolvedModel2D
-    galaxy_model = PSFConvolvedModel2D(galaxy_model, psf=psf, oversample=oversample, psf_oversample=psf_oversample)
+    galaxy_model = PSFConvolvedModel2D(
+        galaxy_model, psf=psf, oversample=oversample, psf_oversample=psf_oversample
+    )
 
     # Make galaxy image from PSFConvolvedModel2D
     galaxy_image = model_to_image(galaxy_model, image_size, center=(x_0, y_0))
 
     # Do photometry on model galaxy image
-    flux_list, area_list, err = radial_photometry(galaxy_image, (x_0, y_0), r_list,
-                                                  plot=plot,
-                                                  vmax=amplitude / 100)
+    flux_list, area_list, err = radial_photometry(
+        galaxy_image, (x_0, y_0), r_list, plot=plot, vmax=amplitude / 100
+    )
     if plot:
         plt.show()
 
@@ -94,12 +93,14 @@ def _generate_petrosian_correction(args):
     p = Petrosian(r_list, area_list, flux_list)
     rc1, rc2, c_index = p.concentration_index()
     if np.any(np.isnan(np.array([rc1, rc2, c_index]))):
-        raise Exception("concentration_index cannot be computed (n={}, r_e={})".format(n, r_eff))
+        raise Exception(
+            "concentration_index cannot be computed (n={}, r_e={})".format(n, r_eff)
+        )
 
     # Compute new r_total_flux
     _, indices = np.unique(flux_list, return_index=True)
     indices = np.array(indices)
-    f = interp1d(flux_list[indices], r_list[indices], kind='linear')
+    f = interp1d(flux_list[indices], r_list[indices], kind="linear")
     model_r_total_flux = f(total_flux)
 
     # Compute new r_80
@@ -116,7 +117,10 @@ def _generate_petrosian_correction(args):
     # ----------------
     # Petrosian indices
     petrosian_list = calculate_petrosian(p.area_list, p.flux_list)[0]
-    p02, p03, p04, p05 = [calculate_petrosian_r(p.r_list, petrosian_list, eta=i)[0] for i in (0.2, 0.3, 0.4, 0.5)]
+    p02, p03, p04, p05 = [
+        calculate_petrosian_r(p.r_list, petrosian_list, eta=i)[0]
+        for i in (0.2, 0.3, 0.4, 0.5)
+    ]
     assert np.round(p.r_petrosian, 6) == np.round(p02, 6)
 
     u_r_eff = p.fraction_flux_to_r(0.5)
@@ -129,11 +133,38 @@ def _generate_petrosian_correction(args):
     c_r_50 = corrected_p.fraction_flux_to_r(0.5)
     c_r_80 = corrected_p.fraction_flux_to_r(0.8)
 
-    row = [n, r_eff, r_20, r_80, r_total_flux, L_total,
-           p02, p03, p04, p05, 5 * np.log10(p02 / p05), 5 * np.log10(p02 / p03),
-           p.epsilon, u_r_50 / p.r_petrosian, u_r_80 / p.r_petrosian, u_r_eff, p.r_total_flux, u_r_20, u_r_80, p.c2080, p.c5090,
-           corrected_epsilon, c_r_50 / p.r_petrosian, corrected_epsilon_80, c_r_eff, corrected_p.r_total_flux, c_r_20, c_r_80,
-           corrected_p.c2080, corrected_p.c5090]
+    row = [
+        n,
+        r_eff,
+        r_20,
+        r_80,
+        r_total_flux,
+        L_total,
+        p02,
+        p03,
+        p04,
+        p05,
+        5 * np.log10(p02 / p05),
+        5 * np.log10(p02 / p03),
+        p.epsilon,
+        u_r_50 / p.r_petrosian,
+        u_r_80 / p.r_petrosian,
+        u_r_eff,
+        p.r_total_flux,
+        u_r_20,
+        u_r_80,
+        p.c2080,
+        p.c5090,
+        corrected_epsilon,
+        c_r_50 / p.r_petrosian,
+        corrected_epsilon_80,
+        c_r_eff,
+        corrected_p.r_total_flux,
+        c_r_20,
+        c_r_80,
+        corrected_p.c2080,
+        corrected_p.c5090,
+    ]
 
     if plot:
         fig, axs = plt.subplots(1, 2, figsize=[12, 6])
@@ -153,10 +184,19 @@ def _generate_petrosian_correction(args):
     return row
 
 
-def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=None, n_list=None,
-                                         oversample=('x_0', 'y_0', 10, 50), psf_oversample=None,
-                                         out_format=None, overwrite=False,
-                                         ipython_widget=False, n_cpu=None, plot=False):
+def generate_petrosian_sersic_correction(
+    output_file_name,
+    psf=None,
+    r_eff_list=None,
+    n_list=None,
+    oversample=("x_0", "y_0", 10, 50),
+    psf_oversample=None,
+    out_format=None,
+    overwrite=False,
+    ipython_widget=False,
+    n_cpu=None,
+    plot=False,
+):
     """
     Generate corrections for Petrosian profiles by simulating a galaxy image (single component sersic) and measuring its
     properties. This is done to identify the correct `epsilon` value that, when multiplied with `r_petrosian`, gives
@@ -219,7 +259,11 @@ def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=
         n_list = np.arange(0.5, 4.5 + 0.5, 0.5)
 
     if psf is not None and psf.sum() != 1:
-        warnings.warn("Input PSF not normalized to 1, current sum = {}. This may cause major errors".format(psf.sum()))
+        warnings.warn(
+            "Input PSF not normalized to 1, current sum = {}. This may cause major errors".format(
+                psf.sum()
+            )
+        )
 
     r_eff_list = np.array(r_eff_list)
     n_list = np.round(np.array(n_list), 6)
@@ -240,23 +284,58 @@ def generate_petrosian_sersic_correction(output_file_name, psf=None, r_eff_list=
                 rows.append(row)
                 bar.update()
     else:
-        assert plot == False, 'Plotting not available for ncpu > 1'
+        assert plot == False, "Plotting not available for ncpu > 1"
         step = 50 if len(r_eff_list) * len(n_list) > 500 else 2
-        rows = ProgressBar.map(_generate_petrosian_correction, args, multiprocess=n_cpu,
-                               ipython_widget=ipython_widget, step=step)
+        rows = ProgressBar.map(
+            _generate_petrosian_correction,
+            args,
+            multiprocess=n_cpu,
+            ipython_widget=ipython_widget,
+            step=step,
+        )
 
-    names = ['n', 'r_eff', 'sersic_r_20', 'sersic_r_80', 'sersic_r_99', 'sersic_L_inf',
-             'p02', 'p03', 'p04', 'p05', 'p0502', 'p0302',
-             'u_epsilon', 'u_epsilon_50', 'u_epsilon_80', 'u_r_50', 'u_r_99', 'u_r_20', 'u_r_80', 'u_c2080', 'u_c5090',
-             'c_epsilon', 'c_epsilon_50', 'c_epsilon_80', 'c_r_50', 'c_r_99', 'c_r_20', 'c_r_80', 'c_c2080', 'c_c5090']
+    names = [
+        "n",
+        "r_eff",
+        "sersic_r_20",
+        "sersic_r_80",
+        "sersic_r_99",
+        "sersic_L_inf",
+        "p02",
+        "p03",
+        "p04",
+        "p05",
+        "p0502",
+        "p0302",
+        "u_epsilon",
+        "u_epsilon_50",
+        "u_epsilon_80",
+        "u_r_50",
+        "u_r_99",
+        "u_r_20",
+        "u_r_80",
+        "u_c2080",
+        "u_c5090",
+        "c_epsilon",
+        "c_epsilon_50",
+        "c_epsilon_80",
+        "c_r_50",
+        "c_r_99",
+        "c_r_20",
+        "c_r_80",
+        "c_c2080",
+        "c_c5090",
+    ]
     petrosian_grid = Table(rows=rows, names=names)
 
     if output_file_name is not None:
         try:
-            petrosian_grid.write(output_file_name, format=out_format, overwrite=overwrite)
+            petrosian_grid.write(
+                output_file_name, format=out_format, overwrite=overwrite
+            )
         except Exception as e:
-            print('Could not save to file: {}'.format(e))
-            print('You can save the returned table using `petrosian_grid.write`')
+            print("Could not save to file: {}".format(e))
+            print("You can save the returned table using `petrosian_grid.write`")
     return petrosian_grid
 
 
@@ -280,26 +359,32 @@ class PetrosianCorrection:
 
         self.enforce_range = enforce_range
 
-        self.eta_keys = {0.2: 'p02', 0.3: 'p03', 0.4: 'p04', 0.5: 'p05'}
+        self.eta_keys = {0.2: "p02", 0.3: "p03", 0.4: "p04", 0.5: "p05"}
 
         if isinstance(grid, Table):
             self.grid = grid
         elif isinstance(grid, str):
-            raise TypeError('Input grid should be an astropy Table use `PetrosianCorrection.read(file_path)`')
+            raise TypeError(
+                "Input grid should be an astropy Table use `PetrosianCorrection.read(file_path)`"
+            )
         else:
-            raise TypeError('Input grid should be an astropy Table')
+            raise TypeError("Input grid should be an astropy Table")
 
-        self.x = self.grid['p02'].value
-        self.y = self.grid['u_r_50'].value
-        self.z = self.grid['u_c2080'].value
+        self.x = self.grid["p02"].value
+        self.y = self.grid["u_r_50"].value
+        self.z = self.grid["u_c2080"].value
         self.r = [self.x, self.y, self.z]
 
         self.weights = np.array([100, 100, 100])
 
     def _get_xyz_from_p(self, p):
         px_list = (0.2, 0.3, 0.4, 0.5)
-        p02, p03, p04, p05 = [calculate_petrosian_r(p.r_list, p.petrosian_list,
-                                                    petrosian_err=None, eta=i)[0] for i in px_list]
+        p02, p03, p04, p05 = [
+            calculate_petrosian_r(
+                p.r_list, p.petrosian_list, petrosian_err=None, eta=i
+            )[0]
+            for i in px_list
+        ]
         x0 = p02
         y0 = p.r_50
         z0 = p.c2080
@@ -350,14 +435,20 @@ class PetrosianCorrection:
         dy = wy * (self.y - y0) / std_y
         dz = wz * (self.z - z0) / std_z
 
-        dr = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
+        dr = np.sqrt(dx**2 + dy**2 + dz**2)
 
         return dr
 
     def _validate_input(self, x0, y0, z0):
-        assert np.min(self.x) <= x0 <= np.max(self.x), 'r_petro(eta=0.2) is outside of the range of the grid'
-        assert np.min(self.y) <= y0 <= np.max(self.y), 'r_50 is outside of the range of the grid'
-        assert np.min(self.z) <= z0 <= np.max(self.z), 'C2080 is outside of the range of the grid'
+        assert (
+            np.min(self.x) <= x0 <= np.max(self.x)
+        ), "r_petro(eta=0.2) is outside of the range of the grid"
+        assert (
+            np.min(self.y) <= y0 <= np.max(self.y)
+        ), "r_50 is outside of the range of the grid"
+        assert (
+            np.min(self.z) <= z0 <= np.max(self.z)
+        ), "C2080 is outside of the range of the grid"
 
     def _closest_row(self, x0, y0, z0):
         if self.enforce_range:
@@ -380,7 +471,7 @@ class PetrosianCorrection:
         return an estimated sersic index n.
         """
         row = self._get_corrected_row(p)
-        return row['n']
+        return row["n"]
 
     def estimate_epsilon(self, p):
         """
@@ -392,24 +483,40 @@ class PetrosianCorrection:
         eta = p.eta
 
         if epsilon_fraction == 0.5:
-            r_ep = row['c_r_eff']
+            r_ep = row["c_r_eff"]
         elif epsilon_fraction == 0.8:
-            r_ep = row['c_r_80']
-        elif epsilon_fraction == .99:
-            r_ep = row['c_r_99']
+            r_ep = row["c_r_80"]
+        elif epsilon_fraction == 0.99:
+            r_ep = row["c_r_99"]
         else:
-            raise ValueError('Input epsilon_fraction={} is not supported, choose from [0.5, 0.8, 0.99]')
+            raise ValueError(
+                "Input epsilon_fraction={} is not supported, choose from [0.5, 0.8, 0.99]"
+            )
 
         if eta not in self.eta_keys.keys():
-            raise ValueError('Input eta={} is not supported, choose from eta={}'.format(
-                eta, list(self.eta_keys.keys())))
+            raise ValueError(
+                "Input eta={} is not supported, choose from eta={}".format(
+                    eta, list(self.eta_keys.keys())
+                )
+            )
 
         r_p = row[self.eta_keys[eta]]
         epsilon = r_ep / r_p
         return epsilon
 
-    def _plot_grid(self, x0=None, y0=None, z0=None, cmap='hot', target_c='blue',
-                   cmap_key='n', colorbar_label=None, suptitle=None, axs=None, minorticks=False):
+    def _plot_grid(
+        self,
+        x0=None,
+        y0=None,
+        z0=None,
+        cmap="hot",
+        target_c="blue",
+        cmap_key="n",
+        colorbar_label=None,
+        suptitle=None,
+        axs=None,
+        minorticks=False,
+    ):
         if axs is None:
             fig, axs = plt.subplots(1, 3, figsize=[6 * 3, 6])
         else:
@@ -421,44 +528,90 @@ class PetrosianCorrection:
         sim_n_list = self.grid[cmap_key]
 
         ax = axs[0]
-        sc = ax.scatter(self.x, self.y, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel(r'$r_{{p}}(\eta=0.2)$')
-        ax.set_ylabel(r'$r_{{50}}$')
+        sc = ax.scatter(
+            self.x,
+            self.y,
+            c=sim_n_list,
+            vmin=0,
+            vmax=max(sim_n_list) + 1,
+            s=35,
+            cmap=cm,
+        )
+        ax.set_xlabel(r"$r_{{p}}(\eta=0.2)$")
+        ax.set_ylabel(r"$r_{{50}}$")
         mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         ax = axs[1]
-        sc = ax.scatter(self.x, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel(r'$r_{{p}}(\eta=0.2)$')
-        ax.set_ylabel(r'$C_{2080}$')
+        sc = ax.scatter(
+            self.x,
+            self.z,
+            c=sim_n_list,
+            vmin=0,
+            vmax=max(sim_n_list) + 1,
+            s=35,
+            cmap=cm,
+        )
+        ax.set_xlabel(r"$r_{{p}}(\eta=0.2)$")
+        ax.set_ylabel(r"$C_{2080}$")
         mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         ax = axs[2]
-        sc = ax.scatter(self.y, self.z, c=sim_n_list, vmin=0, vmax=max(sim_n_list) + 1, s=35, cmap=cm)
-        ax.set_xlabel(r'$r_{{50}}$')
-        ax.set_ylabel(r'$C_{2080}$')
+        sc = ax.scatter(
+            self.y,
+            self.z,
+            c=sim_n_list,
+            vmin=0,
+            vmax=max(sim_n_list) + 1,
+            s=35,
+            cmap=cm,
+        )
+        ax.set_xlabel(r"$r_{{50}}$")
+        ax.set_ylabel(r"$C_{2080}$")
         mpl_tick_frame(ax=ax, minorticks=minorticks)
 
         if None not in [x0, y0, z0]:
             idx = self._dr(x0, y0, z0).argmin()
             cx, cy, cz = self.x[idx], self.y[idx], self.z[idx]
 
-            axs[0].scatter(x0, y0, marker='o', s=200, ec=target_c, fc='None', lw=5)
-            axs[1].scatter(x0, z0, marker='o', s=200, ec=target_c, fc='None', lw=5)
-            axs[2].scatter(y0, z0, marker='o', s=200, ec=target_c, fc='None', lw=5)
+            axs[0].scatter(x0, y0, marker="o", s=200, ec=target_c, fc="None", lw=5)
+            axs[1].scatter(x0, z0, marker="o", s=200, ec=target_c, fc="None", lw=5)
+            axs[2].scatter(y0, z0, marker="o", s=200, ec=target_c, fc="None", lw=5)
 
-            axs[0].plot([x0, cx], [y0, cy], marker='o', lw=5)
-            axs[1].plot([x0, cx], [z0, cz], marker='o', lw=5)
-            axs[2].plot([y0, cy], [z0, cz], marker='o', lw=5)
+            axs[0].plot([x0, cx], [y0, cy], marker="o", lw=5)
+            axs[1].plot([x0, cx], [z0, cz], marker="o", lw=5)
+            axs[2].plot([y0, cy], [z0, cz], marker="o", lw=5)
 
-        fig.colorbar(sc, ax=axs, location='bottom', aspect=50, label=colorbar_label if colorbar_label else cmap_key)
-        fig.suptitle(suptitle if suptitle else 'Petrosian Correction Grid')
+        fig.colorbar(
+            sc,
+            ax=axs,
+            location="bottom",
+            aspect=50,
+            label=colorbar_label if colorbar_label else cmap_key,
+        )
+        fig.suptitle(suptitle if suptitle else "Petrosian Correction Grid")
 
         return fig, axs
 
-    def plot_correction(self, p, cmap='hot', target_c='blue', cmap_key='n',
-                        colorbar_label=None, suptitle=None, axs=None):
+    def plot_correction(
+        self,
+        p,
+        cmap="hot",
+        target_c="blue",
+        cmap_key="n",
+        colorbar_label=None,
+        suptitle=None,
+        axs=None,
+    ):
         x0, y0, z0 = self._get_xyz_from_p(p)
-        fig, axs = self._plot_grid(x0=x0, y0=y0, z0=z0, cmap=cmap, cmap_key=cmap_key,
-                                   colorbar_label=colorbar_label, target_c=target_c,
-                                   suptitle=suptitle, axs=axs)
+        fig, axs = self._plot_grid(
+            x0=x0,
+            y0=y0,
+            z0=z0,
+            cmap=cmap,
+            cmap_key=cmap_key,
+            colorbar_label=colorbar_label,
+            target_c=target_c,
+            suptitle=suptitle,
+            axs=axs,
+        )
         return fig, axs

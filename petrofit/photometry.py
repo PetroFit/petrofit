@@ -5,11 +5,16 @@ from matplotlib import pyplot as plt
 from photutils.aperture import EllipticalAnnulus, EllipticalAperture
 
 __all__ = [
-    'plot_apertures', 'radial_elliptical_aperture',
-    'radial_elliptical_annulus', 'radial_photometry', ]
+    "plot_apertures",
+    "radial_elliptical_aperture",
+    "radial_elliptical_annulus",
+    "radial_photometry",
+]
 
 
-def plot_apertures(image=None, apertures=[], vmin=None, vmax=None, color='white', lw=1.5):
+def plot_apertures(
+    image=None, apertures=[], vmin=None, vmax=None, color="white", lw=1.5
+):
     """
     Plot apertures on image
 
@@ -31,16 +36,16 @@ def plot_apertures(image=None, apertures=[], vmin=None, vmax=None, color='white'
         Line width of aperture outline.
     """
     if image is not None:
-        plt.imshow(image, cmap='Greys_r', vmin=vmin, vmax=vmax)
+        plt.imshow(image, cmap="Greys_r", vmin=vmin, vmax=vmax)
 
     for aperture in apertures:
         aperture.plot(axes=plt.gca(), color=color, lw=lw)
 
     if image is not None or apertures is not None or len(apertures) > 0:
-        plt.title('Apertures')
+        plt.title("Apertures")
 
 
-def radial_elliptical_aperture(position, r, elong=1., theta=0.):
+def radial_elliptical_aperture(position, r, elong=1.0, theta=0.0):
     """
     Helper function given a radius, elongation and theta,
     will make an elliptical aperture.
@@ -67,7 +72,7 @@ def radial_elliptical_aperture(position, r, elong=1., theta=0.):
     return EllipticalAperture(position, a, b, theta=theta)
 
 
-def radial_elliptical_annulus(position, r, dr, elong=1., theta=0.):
+def radial_elliptical_annulus(position, r, dr, elong=1.0, theta=0.0):
     """
     Helper function given a radius, elongation and theta,
     will make an elliptical annulus.
@@ -100,8 +105,19 @@ def radial_elliptical_annulus(position, r, dr, elong=1., theta=0.):
     return EllipticalAnnulus(position, a_in, a_out, b_out, theta=theta)
 
 
-def radial_photometry(image, position, r_list, error=None, mask=None, elong=1., theta=0.,
-                      plot=False, vmin=0, vmax=None, method='exact'):
+def radial_photometry(
+    image,
+    position,
+    r_list,
+    error=None,
+    mask=None,
+    elong=1.0,
+    theta=0.0,
+    plot=False,
+    vmin=0,
+    vmax=None,
+    method="exact",
+):
     """
     Core photometry function.  Given a position, a list of radii and the shape
     of apertures, calculate the photometry of the target in the image.
@@ -185,19 +201,24 @@ def radial_photometry(image, position, r_list, error=None, mask=None, elong=1., 
     for i, r in enumerate(r_list):
         aperture = radial_elliptical_aperture(position, r, elong=elong, theta=theta)
 
-        photometric_value, photometric_err = aperture.do_photometry(data=image, error=error, mask=mask, method=method)
-        aperture_area, aperture_area_err = aperture.do_photometry(data=np.ones_like(image), error=None,
-                                                                  mask=mask, method=method)
+        photometric_value, photometric_err = aperture.do_photometry(
+            data=image, error=error, mask=mask, method=method
+        )
+        aperture_area, aperture_area_err = aperture.do_photometry(
+            data=np.ones_like(image), error=None, mask=mask, method=method
+        )
 
         aperture_area = float(np.round(aperture_area, 6))
         photometric_value = float(np.round(photometric_value, 6))
-        photometric_err = float(np.round(photometric_err, 6)) if photometric_err.size > 0 else np.nan
+        photometric_err = (
+            float(np.round(photometric_err, 6)) if photometric_err.size > 0 else np.nan
+        )
 
         if np.isnan(photometric_value):
             raise Exception("Nan photometric_value")
 
         if plot:
-            aperture.plot(plt.gca(), color='w', alpha=0.5)
+            aperture.plot(plt.gca(), color="w", alpha=0.5)
 
         flux_arr.append(photometric_value)
         area_arr.append(aperture_area)
