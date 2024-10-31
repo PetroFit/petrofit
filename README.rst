@@ -135,8 +135,8 @@ petrofit based on its use in the README file for the
 `MetPy project <https://github.com/Unidata/MetPy>`_.
 
 
-.. |CI tag| image:: https://github.com/PetroFit/petrofit/actions/workflows/ci_tests.yml/badge.svg?branch=main
-    :target: https://github.com/PetroFit/petrofit/actions/workflows/ci_tests.yml
+.. |CI tag| image:: https://github.com/PetroFit/petrofit/actions/workflows/test.yml/badge.svg?branch=main
+    :target: https://github.com/PetroFit/petrofit/actions/workflows/test.yml
     :alt: PetroFit CI status
 
 .. |rtd tag| image:: https://readthedocs.org/projects/petrofit/badge/?version=latest
