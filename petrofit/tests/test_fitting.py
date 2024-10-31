@@ -24,11 +24,11 @@ def test_psf_convolved_image_model():
         ellip=0,
         theta=0,
         bounds={
-            'amplitude': (0., None),
-            'r_eff': (0, None),
-            'n': (0, 10),
-            'ellip': (0, 1),
-            'theta': (-2 * np.pi, 2 * np.pi),
+            "amplitude": (0.0, None),
+            "r_eff": (0, None),
+            "n": (0, 10),
+            "ellip": (0, 1),
+            "theta": (-2 * np.pi, 2 * np.pi),
         },
     )
 
@@ -45,7 +45,7 @@ def test_psf_convolved_image_model():
 
     # Make a PSFConvolvedModel2D
     psf_sersic_model = pf.PSFConvolvedModel2D(sersic_model, psf=PSF, oversample=None)
-    psf_sersic_model.fixed['psf_pa'] = True
+    psf_sersic_model.fixed["psf_pa"] = True
 
     # Make a PSFConvolvedModel2D image
     psf_sersic_model_image = pf.model_to_image(psf_sersic_model, imsize)
@@ -64,7 +64,8 @@ def test_psf_convolved_image_model():
 
     # Fit
     fitted_model, fit_info = pf.fit_model(
-        psf_sersic_image, psf_sersic_model,
+        psf_sersic_image,
+        psf_sersic_model,
         maxiter=10000,
         epsilon=1.4901161193847656e-10,
         acc=1e-9,
@@ -81,12 +82,8 @@ def test_psf_convolved_image_model():
 def test_make_grid():
     # Test default arguments
     x, y = pf.make_grid(3)
-    expected_x = np.array([[0., 1., 2.],
-                           [0., 1., 2.],
-                           [0., 1., 2.]])
-    expected_y = np.array([[0., 0., 0.],
-                           [1., 1., 1.],
-                           [2., 2., 2.]])
+    expected_x = np.array([[0.0, 1.0, 2.0], [0.0, 1.0, 2.0], [0.0, 1.0, 2.0]])
+    expected_y = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [2.0, 2.0, 2.0]])
     assert np.allclose(x, expected_x)
     assert np.allclose(y, expected_y)
 
@@ -97,18 +94,23 @@ def test_make_grid():
 
     x, y = pf.make_grid(2, origin=(0.25, 0.25), factor=2)
     expected_x, expected_y = [
-        np.array([
-            [0., 0.5, 1., 1.5],
-            [0., 0.5, 1., 1.5],
-            [0., 0.5, 1., 1.5],
-            [0., 0.5, 1., 1.5]
-        ]),
-         np.array([
-             [0., 0., 0., 0.],
-             [0.5, 0.5, 0.5, 0.5],
-             [1., 1., 1., 1.],
-             [1.5, 1.5, 1.5, 1.5]
-         ])]
+        np.array(
+            [
+                [0.0, 0.5, 1.0, 1.5],
+                [0.0, 0.5, 1.0, 1.5],
+                [0.0, 0.5, 1.0, 1.5],
+                [0.0, 0.5, 1.0, 1.5],
+            ]
+        ),
+        np.array(
+            [
+                [0.0, 0.0, 0.0, 0.0],
+                [0.5, 0.5, 0.5, 0.5],
+                [1.0, 1.0, 1.0, 1.0],
+                [1.5, 1.5, 1.5, 1.5],
+            ]
+        ),
+    ]
     assert np.allclose(x, expected_x)
     assert np.allclose(y, expected_y)
 
@@ -130,8 +132,10 @@ def test_psf_convolved_model_2d_init():
 
     I_e = 1
     n = 1
-    base_model = models.Sersic2D(amplitude=I_e, r_eff=5, n=n, x_0=15., y_0=15.)
-    psf = pf.model_to_image(models.Gaussian2D(x_mean=15, y_mean=15, x_stddev=5, y_stddev=5), size=30)
+    base_model = models.Sersic2D(amplitude=I_e, r_eff=5, n=n, x_0=15.0, y_0=15.0)
+    psf = pf.model_to_image(
+        models.Gaussian2D(x_mean=15, y_mean=15, x_stddev=5, y_stddev=5), size=30
+    )
     psf /= psf.sum()
 
     pf.PSFConvolvedModel2D(base_model)
@@ -210,23 +214,41 @@ def test_psf_sampling(galfit_psf_images, psf_image):
             amplitude=0.020625826413226116,
             r_eff=30,
             n=4,
-            x_0=99.,
-            y_0=99.,
+            x_0=99.0,
+            y_0=99.0,
             ellip=0,
             theta=0.0,
             bounds=pf.get_default_sersic_bounds(),
-            fixed={'x_0': False, 'y_0': False, 'n': True, 'r_eff': True, 'ellip': True, 'theta': True}
+            fixed={
+                "x_0": False,
+                "y_0": False,
+                "n": True,
+                "r_eff": True,
+                "ellip": True,
+                "theta": True,
+            },
         )
 
         PSF = psf_image if psf_index > 0 else None
         psf_oversample = psf_index if psf_index > 0 else None
-        model = pf.PSFConvolvedModel2D(base_model, psf=PSF,
-                                       oversample=('x_0', 'y_0', 100, psf_oversample * 5 if PSF is not None else 50),
-                                       psf_oversample=psf_oversample if PSF is not None else None
-                                       )
-        model.fixed.update({'psf_pa': True})
+        model = pf.PSFConvolvedModel2D(
+            base_model,
+            psf=PSF,
+            oversample=(
+                "x_0",
+                "y_0",
+                100,
+                psf_oversample * 5 if PSF is not None else 50,
+            ),
+            psf_oversample=psf_oversample if PSF is not None else None,
+        )
+        model.fixed.update({"psf_pa": True})
 
-        fitted_model, fit = pf.fit_model(image, model, acc=1e-12, )
+        fitted_model, fit = pf.fit_model(
+            image,
+            model,
+            acc=1e-12,
+        )
 
         *_, residual = pf.plot_fit(fitted_model, image, vmax=0.039)
         assert abs(residual).max() < 0.05

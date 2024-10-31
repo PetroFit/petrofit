@@ -13,22 +13,26 @@ import petrofit as pf
 
 @pytest.fixture
 def photutils_cog(data_dir):
-    pg = Table.read(os.path.join(data_dir, 'photutils_cog.fits.gz'))
-    areas = pg['A']
-    fluxes = pg['L']
-    areas_err = abs(np.random.normal(loc=0.0, scale=np.sqrt(areas.min()), size=areas.shape))
-    fluxes_err = abs(np.random.normal(loc=0.0, scale=np.sqrt(fluxes.min()), size=areas.shape))
-    pg.add_column(areas_err, name='A_err')
-    pg.add_column(fluxes_err, name='L_err')
+    pg = Table.read(os.path.join(data_dir, "photutils_cog.fits.gz"))
+    areas = pg["A"]
+    fluxes = pg["L"]
+    areas_err = abs(
+        np.random.normal(loc=0.0, scale=np.sqrt(areas.min()), size=areas.shape)
+    )
+    fluxes_err = abs(
+        np.random.normal(loc=0.0, scale=np.sqrt(fluxes.min()), size=areas.shape)
+    )
+    pg.add_column(areas_err, name="A_err")
+    pg.add_column(fluxes_err, name="L_err")
     return pg
 
 
 def test_calculate_petrosian(photutils_cog):
     # Sample data
-    areas = photutils_cog['A']
-    fluxes = photutils_cog['L']
-    areas_err = photutils_cog['A_err']
-    fluxes_err = photutils_cog['L_err']
+    areas = photutils_cog["A"]
+    fluxes = photutils_cog["L"]
+    areas_err = photutils_cog["A_err"]
+    fluxes_err = photutils_cog["L_err"]
 
     # Without errors
     petrosian, err = pf.calculate_petrosian(areas, fluxes)
@@ -70,16 +74,22 @@ def test_calculate_petrosian(photutils_cog):
 
 def test_petrosian(photutils_cog):
     # Sample data
-    r_list = photutils_cog['r']
-    area_list = photutils_cog['A']
-    flux_list = photutils_cog['L']
-    areas_err = photutils_cog['A_err']
-    fluxes_err = photutils_cog['L_err']
+    r_list = photutils_cog["r"]
+    area_list = photutils_cog["A"]
+    flux_list = photutils_cog["L"]
+    areas_err = photutils_cog["A_err"]
+    fluxes_err = photutils_cog["L_err"]
 
-    p = pf.Petrosian(r_list, area_list, flux_list, area_err=areas_err, flux_err=fluxes_err,)
+    p = pf.Petrosian(
+        r_list,
+        area_list,
+        flux_list,
+        area_err=areas_err,
+        flux_err=fluxes_err,
+    )
 
     # Assert default
-    assert p.epsilon == 2.
+    assert p.epsilon == 2.0
     assert p.eta == 0.2
     assert p.fraction_flux_to_r(0.5) == p.r_half_light
     assert p.fraction_flux_to_r(0.2) == p.concentration_index()[0]
@@ -105,20 +115,21 @@ def test_petrosian(photutils_cog):
 
 def test_corrections(data_dir, photutils_cog):
     # Sample data
-    r_list = photutils_cog['r']
-    area_list = photutils_cog['A']
-    flux_list = photutils_cog['L']
-    areas_err = photutils_cog['A_err']
-    fluxes_err = photutils_cog['L_err']
+    r_list = photutils_cog["r"]
+    area_list = photutils_cog["A"]
+    flux_list = photutils_cog["L"]
+    areas_err = photutils_cog["A_err"]
+    fluxes_err = photutils_cog["L_err"]
 
-    p = pf.Petrosian(r_list, area_list, flux_list, area_err=areas_err, flux_err=fluxes_err, )
-
-    pc = pf.PetrosianCorrection.read(
-            os.path.join(
-                data_dir,
-                'corr.csv'
-            )
+    p = pf.Petrosian(
+        r_list,
+        area_list,
+        flux_list,
+        area_err=areas_err,
+        flux_err=fluxes_err,
     )
+
+    pc = pf.PetrosianCorrection.read(os.path.join(data_dir, "corr.csv"))
 
     pc.enforce_range = False
 
@@ -131,10 +142,7 @@ def test_corrections(data_dir, photutils_cog):
 
     assert abs(epsilon - 1.7) / 1.7 < 0.05
 
-    corrected_p = pf.Petrosian(
-        p.r_list, p.area_list, p.flux_list,
-        epsilon=epsilon
-    )
+    corrected_p = pf.Petrosian(p.r_list, p.area_list, p.flux_list, epsilon=epsilon)
 
     corrected_p.plot(True, True)
     plt.show()
@@ -144,31 +152,20 @@ def test_corrections(data_dir, photutils_cog):
 
 
 def test_grid_gen(data_dir, output_dir):
-    out_path = os.path.join(
-                output_dir,
-                "test_grid.csv"
+    out_path = os.path.join(output_dir, "test_grid.csv")
+    pg = pf.generate_petrosian_sersic_correction(
+        out_path,
+        r_eff_list=[10, 20, 30],
+        n_list=[0.5, 1, 4],
+        n_cpu=None,
+        psf=None,
+        oversample=("x_0", "y_0", 100, 10),
+        ipython_widget=True,
+        overwrite=True,
+        plot=False,
     )
-    pg = pf.generate_petrosian_sersic_correction(out_path,
-                                                 r_eff_list=[10, 20, 30],
-                                                 n_list=[0.5, 1, 4],
-                                                 n_cpu=None,
-                                                 psf=None,
-                                                 oversample=('x_0', 'y_0', 100, 10),
-                                                 ipython_widget=True,
-                                                 overwrite=True, plot=False)
 
-    pc = pf.PetrosianCorrection.read(
-            os.path.join(
-                data_dir,
-                'corr.csv'
-            )
-    )
+    pc = pf.PetrosianCorrection.read(os.path.join(data_dir, "corr.csv"))
 
     for colname in pg.colnames:
         assert np.all(abs(pg[colname] - pc.grid[colname]) / pg[colname] < 0.01)
-
-
-
-
-
-
