@@ -1,7 +1,12 @@
 import numpy as np
 
 from astropy.modeling import models, fitting
-from astropy.modeling.fitting import LevMarLSQFitter, TRFLSQFitter, LMLSQFitter, LinearLSQFitter
+from astropy.modeling.fitting import (
+    LevMarLSQFitter,
+    TRFLSQFitter,
+    LMLSQFitter,
+    LinearLSQFitter,
+)
 from astropy.modeling.optimizers import DEFAULT_ACC, DEFAULT_EPS
 from astropy.stats import sigma_clip, gaussian_sigma_to_fwhm
 from astropy.nddata import CCDData, Cutout2D
@@ -13,14 +18,27 @@ from matplotlib import pyplot as plt
 
 
 __all__ = [
-    'fit_model', 'model_to_image', 'fit_background',
-    'fit_gaussian2d', 'print_model_params', 'plot_fit', 'measure_fwhm'
+    "fit_model",
+    "model_to_image",
+    "fit_background",
+    "fit_gaussian2d",
+    "print_model_params",
+    "plot_fit",
+    "measure_fwhm",
 ]
 
 
-def fit_model(image, model, weights=None, fitter=TRFLSQFitter, maxiter=5000,
-              calc_uncertainties=False, epsilon=DEFAULT_EPS, acc=DEFAULT_ACC,
-              estimate_jacobian=False):
+def fit_model(
+    image,
+    model,
+    weights=None,
+    fitter=TRFLSQFitter,
+    maxiter=5000,
+    calc_uncertainties=False,
+    epsilon=DEFAULT_EPS,
+    acc=DEFAULT_ACC,
+    estimate_jacobian=False,
+):
     """
     Wrapper function to conveniently fit an image to an input model.
 
@@ -82,15 +100,26 @@ def fit_model(image, model, weights=None, fitter=TRFLSQFitter, maxiter=5000,
     # Prepare weights
     w = None
     if weights is not None:
-        assert weights.shape == image.shape, "RMS array does not have the same shape as input image."
+        assert (
+            weights.shape == image.shape
+        ), "RMS array does not have the same shape as input image."
         w = weights[(y_arange, x_arange)]
 
     # Fit model to grid
     fitter_instance = fitter(calc_uncertainties=calc_uncertainties)
 
     if fitter in [TRFLSQFitter, LevMarLSQFitter, LMLSQFitter]:
-        fitted_model = fitter_instance(model, x_arange, y_arange, z, weights=w, maxiter=maxiter,
-                                       epsilon=epsilon, acc=acc, estimate_jacobian=estimate_jacobian)
+        fitted_model = fitter_instance(
+            model,
+            x_arange,
+            y_arange,
+            z,
+            weights=w,
+            maxiter=maxiter,
+            epsilon=epsilon,
+            acc=acc,
+            estimate_jacobian=estimate_jacobian,
+        )
     else:
         fitted_model = fitter_instance(model, x_arange, y_arange, z, weights=w)
 
@@ -113,7 +142,9 @@ def _validate_image_size(size):
         Validated size as tuple.
     """
 
-    error_message = "Input size (pixels) should be an integers or a tuple of two integers."
+    error_message = (
+        "Input size (pixels) should be an integers or a tuple of two integers."
+    )
 
     if type(size) in [list, tuple, np.array]:
         assert len(size) == 2, error_message
@@ -150,7 +181,7 @@ def model_center_to_image_origin(center, size):
     return tuple(origin)
 
 
-def model_to_image(model, size, mode='center', factor=1, center=None):
+def model_to_image(model, size, mode="center", factor=1, center=None):
     """
     Converts 2D models into images using `astropy.convolution.utils.discretize_model`.
 
@@ -210,11 +241,17 @@ def model_to_image(model, size, mode='center', factor=1, center=None):
         x_range=[x_origin, x_origin + x_size],
         y_range=[y_origin, y_origin + y_size],
         mode=mode,
-        factor=factor)
+        factor=factor,
+    )
 
 
-def fit_background(image, model=models.Planar2D(), sigma=3.0,
-                   fitter=LinearLSQFitter, calc_uncertainties=False):
+def fit_background(
+    image,
+    model=models.Planar2D(),
+    sigma=3.0,
+    fitter=LinearLSQFitter,
+    calc_uncertainties=False,
+):
     """
     Fit sigma clipped background image using a user provided model.
 
@@ -250,7 +287,9 @@ def fit_background(image, model=models.Planar2D(), sigma=3.0,
     fit_bg_image = image
     if sigma is not None:
         fit_bg_image = sigma_clip(image, sigma)
-    return fit_model(fit_bg_image, model, fitter=fitter, calc_uncertainties=calc_uncertainties)
+    return fit_model(
+        fit_bg_image, model, fitter=fitter, calc_uncertainties=calc_uncertainties
+    )
 
 
 def fit_gaussian2d(image):
@@ -272,11 +311,9 @@ def fit_gaussian2d(image):
     y_mean, x_mean = np.array(image.shape) // 2  # Center guess
 
     # Create model to fit
-    model = models.Gaussian2D(amplitude=image.max(),
-                              x_mean=x_mean,
-                              y_mean=y_mean,
-                              fixed={}
-                              )
+    model = models.Gaussian2D(
+        amplitude=image.max(), x_mean=x_mean, y_mean=y_mean, fixed={}
+    )
 
     # Fit model to grid
     fitted_model, fit = fit_model(image, model)
@@ -290,8 +327,18 @@ def print_model_params(model):
         print("{:0.4f}\t{}".format(value, param))
 
 
-def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None, cbar=True,
-             fontsize=18,  figsize=[18, 6], flux_label='Pixel Value'):
+def plot_fit(
+    model,
+    image,
+    mode="center",
+    center=None,
+    vmin=None,
+    vmax=None,
+    cbar=True,
+    fontsize=18,
+    figsize=[18, 6],
+    flux_label="Pixel Value",
+):
     """
     Plot fitted model, its 1D fit profile and residuals.
     If trying to convert a model to image, use `petrofit.modeling.fitting.model_to_image` instead.
@@ -379,10 +426,7 @@ def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None, cba
 
     # Generate a model image from the model
     model_image = model_to_image(
-        model=model,
-        size=fitted_image_size,
-        mode=mode,
-        center=center
+        model=model, size=fitted_image_size, mode=mode, center=center
     )
 
     residual_image = image - model_image
@@ -401,30 +445,31 @@ def plot_fit(model, image, mode='center', center=None, vmin=None, vmax=None, cba
     axs[0].set_title("Data", fontsize=fontsize)
     axs[0].set_xlabel("Pixels", fontsize=fontsize)
     axs[0].set_ylabel("Pixels", fontsize=fontsize)
-    axs[0].tick_params(axis='both', labelsize=fontsize)
+    axs[0].tick_params(axis="both", labelsize=fontsize)
     mpl_tick_frame(ax=axs[0])
 
     axs[1].imshow(model_image, vmin=vmin, vmax=vmax)
     axs[1].set_title("Model", fontsize=fontsize)
     axs[1].set_xlabel("Pixels", fontsize=fontsize)
-    axs[1].tick_params(axis='both', labelsize=fontsize)
+    axs[1].tick_params(axis="both", labelsize=fontsize)
     mpl_tick_frame(ax=axs[1])
 
     axs[2].imshow(residual_image, vmin=vmin, vmax=vmax)
     axs[2].set_title("Residual", fontsize=fontsize)
     axs[2].set_xlabel("Pixels", fontsize=fontsize)
-    axs[2].tick_params(axis='both', labelsize=fontsize)
+    axs[2].tick_params(axis="both", labelsize=fontsize)
     mpl_tick_frame(ax=axs[2])
 
-    fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8,
-                        wspace=0.04, hspace=0.04)
+    fig.subplots_adjust(
+        bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.04, hspace=0.04
+    )
     axs[1].set_yticklabels([])
     axs[2].set_yticklabels([])
 
     fig_cbar = None
     if cbar:
         cbar_ax = fig.add_axes([0.1, 0.08, 0.7, 0.05])
-        fig_cbar = fig.colorbar(im0, cax=cbar_ax, aspect=40, orientation='horizontal')
+        fig_cbar = fig.colorbar(im0, cax=cbar_ax, aspect=40, orientation="horizontal")
         fig.subplots_adjust(bottom=0.23)
         fig_cbar.ax.set_xlabel(flux_label, fontsize=fontsize)
 
@@ -467,7 +512,7 @@ def measure_fwhm(image, plot=True, printout=True):
     y_fwhm = fitted_line.y_stddev * gaussian_sigma_to_fwhm
 
     # Find half max
-    hm = fitted_line(x_mean, y_mean) / 2.
+    hm = fitted_line(x_mean, y_mean) / 2.0
 
     # Find the mean of the x and y direction
     mean_fwhm = np.mean([x_fwhm, y_fwhm])
@@ -480,8 +525,12 @@ def measure_fwhm(image, plot=True, printout=True):
         print("Image Max: {}".format(image.max()))
         print("Amplitude: {}".format(fitted_line.amplitude.value))
         print("Center: ({}, {})".format(x_mean, y_mean))
-        print("Sigma = ({}, {})".format(fitted_line.x_stddev.value,
-                                        fitted_line.y_stddev.value, ))
+        print(
+            "Sigma = ({}, {})".format(
+                fitted_line.x_stddev.value,
+                fitted_line.y_stddev.value,
+            )
+        )
         print("Mean FWHM: {} Pix ".format(mean_fwhm))
         print("FWHM: (x={}, y={}) Pix ".format(x_fwhm, y_fwhm))
 
@@ -490,18 +539,18 @@ def measure_fwhm(image, plot=True, printout=True):
         fig, [ax0, ax1, ax2, ax3] = plot_fit(image, fitted_line)
 
         # Make x and y grid to plot to
-        y_arange, x_arange = np.mgrid[:image.shape[0], :image.shape[1]]
+        y_arange, x_arange = np.mgrid[: image.shape[0], : image.shape[1]]
 
         # Plot input image with FWHM and center
         # -------------------------------------
 
-        ax0.imshow(image, cmap='gray_r')
+        ax0.imshow(image, cmap="gray_r")
 
-        ax0.axvline(x_mean - x_fwhm / 2, c='c', linestyle="--", label="X FWHM")
-        ax0.axvline(x_mean + x_fwhm / 2, c='c', linestyle="--")
+        ax0.axvline(x_mean - x_fwhm / 2, c="c", linestyle="--", label="X FWHM")
+        ax0.axvline(x_mean + x_fwhm / 2, c="c", linestyle="--")
 
-        ax0.axhline(y_mean - y_fwhm / 2, c='g', linestyle="--", label="Y FWHM")
-        ax0.axhline(y_mean + y_fwhm / 2, c='g', linestyle="--")
+        ax0.axhline(y_mean - y_fwhm / 2, c="g", linestyle="--", label="Y FWHM")
+        ax0.axhline(y_mean + y_fwhm / 2, c="g", linestyle="--")
 
         ax0.set_title("Center and FWHM Plot")
         ax0.legend()
@@ -510,8 +559,8 @@ def measure_fwhm(image, plot=True, printout=True):
         # ----------
 
         ax2.axvline(x_mean, linestyle="-", label="Center")
-        ax2.axvline(x_mean - x_fwhm / 2, c='c', linestyle="--", label="X FWHM")
-        ax2.axvline(x_mean + x_fwhm / 2, c='c', linestyle="--")
+        ax2.axvline(x_mean - x_fwhm / 2, c="c", linestyle="--", label="X FWHM")
+        ax2.axvline(x_mean + x_fwhm / 2, c="c", linestyle="--")
         ax2.axhline(hm, c="black", linestyle="--", label="Half Max")
 
         ax2.legend()
@@ -520,8 +569,8 @@ def measure_fwhm(image, plot=True, printout=True):
         # ----------
 
         ax3.axvline(y_mean, linestyle="-", label="Center")
-        ax3.axvline(y_mean - y_fwhm / 2, c='g', linestyle="--", label="Y FWHM")
-        ax3.axvline(y_mean + y_fwhm / 2, c='g', linestyle="--")
+        ax3.axvline(y_mean - y_fwhm / 2, c="g", linestyle="--", label="Y FWHM")
+        ax3.axvline(y_mean + y_fwhm / 2, c="g", linestyle="--")
         ax3.axhline(hm, c="black", linestyle="--", label="Half Max")
 
         ax3.legend()

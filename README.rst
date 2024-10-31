@@ -67,7 +67,7 @@ Given a 2D image (``image``) the following code snippet demonstrates how to crea
         image,
         threshold=image.std()*3,
         wcs=None, deblend=True,
-        npixels=npixels, nlevels=30, contrast=0.001,
+        npixels=4**2, nlevels=30, contrast=0.001,
     )
 
     # Photomerty on first source in catalog

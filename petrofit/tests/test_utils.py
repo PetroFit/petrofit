@@ -24,9 +24,9 @@ def test_flux_to_abmag():
 
     header = fits.Header()
 
-    header['PHOTFLAM'] = 3.03865739999999e-20
-    header['PHOTZPT'] = -21.10000000000001
-    header['PHOTPLAM'] = 10551.04700000001
+    header["PHOTFLAM"] = 3.03865739999999e-20
+    header["PHOTZPT"] = -21.10000000000001
+    header["PHOTPLAM"] = 10551.04700000001
 
     mags = np.round(pf.hst_flux_to_abmag(100, header), 2)
 
@@ -58,16 +58,26 @@ def test_make_radius_list():
     assert max(r_list) == max_pix
     assert len(r_list) == n
     assert not np.any(r_list <= 0)
-    expected = np.array([1., 1.93069773, 3.72759372, 7.19685673,
-                         13.89495494, 26.82695795, 51.79474679, 100.])
-    assert np.all(abs(r_list - expected)/expected < 0.01)
+    expected = np.array(
+        [
+            1.0,
+            1.93069773,
+            3.72759372,
+            7.19685673,
+            13.89495494,
+            26.82695795,
+            51.79474679,
+            100.0,
+        ]
+    )
+    assert np.all(abs(r_list - expected) / expected < 0.01)
 
 
 def test_match_catalogs():
     ra_1 = [10, 20, 30]
     dec_1 = [-10, -20, -30]
     ra_2 = [19.9, 9.9, 30.1]
-    dec_2 = [-19.9, -10.1,  -29.9]
+    dec_2 = [-19.9, -10.1, -29.9]
 
     idx, d2d, d3d = pf.match_catalogs(ra_1, dec_1, ra_2, dec_2)
 
@@ -88,7 +98,7 @@ def test_angular_to_pixel(data_dir):
 def test_get_interpolated_values():
     # Sample data
     x = np.linspace(0, 10, 10)
-    y = x ** 2
+    y = x**2
 
     # Using cubic interpolation
     x_new, y_new = pf.get_interpolated_values(x, y)
@@ -99,7 +109,7 @@ def test_get_interpolated_values():
     assert np.allclose(y, y_none)
 
     # Using cubic interpolation manually for verification
-    f = interp1d(x, y, kind='cubic')
+    f = interp1d(x, y, kind="cubic")
     x_check = np.linspace(min(x), max(x), num=5000, endpoint=True)
     y_check = f(x_check)
 
@@ -108,7 +118,7 @@ def test_get_interpolated_values():
 
     # Case when input length is greater than default num
     x_large = np.linspace(0, 10, 6000)
-    y_large = x_large ** 2
+    y_large = x_large**2
     x_new_large, y_new_large = pf.get_interpolated_values(x_large, y_large)
 
     assert len(x_new_large) == 6000

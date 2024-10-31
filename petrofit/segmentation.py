@@ -17,9 +17,20 @@ from .photometry import radial_photometry
 from .utils import mpl_tick_frame
 
 __all__ = [
-    'plot_segments', 'plot_segment_residual', 'get_source_position', 'get_source_elong',
-    'get_source_ellip', 'get_source_theta', 'get_amplitude_at_r', 'order_cat', 'segm_mask',
-    'masked_segm_image', 'make_segments', 'deblend_segments', 'make_catalog', 'source_photometry'
+    "plot_segments",
+    "plot_segment_residual",
+    "get_source_position",
+    "get_source_elong",
+    "get_source_ellip",
+    "get_source_theta",
+    "get_amplitude_at_r",
+    "order_cat",
+    "segm_mask",
+    "masked_segm_image",
+    "make_segments",
+    "deblend_segments",
+    "make_catalog",
+    "source_photometry",
 ]
 
 
@@ -56,23 +67,35 @@ def get_source_position(source):
     if isinstance(source, SourceCatalog):
         x, y = source.maxval_xindex, source.maxval_yindex
     else:
-        x, y = source['maxval_xindex'], source['maxval_yindex']
+        x, y = source["maxval_xindex"], source["maxval_yindex"]
     return x, y
 
 
 def get_source_elong(source):
-    """ Return SourceCatalog elongation"""
-    return source.elongation.value if isinstance(source, SourceCatalog) else source['elongation']
+    """Return SourceCatalog elongation"""
+    return (
+        source.elongation.value
+        if isinstance(source, SourceCatalog)
+        else source["elongation"]
+    )
 
 
 def get_source_ellip(source):
-    """ Return SourceCatalog ellipticity"""
-    return source.ellipticity.value if isinstance(source, SourceCatalog) else source['ellipticity']
+    """Return SourceCatalog ellipticity"""
+    return (
+        source.ellipticity.value
+        if isinstance(source, SourceCatalog)
+        else source["ellipticity"]
+    )
 
 
 def get_source_theta(source):
-    """ Return SourceCatalog orientation in rad"""
-    return source.orientation.to('rad').value if isinstance(source, SourceCatalog) else np.deg2rad(source['orientation'])
+    """Return SourceCatalog orientation in rad"""
+    return (
+        source.orientation.to("rad").value
+        if isinstance(source, SourceCatalog)
+        else np.deg2rad(source["orientation"])
+    )
 
 
 def get_amplitude_at_r(r, image, x0, y0, ellip, theta):
@@ -119,7 +142,7 @@ def get_amplitude_at_r(r, image, x0, y0, ellip, theta):
 
     try:
         # Define EllipseGeometry using ellip and theta
-        g = EllipseGeometry(x0, y0, 1., ellip, theta)
+        g = EllipseGeometry(x0, y0, 1.0, ellip, theta)
 
         # Create Ellipse model
         ellipse = Ellipse(image, geometry=g)
@@ -132,13 +155,19 @@ def get_amplitude_at_r(r, image, x0, y0, ellip, theta):
 
     except Exception as exception:
         import warnings
-        warnings.warn("Amplitude could not be computed, returning np.nan. Exception: {}".format(str(exception)), Warning)
+
+        warnings.warn(
+            "Amplitude could not be computed, returning np.nan. Exception: {}".format(
+                str(exception)
+            ),
+            Warning,
+        )
         amplitude = np.nan
 
     return amplitude
 
 
-def order_cat(cat, key='area', reverse=True):
+def order_cat(cat, key="area", reverse=True):
     """
     Sort a catalog by largest area and return the argsort
 
@@ -188,12 +217,18 @@ def segm_mask(source, segm, mask_background=False):
     mask : bool array
     """
 
-    if isinstance(source, int) or isinstance(source, np.integer) or isinstance(source, SourceCatalog):
+    if (
+        isinstance(source, int)
+        or isinstance(source, np.integer)
+        or isinstance(source, SourceCatalog)
+    ):
         sources = [source]
     elif isinstance(source, list):
         sources = source
     else:
-        raise TypeError('Input should be a label (int or photutils SourceCatalog) or a list of such items')
+        raise TypeError(
+            "Input should be a label (int or photutils SourceCatalog) or a list of such items"
+        )
 
     if not mask_background:
         sources.append(0)
@@ -204,9 +239,9 @@ def segm_mask(source, segm, mask_background=False):
             source = [source.label]
 
         if mask is None:
-            mask = (segm.data == source)
+            mask = segm.data == source
         else:
-            mask = ((segm.data == source) | mask)
+            mask = (segm.data == source) | mask
     return mask
 
 
@@ -251,7 +286,7 @@ def masked_segm_image(source, image, segm, fill=None, mask_background=False):
     return masked_image
 
 
-def make_segments(image, npixels=None, threshold=3.):
+def make_segments(image, npixels=None, threshold=3.0):
     """
     Segment an image.
 
@@ -283,7 +318,7 @@ def make_segments(image, npixels=None, threshold=3.):
     return detect_sources(image, threshold, npixels=npixels)
 
 
-def deblend_segments(image, segm, npixels=None, nlevels=30, contrast=1/1000):
+def deblend_segments(image, segm, npixels=None, nlevels=30, contrast=1 / 1000):
     """
     Deblend overlapping sources labeled in a segmentation image.
 
@@ -326,15 +361,26 @@ def deblend_segments(image, segm, npixels=None, nlevels=30, contrast=1/1000):
         sources are marked by different positive integer values.  A
         value of zero is reserved for the background.
     """
-    segm_deblend = deblend_sources(image, segm, npixels=npixels,
-                                   nlevels=nlevels, contrast=contrast)
+    segm_deblend = deblend_sources(
+        image, segm, npixels=npixels, nlevels=nlevels, contrast=contrast
+    )
 
     return segm_deblend
 
 
-def make_catalog(image, threshold, wcs=None, deblend=True,
-                 npixels=None, nlevels=30, contrast=1/1000,
-                 plot=True, vmax=None, vmin=None, figsize=None):
+def make_catalog(
+    image,
+    threshold,
+    wcs=None,
+    deblend=True,
+    npixels=None,
+    nlevels=30,
+    contrast=1 / 1000,
+    plot=True,
+    vmax=None,
+    vmin=None,
+    figsize=None,
+):
     """
     This function constructs a catalog using `PhotUtils`. The `petrofit.segmentation.make_segments` and
     `petrofit.segmentation.deblend_segments` functions are used to construct segmentation maps and
@@ -404,9 +450,7 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
         image = image.data
 
     # Make segmentation map
-    segm = make_segments(image,
-                         threshold=threshold,
-                         npixels=npixels)
+    segm = make_segments(image, threshold=threshold, npixels=npixels)
 
     if plot and segm:
         # Make plots
@@ -415,20 +459,25 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
             plt.sca(ax[0])
         else:
             fig, ax = plt.subplots(1, 1, figsize=figsize)
-        plot_segments(segm, image=image, vmax=vmax, vmin=vmin, title='Segmentation Map')
+        plot_segments(segm, image=image, vmax=vmax, vmin=vmin, title="Segmentation Map")
 
     # Deblend segmentation map
     segm_deblend = None
     if deblend:
-        segm_deblend = deblend_segments(image, segm,
-                                        contrast=contrast,
-                                        nlevels=nlevels,
-                                        npixels=npixels)
+        segm_deblend = deblend_segments(
+            image, segm, contrast=contrast, nlevels=nlevels, npixels=npixels
+        )
 
         if plot and segm_deblend:
             # Make plots
             plt.sca(ax[1])
-            plot_segments(segm_deblend, image=image, vmax=vmax, vmin=vmin, title='Deblended Segmentation Map')
+            plot_segments(
+                segm_deblend,
+                image=image,
+                vmax=vmax,
+                vmin=vmin,
+                title="Deblended Segmentation Map",
+            )
 
     # Make catalog
     cat = SourceCatalog(image, segm_deblend if deblend else segm, wcs=wcs)
@@ -436,9 +485,23 @@ def make_catalog(image, threshold, wcs=None, deblend=True,
     return cat, segm, segm_deblend
 
 
-def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_size=None,
-                      bg_sub=False, sigma=3.0, sigma_type='clip', method='exact', mask_background=False,
-                      plot=False, vmin=0, vmax=None, figsize=[12, 6]):
+def source_photometry(
+    source,
+    image,
+    segm_deblend,
+    r_list,
+    error=None,
+    cutout_size=None,
+    bg_sub=False,
+    sigma=3.0,
+    sigma_type="clip",
+    method="exact",
+    mask_background=False,
+    plot=False,
+    vmin=0,
+    vmax=None,
+    figsize=[12, 6],
+):
     """
     Aperture photometry on a PhotUtils `SourceProperties`.
 
@@ -553,20 +616,30 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
     # ------------
     masked_err = None
     if error is not None:
-        masked_err = Cutout2D(error, position, cutout_size, mode='partial', fill_value=np.nan).data
+        masked_err = Cutout2D(
+            error, position, cutout_size, mode="partial", fill_value=np.nan
+        ).data
 
     # Image Cutout
     # ------------
-    full_masked_image = masked_segm_image(source, image, segm_deblend, fill=np.nan, mask_background=mask_background).data
-    masked_nan_image = Cutout2D(full_masked_image, position, cutout_size, mode='partial', fill_value=np.nan)
+    full_masked_image = masked_segm_image(
+        source, image, segm_deblend, fill=np.nan, mask_background=mask_background
+    ).data
+    masked_nan_image = Cutout2D(
+        full_masked_image, position, cutout_size, mode="partial", fill_value=np.nan
+    )
     masked_image = masked_nan_image.data
 
     # Cutout for Stats
     # ----------------
     # This cutout has all sources masked
     stats_cutout_size = cutout_size  # max(source.bbox.ixmax - source.bbox.ixmin, source.bbox.iymax - source.bbox.iymin) * 2
-    full_bg_image = masked_segm_image(0, image, segm_deblend, fill=np.nan, mask_background=False).data
-    masked_stats_image = Cutout2D(full_bg_image, position, stats_cutout_size, mode='partial', fill_value=np.nan).data
+    full_bg_image = masked_segm_image(
+        0, image, segm_deblend, fill=np.nan, mask_background=False
+    ).data
+    masked_stats_image = Cutout2D(
+        full_bg_image, position, stats_cutout_size, mode="partial", fill_value=np.nan
+    ).data
 
     # Subtract Mean Plane
     # -------------------
@@ -574,26 +647,31 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
         if len(np.where(~np.isnan(masked_stats_image))[0]) > 10:
             with warnings.catch_warnings():
 
-                warnings.simplefilter('ignore', AstropyWarning)
-                if sigma_type.lower() == 'clip':
+                warnings.simplefilter("ignore", AstropyWarning)
+                if sigma_type.lower() == "clip":
                     fit_bg_image = masked_stats_image
                     fit_bg_image = sigma_clip(fit_bg_image, sigma)
 
-                elif sigma_type.lower() == 'bound':
-                    mean, median, std = sigma_clipped_stats(masked_stats_image, sigma=3,
-                                                            mask=np.isnan(masked_stats_image.data))
+                elif sigma_type.lower() == "bound":
+                    mean, median, std = sigma_clipped_stats(
+                        masked_stats_image,
+                        sigma=3,
+                        mask=np.isnan(masked_stats_image.data),
+                    )
 
                     fit_bg_image = masked_stats_image
                     fit_bg_image[np.where(fit_bg_image > mean + std * sigma)] = np.nan
                     fit_bg_image[np.where(fit_bg_image < mean - std * sigma)] = np.nan
                 else:
-                    raise ("background image masking sigma type not understood, try 'clip' or 'bound'")
+                    raise (
+                        "background image masking sigma type not understood, try 'clip' or 'bound'"
+                    )
 
                 fitted_model, _ = fit_background(fit_bg_image, sigma=None)
 
                 masked_image -= model_to_image(fitted_model, cutout_size)
-                if sigma_type.lower() == 'bound':
-                    masked_image = np.clip(masked_image, - sigma, np.inf)
+                if sigma_type.lower() == "bound":
+                    masked_image = np.clip(masked_image, -sigma, np.inf)
 
         elif plot:
             print("bg_sub: Not enough datapoints, did not subtract.")
@@ -604,7 +682,7 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
     mask[np.where(np.isnan(masked_image))] = 0
     mask = mask.astype(bool)
 
-    position = np.array(masked_image.data.shape) / 2.
+    position = np.array(masked_image.data.shape) / 2.0
 
     if plot:
         print(source.label)
@@ -613,15 +691,25 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
     if plot:
         plt.sca(ax[0])
 
-    flux_arr, area_arr, error_arr = radial_photometry(masked_image, position, r_list, error=masked_err, mask=mask,
-                                                      elong=elong, theta=theta, plot=plot, vmin=vmin, vmax=vmax,
-                                                      method=method)
+    flux_arr, area_arr, error_arr = radial_photometry(
+        masked_image,
+        position,
+        r_list,
+        error=masked_err,
+        mask=mask,
+        elong=elong,
+        theta=theta,
+        plot=plot,
+        vmin=vmin,
+        vmax=vmax,
+        method=method,
+    )
 
     if plot:
         plt.sca(ax[1])
-        plt.plot(r_list, flux_arr, c='tab:blue', linewidth=3, zorder=3)
+        plt.plot(r_list, flux_arr, c="tab:blue", linewidth=3, zorder=3)
         for r in r_list:
-            plt.axvline(r, alpha=0.5, c='gray')
+            plt.axvline(r, alpha=0.5, c="gray")
         plt.title("Curve of Growth")
         plt.xlabel("Radius in Pixels")
         plt.ylabel("Flux Enclosed")
@@ -631,23 +719,23 @@ def source_photometry(source, image, segm_deblend, r_list, error=None, cutout_si
         r = max(r_list)
         fig, ax = plt.subplots(1, 1, figsize=figsize)
 
-        plt.plot(masked_image[int(position[1]), :], c='tab:blue', linewidth=3, zorder=3)
-        plt.axhline(0, c='black')
+        plt.plot(masked_image[int(position[1]), :], c="tab:blue", linewidth=3, zorder=3)
+        plt.axhline(0, c="black")
         # plt.axhline(noise_sigma, c='b')
-        plt.axvline(position[0], linestyle='--', c='gray')
-        plt.axvline(position[0] + r, alpha=0.5, c='gray')
-        plt.axvline(position[0] - r, alpha=0.5, c='gray')
+        plt.axvline(position[0], linestyle="--", c="gray")
+        plt.axvline(position[0] + r, alpha=0.5, c="gray")
+        plt.axvline(position[0] - r, alpha=0.5, c="gray")
         plt.xlabel("Slice Along X [pix]")
         plt.ylabel("Pixel Value")
         mpl_tick_frame(ax=ax, minorticks=True)
 
         fig, ax = plt.subplots(1, 1, figsize=figsize)
-        plt.plot(masked_image[:, int(position[0])], c='tab:blue', linewidth=3, zorder=3)
-        plt.axhline(0, c='black')
+        plt.plot(masked_image[:, int(position[0])], c="tab:blue", linewidth=3, zorder=3)
+        plt.axhline(0, c="black")
         # plt.axhline(noise_sigma, c='b')
-        plt.axvline(position[0], linestyle='--', c='gray')
-        plt.axvline(position[0] + r, alpha=0.5, c='gray')
-        plt.axvline(position[0] - r, alpha=0.5, c='gray')
+        plt.axvline(position[0], linestyle="--", c="gray")
+        plt.axvline(position[0] + r, alpha=0.5, c="gray")
+        plt.axvline(position[0] - r, alpha=0.5, c="gray")
         plt.xlabel("Slice Along Y [pix]")
         plt.ylabel("Pixel Value")
         mpl_tick_frame(ax=ax, minorticks=True)

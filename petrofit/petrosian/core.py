@@ -4,12 +4,20 @@ from scipy.interpolate import interp1d
 
 from matplotlib import pyplot as plt
 
-from ..utils import closest_value_index, get_interpolated_values, pixel_to_angular, mpl_tick_frame
+from ..utils import (
+    closest_value_index,
+    get_interpolated_values,
+    pixel_to_angular,
+    mpl_tick_frame,
+)
 from ..photometry import radial_elliptical_aperture
 
 __all__ = [
-    'calculate_petrosian', 'calculate_petrosian_r',
-    'calculate_concentration_index', 'Petrosian', 'fraction_to_r',
+    "calculate_petrosian",
+    "calculate_petrosian_r",
+    "calculate_concentration_index",
+    "Petrosian",
+    "fraction_to_r",
 ]
 
 
@@ -90,18 +98,21 @@ def calculate_petrosian(area_list, flux_list, area_err=None, flux_err=None):
         # Compute the error in the surface brightness at the edge of each aperture
         I_at_r_err = np.zeros_like(area_diff)
         I_at_r_err[zero_mask] = abs(I_at_r[zero_mask]) * np.sqrt(
-            (flux_diff_err[zero_mask] / flux_diff[zero_mask]) ** 2\
-            + (area_diff_err[zero_mask] / area_diff[zero_mask]) ** 2)
+            (flux_diff_err[zero_mask] / flux_diff[zero_mask]) ** 2
+            + (area_diff_err[zero_mask] / area_diff[zero_mask]) ** 2
+        )
 
         # Compute the error in the average surface brightness within each aperture
         I_avg_within_r_err = abs(I_avg_within_r) * np.sqrt(
-            (flux_err[1:] / flux_list[1:]) ** 2 + (area_err[1:] / area_list[1:]) ** 2)
+            (flux_err[1:] / flux_list[1:]) ** 2 + (area_err[1:] / area_list[1:]) ** 2
+        )
 
         # Compute the error in the Petrosian value at each radius
         petrosian_err = np.zeros_like(area_diff)
         petrosian_err[zero_mask] = abs(petrosian_list[1:][zero_mask]) * np.sqrt(
-            (I_at_r_err[zero_mask] / I_at_r[zero_mask]) ** 2 + \
-            (I_avg_within_r_err[zero_mask] / I_avg_within_r[zero_mask]) ** 2)
+            (I_at_r_err[zero_mask] / I_at_r[zero_mask]) ** 2
+            + (I_avg_within_r_err[zero_mask] / I_avg_within_r[zero_mask]) ** 2
+        )
 
         # Append the first Petrosian error to the beginning of the array
         petrosian_err = np.insert(petrosian_err, 0, np.nan)
@@ -113,8 +124,14 @@ def calculate_petrosian(area_list, flux_list, area_err=None, flux_err=None):
     return petrosian_list, None
 
 
-def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
-                          interp_kind='cubic', interp_num=5000):
+def calculate_petrosian_r(
+    r_list,
+    petrosian_list,
+    petrosian_err=None,
+    eta=0.2,
+    interp_kind="cubic",
+    interp_num=5000,
+):
     """
     Calculate petrosian radius from photometric values using interpolation.
     The Petrosian radius is defined as the radius at which the petrosian profile equals eta.
@@ -166,8 +183,9 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
     petrosian_list[0] = 1
 
     # Interpolate values
-    r_list_new, petrosian_list_new = get_interpolated_values(r_list, petrosian_list,
-                                                             kind=interp_kind, num=interp_num)
+    r_list_new, petrosian_list_new = get_interpolated_values(
+        r_list, petrosian_list, kind=interp_kind, num=interp_num
+    )
 
     idx = closest_value_index(eta, petrosian_list_new)
 
@@ -182,27 +200,37 @@ def calculate_petrosian_r(r_list, petrosian_list, petrosian_err=None, eta=0.2,
     petrosian_err[0] = 0
 
     # Compute upper 1-sigma r_petro
-    r_list_upper, petrosian_list_upper = get_interpolated_values(r_list, petrosian_list + petrosian_err,
-                                                                 kind=interp_kind, num=interp_num)
+    r_list_upper, petrosian_list_upper = get_interpolated_values(
+        r_list, petrosian_list + petrosian_err, kind=interp_kind, num=interp_num
+    )
     idx = closest_value_index(eta, petrosian_list_upper)
     r_petro_upper = np.nan if idx is None else r_list_upper[idx]
 
     # Compute lower 1-sigma r_petro
-    r_list_lower, petrosian_list_lower = get_interpolated_values(r_list, petrosian_list - petrosian_err,
-                                                                 kind=interp_kind, num=interp_num)
+    r_list_lower, petrosian_list_lower = get_interpolated_values(
+        r_list, petrosian_list - petrosian_err, kind=interp_kind, num=interp_num
+    )
     idx = closest_value_index(eta, petrosian_list_lower)
     r_petro_lower = np.nan if idx is None else r_list_lower[idx]
 
     # Estimate error
-    r_petro_err = (r_petro_upper - r_petro_lower) / 2.
+    r_petro_err = (r_petro_upper - r_petro_lower) / 2.0
 
     return r_petro, r_petro_err
 
 
-def fraction_to_r(fraction, r_list, flux_list, r_petrosian,
-                  flux_err=None, r_petrosian_err=None,
-                  epsilon=2., epsilon_fraction=0.99,
-                  interp_kind='cubic', interp_num=5000):
+def fraction_to_r(
+    fraction,
+    r_list,
+    flux_list,
+    r_petrosian,
+    flux_err=None,
+    r_petrosian_err=None,
+    epsilon=2.0,
+    epsilon_fraction=0.99,
+    interp_kind="cubic",
+    interp_num=5000,
+):
     """
     Given photometric values and `r_total_flux`, calculate radius which encloses a specified
     fraction of the total flux.
@@ -263,7 +291,9 @@ def fraction_to_r(fraction, r_list, flux_list, r_petrosian,
     if r_epsilon > max(r_list):
         return np.nan, np.nan
 
-    f = interp1d(r_list, flux_list, kind='cubic' if interp_kind is None else interp_kind)
+    f = interp1d(
+        r_list, flux_list, kind="cubic" if interp_kind is None else interp_kind
+    )
 
     # Flux in r_epsilon
     epsilon_flux = f(r_epsilon)
@@ -272,7 +302,9 @@ def fraction_to_r(fraction, r_list, flux_list, r_petrosian,
     fractional_flux = epsilon_flux * (fraction / epsilon_fraction)
 
     # Get interp flux list and find r_frac:
-    r_list_new, flux_list_new = get_interpolated_values(r_list, flux_list, kind=interp_kind, num=interp_num)
+    r_list_new, flux_list_new = get_interpolated_values(
+        r_list, flux_list, kind=interp_kind, num=interp_num
+    )
     idx = closest_value_index(fractional_flux, flux_list_new, growing=True)
     r_frac = np.nan if idx is None else r_list_new[idx]
 
@@ -281,40 +313,62 @@ def fraction_to_r(fraction, r_list, flux_list, r_petrosian,
 
     # Compute Errors
     # --------------
-    r_petrosian_err = 0 if r_petrosian_err is None or np.isnan(r_petrosian_err) else r_petrosian_err
+    r_petrosian_err = (
+        0 if r_petrosian_err is None or np.isnan(r_petrosian_err) else r_petrosian_err
+    )
     r_epsilon_err = r_petrosian_err
 
     # Compute the fractional_flux_err error
-    f_lower = interp1d(r_list, flux_list - flux_err, kind='cubic' if interp_kind is None else interp_kind)
-    f_upper = interp1d(r_list, flux_list + flux_err, kind='cubic' if interp_kind is None else interp_kind)
+    f_lower = interp1d(
+        r_list,
+        flux_list - flux_err,
+        kind="cubic" if interp_kind is None else interp_kind,
+    )
+    f_upper = interp1d(
+        r_list,
+        flux_list + flux_err,
+        kind="cubic" if interp_kind is None else interp_kind,
+    )
 
     fractional_flux_err_lower = f_lower(r_epsilon - r_epsilon_err)
     fractional_flux_err_upper = f_upper(r_epsilon + r_epsilon_err)
 
-    fractional_flux_err = (fractional_flux_err_upper - fractional_flux_err_lower) / 2.
+    fractional_flux_err = (fractional_flux_err_upper - fractional_flux_err_lower) / 2.0
 
     # Find r_frac in the range of fractional_flux +/- fractional_flux_err
     fractional_flux_upper = fractional_flux + fractional_flux_err
     fractional_flux_lower = fractional_flux - fractional_flux_err
 
-    r_list_lower, flux_list_lower = get_interpolated_values(r_list, flux_list - flux_err)
+    r_list_lower, flux_list_lower = get_interpolated_values(
+        r_list, flux_list - flux_err
+    )
     idx = closest_value_index(fractional_flux_upper, flux_list_lower, growing=True)
     r_frac_upper = np.nan if idx is None else r_list_lower[idx]
 
-    r_list_upper, flux_list_upper = get_interpolated_values(r_list, flux_list + flux_err)
+    r_list_upper, flux_list_upper = get_interpolated_values(
+        r_list, flux_list + flux_err
+    )
     idx = closest_value_index(fractional_flux_lower, flux_list_upper, growing=True)
     r_frac_lower = np.nan if idx is None else r_list_upper[idx]
 
-    r_frac_err = (r_frac_upper - r_frac_lower) / 2.
+    r_frac_err = (r_frac_upper - r_frac_lower) / 2.0
 
     return r_frac, r_frac_err
 
 
-def calculate_concentration_index(fraction_1, fraction_2,
-                                  r_list, flux_list, r_petrosian,
-                                  flux_err=None, r_petrosian_err=None,
-                                  epsilon=2., epsilon_fraction=0.99,
-                                  interp_kind='cubic', interp_num=5000):
+def calculate_concentration_index(
+    fraction_1,
+    fraction_2,
+    r_list,
+    flux_list,
+    r_petrosian,
+    flux_err=None,
+    r_petrosian_err=None,
+    epsilon=2.0,
+    epsilon_fraction=0.99,
+    interp_kind="cubic",
+    interp_num=5000,
+):
     """
     Calculates Petrosian concentration index.
 
@@ -372,15 +426,31 @@ def calculate_concentration_index(fraction_1, fraction_2,
             Concentration index
     """
 
-    r1 = fraction_to_r(fraction_1, r_list, flux_list, r_petrosian,
-                       flux_err=flux_err, r_petrosian_err=r_petrosian_err,
-                       epsilon=epsilon, epsilon_fraction=epsilon_fraction,
-                       interp_kind=interp_kind, interp_num=interp_num)
+    r1 = fraction_to_r(
+        fraction_1,
+        r_list,
+        flux_list,
+        r_petrosian,
+        flux_err=flux_err,
+        r_petrosian_err=r_petrosian_err,
+        epsilon=epsilon,
+        epsilon_fraction=epsilon_fraction,
+        interp_kind=interp_kind,
+        interp_num=interp_num,
+    )
 
-    r2 = fraction_to_r(fraction_2, r_list, flux_list, r_petrosian,
-                       flux_err=flux_err, r_petrosian_err=r_petrosian_err,
-                       epsilon=epsilon, epsilon_fraction=epsilon_fraction,
-                       interp_kind=interp_kind, interp_num=interp_num)
+    r2 = fraction_to_r(
+        fraction_2,
+        r_list,
+        flux_list,
+        r_petrosian,
+        flux_err=flux_err,
+        r_petrosian_err=r_petrosian_err,
+        epsilon=epsilon,
+        epsilon_fraction=epsilon_fraction,
+        interp_kind=interp_kind,
+        interp_num=interp_num,
+    )
 
     r1 = r1[0]
     r2 = r2[0]
@@ -395,6 +465,7 @@ class Petrosian:
     """
     Class that computes and plots Petrosian properties.
     """
+
     _eta = None
     _epsilon = None
     _epsilon_fraction = None
@@ -402,9 +473,21 @@ class Petrosian:
 
     _r_plot_alpha = 0.7
 
-    def __init__(self, r_list, area_list, flux_list, area_err=None, flux_err=None,
-                 eta=0.2, epsilon=2., epsilon_fraction=0.99, total_flux_fraction=0.99,
-                 verbose=False, interp_kind='cubic', interp_num=5000):
+    def __init__(
+        self,
+        r_list,
+        area_list,
+        flux_list,
+        area_err=None,
+        flux_err=None,
+        eta=0.2,
+        epsilon=2.0,
+        epsilon_fraction=0.99,
+        total_flux_fraction=0.99,
+        verbose=False,
+        interp_kind="cubic",
+        interp_num=5000,
+    ):
         """
         Petrosian properties.
 
@@ -482,7 +565,9 @@ class Petrosian:
         """
         Check if input arrays are equal in size and have at least 3 data points
         """
-        assert len(self.r_list) > 2, "At least 3 data points are needed to compute Petrosian."
+        assert (
+            len(self.r_list) > 2
+        ), "At least 3 data points are needed to compute Petrosian."
         assert len(self.r_list.shape) == 1, "Input arrays should be one dimensional."
         assert self.r_list.shape == self.flux_list.shape
 
@@ -495,29 +580,43 @@ class Petrosian:
         """
         Updates the Petrosian properties based on current parameters.
         """
-        self.petrosian_list, self.petrosian_err = calculate_petrosian(self.area_list, self.flux_list,
-                                                                      area_err=self.area_err,
-                                                                      flux_err=self.flux_err)
+        self.petrosian_list, self.petrosian_err = calculate_petrosian(
+            self.area_list,
+            self.flux_list,
+            area_err=self.area_err,
+            flux_err=self.flux_err,
+        )
         self.has_petrosian_err = self.petrosian_err is not None
 
     def _calculate_petrosian_r(self):
         """
         Calculates the Petrosian radius based on the current Petrosian profile.
         """
-        return calculate_petrosian_r(self.r_list, self.petrosian_list,
-                                     petrosian_err=self.petrosian_err,
-                                     eta=self.eta,
-                                     interp_kind=self.interp_kind,
-                                     interp_num=self.interp_num)
+        return calculate_petrosian_r(
+            self.r_list,
+            self.petrosian_list,
+            petrosian_err=self.petrosian_err,
+            eta=self.eta,
+            interp_kind=self.interp_kind,
+            interp_num=self.interp_num,
+        )
 
     def _calculate_fraction_to_r(self, fraction):
         """
         Calculates the radius containing a given fraction of the total flux.
         """
-        return fraction_to_r(fraction, self.r_list, self.flux_list, self.r_petrosian,
-                             flux_err=self.flux_err, r_petrosian_err=self.r_petrosian_err,
-                             epsilon=self.epsilon, epsilon_fraction=self.epsilon_fraction,
-                             interp_kind=self.interp_kind, interp_num=self.interp_num)
+        return fraction_to_r(
+            fraction,
+            self.r_list,
+            self.flux_list,
+            self.r_petrosian,
+            flux_err=self.flux_err,
+            r_petrosian_err=self.r_petrosian_err,
+            epsilon=self.epsilon,
+            epsilon_fraction=self.epsilon_fraction,
+            interp_kind=self.interp_kind,
+            interp_num=self.interp_num,
+        )
 
     def concentration_index(self, fraction_1=0.2, fraction_2=0.8):
         """
@@ -546,11 +645,19 @@ class Petrosian:
             * concentration_index : float or np.nan
                 Concentration index
         """
-        return calculate_concentration_index(fraction_1, fraction_2,
-                                             self.r_list, self.flux_list, self.r_petrosian,
-                                             flux_err=self.flux_err, r_petrosian_err=self.r_petrosian_err,
-                                             epsilon=self.epsilon, epsilon_fraction=self.epsilon_fraction,
-                                             interp_kind=self.interp_kind, interp_num=self.interp_num)
+        return calculate_concentration_index(
+            fraction_1,
+            fraction_2,
+            self.r_list,
+            self.flux_list,
+            self.r_petrosian,
+            flux_err=self.flux_err,
+            r_petrosian_err=self.r_petrosian_err,
+            epsilon=self.epsilon,
+            epsilon_fraction=self.epsilon_fraction,
+            interp_kind=self.interp_kind,
+            interp_num=self.interp_num,
+        )
 
     @property
     def r_list(self):
@@ -676,9 +783,9 @@ class Petrosian:
         if self.flux_err is None or np.isnan(self.total_flux):
             return np.nan
 
-        f = interp1d(self.r_list, self.flux_err, kind='nearest')
+        f = interp1d(self.r_list, self.flux_err, kind="nearest")
         flux_err = f(self.r_total_flux)
-        return np.sqrt(flux_err ** 2 + r_total_flux_err ** 2)
+        return np.sqrt(flux_err**2 + r_total_flux_err**2)
 
     @property
     def half_flux(self):
@@ -703,9 +810,9 @@ class Petrosian:
         if self.flux_err is None or np.isnan(self.half_flux):
             return np.nan
 
-        f = interp1d(self.r_list, self.flux_err, kind='nearest')
+        f = interp1d(self.r_list, self.flux_err, kind="nearest")
         flux_err = f(self.r_half_flux)
-        return np.sqrt(flux_err ** 2 + r_half_flux_err ** 2)
+        return np.sqrt(flux_err**2 + r_half_flux_err**2)
 
     @property
     def r_half_light(self):
@@ -766,31 +873,60 @@ class Petrosian:
         """``c5090 = 5 * np.log10(r_90 / r_50)``"""
         return self.concentration_index(fraction_1=0.5, fraction_2=0.9)[-1]
 
-    def _plot_radii(self, ax, radius_unit='pix'):
-        radius_unit = '' if radius_unit is None else str(radius_unit)
+    def _plot_radii(self, ax, radius_unit="pix"):
+        radius_unit = "" if radius_unit is None else str(radius_unit)
 
         r_petrosian = self.r_petrosian
         if not np.isnan(r_petrosian):
-            ax.axvline(r_petrosian, linestyle='--', color='black', alpha=self._r_plot_alpha,
-                       label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
+            ax.axvline(
+                r_petrosian,
+                linestyle="--",
+                color="black",
+                alpha=self._r_plot_alpha,
+                label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(
+                    self.eta, r_petrosian, radius_unit
+                ),
+            )
 
         r_total_flux = self.r_total_flux
         if not np.isnan(r_total_flux):
             total_flux_fraction = int(self.total_flux_fraction * 100)
-            ax.axvline(r_total_flux, linestyle='--', c='tab:red', alpha=self._r_plot_alpha,
-                       label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(total_flux_fraction, r_total_flux,
-                                                                           radius_unit))
+            ax.axvline(
+                r_total_flux,
+                linestyle="--",
+                c="tab:red",
+                alpha=self._r_plot_alpha,
+                label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(
+                    total_flux_fraction, r_total_flux, radius_unit
+                ),
+            )
 
         r_half_light = self.r_half_light
         if not np.isnan(r_half_light):
-            ax.axvline(r_half_light, linestyle='--', c='tab:blue', alpha=self._r_plot_alpha,
-                       label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(r_half_light, radius_unit))
+            ax.axvline(
+                r_half_light,
+                linestyle="--",
+                c="tab:blue",
+                alpha=self._r_plot_alpha,
+                label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(
+                    r_half_light, radius_unit
+                ),
+            )
 
-    def plot(self, plot_r=True, title='Petrosian Profile',
-             radius_unit='pix', ax=None, color='tab:blue',
-             err_alpha=0.2, err_capsize=3,
-             show_legend=True, legend_fontsize=None,
-             ax_fontsize=None, tick_fontsize=None):
+    def plot(
+        self,
+        plot_r=True,
+        title="Petrosian Profile",
+        radius_unit="pix",
+        ax=None,
+        color="tab:blue",
+        err_alpha=0.2,
+        err_capsize=3,
+        show_legend=True,
+        legend_fontsize=None,
+        ax_fontsize=None,
+        tick_fontsize=None,
+    ):
         """
         Plots the Petrosian profile.
 
@@ -834,38 +970,69 @@ class Petrosian:
         ax : matplotlib.axis
             Matplotlib axis object with the plot.
         """
-        radius_unit = '' if radius_unit is None else str(radius_unit)
+        radius_unit = "" if radius_unit is None else str(radius_unit)
         if ax is None:
             ax = plt.gca()
 
-        ax.errorbar(self.r_list, self.petrosian_list, yerr=self.petrosian_err,
-                    marker='o', capsize=err_capsize,
-                    label="Data", color=color)
+        ax.errorbar(
+            self.r_list,
+            self.petrosian_list,
+            yerr=self.petrosian_err,
+            marker="o",
+            capsize=err_capsize,
+            label="Data",
+            color=color,
+        )
 
         if err_alpha is not None and self.has_petrosian_err and err_alpha > 0:
-            ax.fill_between(self.r_list,
-                            self.petrosian_list - self.petrosian_err,
-                            self.petrosian_list + self.petrosian_err,
-                            alpha=err_alpha, color=color)
+            ax.fill_between(
+                self.r_list,
+                self.petrosian_list - self.petrosian_err,
+                self.petrosian_list + self.petrosian_err,
+                alpha=err_alpha,
+                color=color,
+            )
 
         r_petrosian = self.r_petrosian
         r_petrosian_err = self.r_petrosian_err
 
         if plot_r:
-            r_color = 'black'
-            ax.axhline(self.eta, linestyle='--', color=r_color, alpha=self._r_plot_alpha)
+            r_color = "black"
+            ax.axhline(
+                self.eta, linestyle="--", color=r_color, alpha=self._r_plot_alpha
+            )
             if not np.isnan(r_petrosian):
-                ax.axvline(r_petrosian, linestyle='--', color=r_color, alpha=self._r_plot_alpha,
-                           label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(self.eta, r_petrosian, radius_unit))
+                ax.axvline(
+                    r_petrosian,
+                    linestyle="--",
+                    color=r_color,
+                    alpha=self._r_plot_alpha,
+                    label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(
+                        self.eta, r_petrosian, radius_unit
+                    ),
+                )
                 if not np.isnan(r_petrosian_err):
-                    ax.errorbar(r_petrosian, self.eta, xerr=r_petrosian_err, zorder=6,
-                                marker='o', capsize=5, lw=3, color='tab:orange')
+                    ax.errorbar(
+                        r_petrosian,
+                        self.eta,
+                        xerr=r_petrosian_err,
+                        zorder=6,
+                        marker="o",
+                        capsize=5,
+                        lw=3,
+                        color="tab:orange",
+                    )
                 else:
-                    ax.scatter(r_petrosian, self.eta, zorder=6, marker='o', color='tab:orange')
+                    ax.scatter(
+                        r_petrosian, self.eta, zorder=6, marker="o", color="tab:orange"
+                    )
 
-        ax.axhline(0, c='black')
+        ax.axhline(0, c="black")
         ax.set_title(title, fontsize=ax_fontsize)
-        ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
+        ax.set_xlabel(
+            "Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "",
+            fontsize=ax_fontsize,
+        )
         ax.set_ylabel(r"Petrosian Index $\eta(r)$", fontsize=ax_fontsize)
 
         mpl_tick_frame(minorticks=True, tick_fontsize=tick_fontsize)
@@ -876,12 +1043,21 @@ class Petrosian:
 
         return ax
 
-    def plot_cog(self, plot_r=True, title='Curve of Growth',
-                 radius_unit='pix', flux_unit='',
-                 ax=None, color='tab:blue',
-                 err_alpha=0.2, err_capsize=3,
-                 show_legend=True, legend_fontsize=None,
-                 ax_fontsize=None, tick_fontsize=None):
+    def plot_cog(
+        self,
+        plot_r=True,
+        title="Curve of Growth",
+        radius_unit="pix",
+        flux_unit="",
+        ax=None,
+        color="tab:blue",
+        err_alpha=0.2,
+        err_capsize=3,
+        show_legend=True,
+        legend_fontsize=None,
+        ax_fontsize=None,
+        tick_fontsize=None,
+    ):
         """
         Plots the Curve of Growth (COG) for the Petrosian profile.
 
@@ -929,42 +1105,78 @@ class Petrosian:
         ax : matplotlib.axis
             Matplotlib axis object with the plot.
         """
-        radius_unit = '' if radius_unit is None else str(radius_unit)
+        radius_unit = "" if radius_unit is None else str(radius_unit)
         if ax is None:
             ax = plt.gca()
 
-        ax.errorbar(self.r_list, self.flux_list, yerr=self.flux_err,
-                    marker='o', capsize=err_capsize, c=color,
-                    label="Data")
+        ax.errorbar(
+            self.r_list,
+            self.flux_list,
+            yerr=self.flux_err,
+            marker="o",
+            capsize=err_capsize,
+            c=color,
+            label="Data",
+        )
 
         if err_alpha is not None and self.has_petrosian_err and err_alpha > 0:
-            ax.fill_between(self.r_list,
-                            self.flux_list - self.flux_err,
-                            self.flux_list + self.flux_err,
-                            alpha=err_alpha, color=color)
+            ax.fill_between(
+                self.r_list,
+                self.flux_list - self.flux_err,
+                self.flux_list + self.flux_err,
+                alpha=err_alpha,
+                color=color,
+            )
 
         if plot_r:
             r_half_light = self.r_half_light
             half_flux = self.half_flux
             if not np.isnan(r_half_light) and not np.isnan(half_flux):
-                ax.axvline(r_half_light, linestyle='--', c='black', alpha=self._r_plot_alpha,
-                           label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(r_half_light, radius_unit))
-                ax.axhline(half_flux, linestyle='--', c='black', alpha=self._r_plot_alpha)
-                ax.scatter(r_half_light, half_flux, zorder=6, marker='o', color='tab:orange')
+                ax.axvline(
+                    r_half_light,
+                    linestyle="--",
+                    c="black",
+                    alpha=self._r_plot_alpha,
+                    label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(
+                        r_half_light, radius_unit
+                    ),
+                )
+                ax.axhline(
+                    half_flux, linestyle="--", c="black", alpha=self._r_plot_alpha
+                )
+                ax.scatter(
+                    r_half_light, half_flux, zorder=6, marker="o", color="tab:orange"
+                )
 
             r_total_flux = self.r_total_flux
             total_flux = self.total_flux
             if not np.isnan(r_total_flux) and not np.isnan(total_flux):
                 total_flux_fraction = int(self.total_flux_fraction * 100)
-                ax.axvline(r_total_flux, linestyle='-', c='black', alpha=self._r_plot_alpha,
-                           label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(total_flux_fraction, r_total_flux,
-                                                                               radius_unit))
-                ax.axhline(total_flux, linestyle='-', c='black', alpha=self._r_plot_alpha)
-                ax.scatter(r_total_flux, total_flux, zorder=6, marker='o', color='tab:orange')
+                ax.axvline(
+                    r_total_flux,
+                    linestyle="-",
+                    c="black",
+                    alpha=self._r_plot_alpha,
+                    label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(
+                        total_flux_fraction, r_total_flux, radius_unit
+                    ),
+                )
+                ax.axhline(
+                    total_flux, linestyle="-", c="black", alpha=self._r_plot_alpha
+                )
+                ax.scatter(
+                    r_total_flux, total_flux, zorder=6, marker="o", color="tab:orange"
+                )
 
         ax.set_title(title, fontsize=ax_fontsize)
-        ax.set_xlabel("Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "", fontsize=ax_fontsize)
-        ax.set_ylabel(r"$L(\leq r)$" + (" [{}]".format(flux_unit) if flux_unit else ''), fontsize=ax_fontsize)
+        ax.set_xlabel(
+            "Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "",
+            fontsize=ax_fontsize,
+        )
+        ax.set_ylabel(
+            r"$L(\leq r)$" + (" [{}]".format(flux_unit) if flux_unit else ""),
+            fontsize=ax_fontsize,
+        )
 
         mpl_tick_frame(minorticks=True, tick_fontsize=tick_fontsize)
 
@@ -975,7 +1187,7 @@ class Petrosian:
 
         return ax
 
-    def imshow(self, position=(0, 0), elong=1., theta=0., color=None, lw=None):
+    def imshow(self, position=(0, 0), elong=1.0, theta=0.0, color=None, lw=None):
         """
         Make 2D plots of elliptical apertures with radii  of `r_half_light`, `r_total_flux`, `r_20` and `r_80`.
 
@@ -997,14 +1209,22 @@ class Petrosian:
             Line width (thickness) of the plotted apertures.
         """
 
-        labels = ['r_half_light', 'r_total_flux', 'r_20', 'r_80']
-        radii = [self.r_half_light, self.r_total_flux, self._calculate_fraction_to_r(.2)[0],
-                 self._calculate_fraction_to_r(.8)[0]]
-        colors = ['r', 'r', 'b', 'b']
-        linestyles = ['dashed', 'solid', 'dotted', 'dashdot']
+        labels = ["r_half_light", "r_total_flux", "r_20", "r_80"]
+        radii = [
+            self.r_half_light,
+            self.r_total_flux,
+            self._calculate_fraction_to_r(0.2)[0],
+            self._calculate_fraction_to_r(0.8)[0],
+        ]
+        colors = ["r", "r", "b", "b"]
+        linestyles = ["dashed", "solid", "dotted", "dashdot"]
         for label, r, default_color, ls in zip(labels, radii, colors, linestyles):
             if not np.isnan(r) and r > 0:
                 radial_elliptical_aperture(position, r, elong, theta).plot(
-                    label=label, linestyle=ls, color=color if color else default_color, lw=lw)
+                    label=label,
+                    linestyle=ls,
+                    color=color if color else default_color,
+                    lw=lw,
+                )
 
-        plt.scatter(*position, marker='+', color=color if color else 'red')
+        plt.scatter(*position, marker="+", color=color if color else "red")

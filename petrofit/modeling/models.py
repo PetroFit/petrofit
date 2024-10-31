@@ -13,10 +13,20 @@ from astropy.nddata import block_reduce
 from astropy.modeling import FittableModel, Parameter, custom_model, models
 
 __all__ = [
-    'get_default_sersic_bounds', 'make_grid', 'PSFConvolvedModel2D', 'Nuker2D',
-    'sersic_enclosed', 'sersic_enclosed_inv', 'sersic_enclosed_model', 'PetroApprox',
-    'petrosian_profile', 'petrosian_model', 'get_default_gen_sersic_bounds', 'GenSersic2D',
-    'Ie_to_I0', 'I0_to_Ie'
+    "get_default_sersic_bounds",
+    "make_grid",
+    "PSFConvolvedModel2D",
+    "Nuker2D",
+    "sersic_enclosed",
+    "sersic_enclosed_inv",
+    "sersic_enclosed_model",
+    "PetroApprox",
+    "petrosian_profile",
+    "petrosian_model",
+    "get_default_gen_sersic_bounds",
+    "GenSersic2D",
+    "Ie_to_I0",
+    "I0_to_Ie",
 ]
 
 
@@ -37,7 +47,7 @@ def Ie_to_I0(I_e, n):
     float
         Intensity at the 0 radius (I_0)
     """
-    return I_e * np.exp(gammaincinv(2. * n, 0.5))
+    return I_e * np.exp(gammaincinv(2.0 * n, 0.5))
 
 
 def I0_to_Ie(I_0, n):
@@ -57,17 +67,17 @@ def I0_to_Ie(I_0, n):
     float
         Sersic intensity at the effective radius (I_e).
     """
-    return I_0 / np.exp(gammaincinv(2. * n, 0.5))
+    return I_0 / np.exp(gammaincinv(2.0 * n, 0.5))
 
 
 def get_default_sersic_bounds(override={}):
     """Returns the default bounds of the Sersic profile."""
     bounds = {
-        'amplitude': (0., None),
-        'r_eff': (1e-3, None),
-        'n': (0.1, 10),
-        'ellip': (0, 0.99),
-        'theta': (-2 * np.pi, 2 * np.pi),
+        "amplitude": (0.0, None),
+        "r_eff": (1e-3, None),
+        "n": (0.1, 10),
+        "ellip": (0, 0.99),
+        "theta": (-2 * np.pi, 2 * np.pi),
     }
     bounds.update(override)
     return bounds
@@ -79,7 +89,7 @@ def get_default_gen_sersic_bounds(override={}):
     This is identical to `get_default_sersic_bounds` but adds a `c_0` bound.
     """
     bounds = get_default_sersic_bounds()
-    bounds['c_0'] = (0, 2.0)
+    bounds["c_0"] = (0, 2.0)
     bounds.update(override)
     return bounds
 
@@ -153,14 +163,18 @@ class PSFConvolvedModel2D(FittableModel):
     _cached_grid = None  # Cached sampling grid
     _cache_grid_range = None  # Cached sampling grid range (x.min, x.max, y.min, y.max)
 
-    def __init__(self, model, psf=None, oversample=None,  psf_oversample=None, name=None, **kwargs):
+    def __init__(
+        self, model, psf=None, oversample=None, psf_oversample=None, name=None, **kwargs
+    ):
         # Reset params
         self._parameters = None
         self._parameters_ = {}
 
         # Check if input model is good
         if isinstance(model, self.__class__):
-            raise TypeError("Can not wrap a PSFConvolvedModel2D, try: PSFConvolvedModel2D(psf_convolved_model.model)")
+            raise TypeError(
+                "Can not wrap a PSFConvolvedModel2D, try: PSFConvolvedModel2D(psf_convolved_model.model)"
+            )
         assert model.n_inputs == 2, "Input model is not 2D"
 
         # Save attributes
@@ -177,9 +191,9 @@ class PSFConvolvedModel2D(FittableModel):
         super().__init__(name=name, **kwargs)
 
         # Sync model states
-        if 'fixed' not in kwargs:
+        if "fixed" not in kwargs:
             self.fixed.update(model.fixed)
-        if 'bounds' not in kwargs:
+        if "bounds" not in kwargs:
             self.bounds.update(model.bounds)
 
     def _load_parameters(self):
@@ -191,13 +205,15 @@ class PSFConvolvedModel2D(FittableModel):
         self._parameters_ = {}
         self._param_names = []
 
-        for param_name, param_val in zip(self._model.param_names, self._model.parameters):
+        for param_name, param_val in zip(
+            self._model.param_names, self._model.parameters
+        ):
             param = Parameter(param_name, default=param_val)
             self.__dict__[param_name] = param
             self._parameters_[param_name] = param
             self._param_names.append(param_name)
 
-        param_name = 'psf_pa'
+        param_name = "psf_pa"
         param = Parameter(param_name, default=0)
         self.__dict__[param_name] = param
         self._parameters_[param_name] = param
@@ -214,10 +230,10 @@ class PSFConvolvedModel2D(FittableModel):
             setattr(model, param, getattr(self, param).value)
 
         fixed = copy(self.fixed)
-        del fixed['psf_pa']
+        del fixed["psf_pa"]
 
         bounds = copy(self.bounds)
-        del bounds['psf_pa']
+        del bounds["psf_pa"]
 
         model.fixed.update(fixed)
         model.bounds.update(bounds)
@@ -241,7 +257,9 @@ class PSFConvolvedModel2D(FittableModel):
     @psf.setter
     def psf(self, psf):
         if psf is not None and np.round(psf.sum(), 6) != 1:
-            warnings.warn("Input PSF not normalized to 1, current sum = {}".format(psf.sum()))
+            warnings.warn(
+                "Input PSF not normalized to 1, current sum = {}".format(psf.sum())
+            )
         self._psf = psf
 
     @property
@@ -256,18 +274,24 @@ class PSFConvolvedModel2D(FittableModel):
             if isinstance(oversample, (tuple, list, np.ndarray)):
                 if len(oversample) != 4:
                     raise ValueError("oversample should be (x, y, size, factor).")
-                if not isinstance(oversample[2], int) or not isinstance(oversample[3], int):
-                    raise ValueError('size and factor should be integers.')
+                if not isinstance(oversample[2], int) or not isinstance(
+                    oversample[3], int
+                ):
+                    raise ValueError("size and factor should be integers.")
                 grid_factor = oversample[3]
                 oversample = tuple(oversample)  # Important Conversion!
             elif isinstance(oversample, int):
                 grid_factor = oversample
             else:
-                raise TypeError("oversample should be a single int factor or a tuple (x, y, size, factor).")
+                raise TypeError(
+                    "oversample should be a single int factor or a tuple (x, y, size, factor)."
+                )
             if grid_factor <= 0:
                 raise ValueError("oversample should be a positive int factor.")
             if grid_factor % psf_oversample != 0:
-                raise ValueError('oversample should be equal to or an integer multiple of psf_oversample')
+                raise ValueError(
+                    "oversample should be equal to or an integer multiple of psf_oversample"
+                )
         self._oversample = oversample
 
     @property
@@ -280,12 +304,16 @@ class PSFConvolvedModel2D(FittableModel):
         grid_factor = self._get_oversample_factor()
         if psf_oversample is not None:
             if self.psf is None:
-                raise ValueError('psf_oversample provided but PSF is None')
+                raise ValueError("psf_oversample provided but PSF is None")
             if not isinstance(psf_oversample, int) or psf_oversample <= 0:
-                raise TypeError("psf_oversample should be a single positive int factor.")
+                raise TypeError(
+                    "psf_oversample should be a single positive int factor."
+                )
             if grid_factor % psf_oversample != 0:
-                raise ValueError('oversample should be equal to or an integer multiple of psf_oversample. ' 
-                                 'Set PSFConvolvedModel2D.oversample value first.')
+                raise ValueError(
+                    "oversample should be equal to or an integer multiple of psf_oversample. "
+                    "Set PSFConvolvedModel2D.oversample value first."
+                )
         self._psf_oversample = psf_oversample
 
     def _get_oversample_factor(self):
@@ -336,14 +364,20 @@ class PSFConvolvedModel2D(FittableModel):
 
         # Compute image size and oversampling factor
         # ------------------------------------------
-        psf_factor = self._get_psf_factor()  # Oversampling factor of PSF compared to data
+        psf_factor = (
+            self._get_psf_factor()
+        )  # Oversampling factor of PSF compared to data
 
         # Grid oversample factor compared to data:
         # If the oversampling is subgrid, then the main grid is at PSF oversample.
         # If the oversampling is an int, the main grid is at oversample factor.
-        grid_factor = psf_factor if is_subgrid_oversample else self._get_oversample_factor()
+        grid_factor = (
+            psf_factor if is_subgrid_oversample else self._get_oversample_factor()
+        )
 
-        grid_to_psf_factor = grid_factor // psf_factor  # Oversampling factor of grid compared to PSF
+        grid_to_psf_factor = (
+            grid_factor // psf_factor
+        )  # Oversampling factor of grid compared to PSF
 
         # Grid size params:
         grid_size = max([i.max(), j.max()]) + 1  # size = max_index + 1
@@ -352,12 +386,18 @@ class PSFConvolvedModel2D(FittableModel):
         # Make main grid
         # --------------
         # Make the main sampling grid
-        if grid_size == self._cached_grid_size and grid_factor == self._cached_grid_factor and grid_range == self._cache_grid_range:
+        if (
+            grid_size == self._cached_grid_size
+            and grid_factor == self._cached_grid_factor
+            and grid_range == self._cache_grid_range
+        ):
             # If the sampling gird cached
             main_grid = self._cached_grid
         else:
             # Else make a sampling gird
-            main_grid = make_grid(grid_size, origin=(x.min(), y.min()), factor=grid_factor)
+            main_grid = make_grid(
+                grid_size, origin=(x.min(), y.min()), factor=grid_factor
+            )
             # Cache Grid
             if self.cache_grid:
                 self._cached_grid = main_grid
@@ -377,7 +417,9 @@ class PSFConvolvedModel2D(FittableModel):
         # ------------
         if not is_subgrid_oversample and grid_to_psf_factor > 1:
             # If the oversample factor is an int, block reduce the image to PSF resolution
-            model_image = block_reduce(model_image, grid_to_psf_factor) / grid_to_psf_factor ** 2
+            model_image = (
+                block_reduce(model_image, grid_to_psf_factor) / grid_to_psf_factor**2
+            )
 
         elif is_subgrid_oversample:
             # If the oversample is a window, compute pixel values for that window
@@ -390,34 +432,50 @@ class PSFConvolvedModel2D(FittableModel):
             if sub_grid_to_psf_factor > 1:
                 # If the center of the window is a parameter name, extract its value
                 if isinstance(sub_grid_x0, str):
-                    assert sub_grid_x0 in self._model.param_names, \
-                        "oversample param '{}' is not in the wrapped model param list".format(sub_grid_x0)
+                    assert (
+                        sub_grid_x0 in self._model.param_names
+                    ), "oversample param '{}' is not in the wrapped model param list".format(
+                        sub_grid_x0
+                    )
                     idx = self._model.param_names.index(sub_grid_x0)
                     sub_grid_x0 = sub_model_params[idx][0]
 
                 if isinstance(sub_grid_y0, str):
-                    assert sub_grid_y0 in self._model.param_names, \
-                        "oversample param '{}' is not in the wrapped model param list".format(sub_grid_y0)
+                    assert (
+                        sub_grid_y0 in self._model.param_names
+                    ), "oversample param '{}' is not in the wrapped model param list".format(
+                        sub_grid_y0
+                    )
                     idx = self._model.param_names.index(sub_grid_y0)
                     sub_grid_y0 = sub_model_params[idx][0]
 
                 # Compute the corner of the sub-grid
-                sub_grid_origin = (np.round(sub_grid_x0) - sub_grid_size // 2, np.round(sub_grid_y0) - sub_grid_size // 2)
+                sub_grid_origin = (
+                    np.round(sub_grid_x0) - sub_grid_size // 2,
+                    np.round(sub_grid_y0) - sub_grid_size // 2,
+                )
 
                 # Make an oversampled sub-grid for window
-                x_sub_grid, y_sub_grid = make_grid(sub_grid_size, origin=sub_grid_origin, factor=sub_grid_factor)
+                x_sub_grid, y_sub_grid = make_grid(
+                    sub_grid_size, origin=sub_grid_origin, factor=sub_grid_factor
+                )
 
                 # Sample the sub-model onto the sub-grid
-                sub_model_oversampled_image = self._model.evaluate(x_sub_grid, y_sub_grid, *sub_model_params)
+                sub_model_oversampled_image = self._model.evaluate(
+                    x_sub_grid, y_sub_grid, *sub_model_params
+                )
 
                 # Block reduce the window to the psf resolution
-                sub_model_image = block_reduce(sub_model_oversampled_image, sub_grid_to_psf_factor) / sub_grid_to_psf_factor ** 2
+                sub_model_image = (
+                    block_reduce(sub_model_oversampled_image, sub_grid_to_psf_factor)
+                    / sub_grid_to_psf_factor**2
+                )
 
                 # Compute window indices in main image frame at data resolution first
                 i_sub_min = int(np.round(sub_grid_origin[0]))
                 j_sub_min = int(np.round(sub_grid_origin[1]))
-                i_sub_max = (i_sub_min + sub_grid_size)
-                j_sub_max = (j_sub_min + sub_grid_size)
+                i_sub_max = i_sub_min + sub_grid_size
+                j_sub_max = j_sub_min + sub_grid_size
 
                 # Clip window indices
                 if i_sub_min < 0:
@@ -436,10 +494,7 @@ class PSFConvolvedModel2D(FittableModel):
                 j_sub_max *= psf_factor
 
                 # Add oversampled window to image
-                model_image[
-                    j_sub_min:j_sub_max,
-                    i_sub_min:i_sub_max
-                ] = sub_model_image
+                model_image[j_sub_min:j_sub_max, i_sub_min:i_sub_max] = sub_model_image
 
         # PSF convolve
         # ------------
@@ -447,11 +502,11 @@ class PSFConvolvedModel2D(FittableModel):
             psf = self.psf
             if psf_p[0] != 0:
                 psf = rotate(psf, psf_p[0], reshape=False)
-            model_image = convolve(model_image, psf, mode='same')
+            model_image = convolve(model_image, psf, mode="same")
 
         if psf_factor > 1:
             # If PSF is oversampled relative to the data, block_reduce to data resolution
-            model_image = block_reduce(model_image, psf_factor) / psf_factor ** 2
+            model_image = block_reduce(model_image, psf_factor) / psf_factor**2
 
         return model_image[j, i]
 
@@ -493,40 +548,58 @@ class GenSersic2D(models.Sersic2D):
 
         if cls._gammaincinv is None:
             from scipy.special import gammaincinv
+
             cls._gammaincinv = gammaincinv
 
-        bn = cls._gammaincinv(2. * n, 0.5)
+        bn = cls._gammaincinv(2.0 * n, 0.5)
         a, b = r_eff, (1 - ellip) * r_eff
         cos_theta, sin_theta = np.cos(theta), np.sin(theta)
         x_maj = (x - x_0) * cos_theta + (y - y_0) * sin_theta
         x_min = -(x - x_0) * sin_theta + (y - y_0) * cos_theta
 
-        z = (abs(x_maj / a) ** (c_0 + 2) + abs(x_min / b)  ** (c_0 + 2)) ** (1 / (c_0 + 2))
+        z = (abs(x_maj / a) ** (c_0 + 2) + abs(x_min / b) ** (c_0 + 2)) ** (
+            1 / (c_0 + 2)
+        )
 
         return amplitude * np.exp(-bn * (z ** (1 / n) - 1))
 
 
 @custom_model
-def Nuker2D(x, y, amplitude=1, r_break=1, x_0=0, y_0=0,
-            alpha=2, betta=4, gamma=0):
-
+def Nuker2D(x, y, amplitude=1, r_break=1, x_0=0, y_0=0, alpha=2, betta=4, gamma=0):
     """Two dimensional Nuker2D model"""
-    x_maj = (x - x_0)  + (y - y_0)
+    x_maj = (x - x_0) + (y - y_0)
     x_min = -(x - x_0) + (y - y_0)
     r = np.sqrt((x_maj) ** 2 + (x_min) ** 2)
 
     r[np.where(r == 0)] = np.nan
 
-    return amplitude *  (2 ** ((betta - gamma) / alpha)) * (r / r_break) ** (- gamma) * (1 + (r / r_break) ** alpha) ** ((gamma - betta) / alpha)
+    return (
+        amplitude
+        * (2 ** ((betta - gamma) / alpha))
+        * (r / r_break) ** (-gamma)
+        * (1 + (r / r_break) ** alpha) ** ((gamma - betta) / alpha)
+    )
 
 
 @custom_model
-def CoreSersic2D(x, y, amplitude=1, r_eff=1, r_break=1, n=1, x_0=0, y_0=0,
-                 alpha=10, gamma=0.1, ellip=0, theta=0):
+def CoreSersic2D(
+    x,
+    y,
+    amplitude=1,
+    r_eff=1,
+    r_break=1,
+    n=1,
+    x_0=0,
+    y_0=0,
+    alpha=10,
+    gamma=0.1,
+    ellip=0,
+    theta=0,
+):
     """
     Core Sersic model as defined by Graham et al 2003.
     """
-    bn = gammaincinv(2. * n, 0.5)
+    bn = gammaincinv(2.0 * n, 0.5)
     a, b = r_eff, (1 - ellip) * r_eff
     cos_theta, sin_theta = np.cos(theta), np.sin(theta)
     x_maj = (x - x_0) * cos_theta + (y - y_0) * sin_theta
@@ -535,30 +608,53 @@ def CoreSersic2D(x, y, amplitude=1, r_eff=1, r_break=1, n=1, x_0=0, y_0=0,
 
     r[np.where(r == 0)] = np.nan
 
-    I = amplitude * (2 ** -(gamma / alpha)) * np.exp(
-        bn * (2 ** (1 / alpha) * (r_break / r_eff)) ** (1 / n)
+    I = (
+        amplitude
+        * (2 ** -(gamma / alpha))
+        * np.exp(bn * (2 ** (1 / alpha) * (r_break / r_eff)) ** (1 / n))
     )
 
-    return I * (1 + (r_break / r) ** (alpha)) ** (gamma / alpha) * np.exp(
-        - bn * ((r ** alpha + r_break ** alpha) / (r_eff) ** alpha) ** (1 / (alpha * n))
+    return (
+        I
+        * (1 + (r_break / r) ** (alpha)) ** (gamma / alpha)
+        * np.exp(
+            -bn * ((r**alpha + r_break**alpha) / (r_eff) ** alpha) ** (1 / (alpha * n))
+        )
     )
 
 
 def sersic_enclosed(r, amplitude, r_eff, n, ellip=0):
     """Total Sersic flux enclosed within a radius."""
-    bn = gammaincinv(2. * n, 0.5)
+    bn = gammaincinv(2.0 * n, 0.5)
     x = bn * (r / r_eff) ** (1 / n)
-    g = gamma(2. * n) * gammainc(2. * n, x)
+    g = gamma(2.0 * n) * gammainc(2.0 * n, x)
 
-    return amplitude * (r_eff ** 2) * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * g * (1 - ellip)
+    return (
+        amplitude
+        * (r_eff**2)
+        * 2
+        * np.pi
+        * n
+        * ((np.exp(bn)) / (bn) ** (2 * n))
+        * g
+        * (1 - ellip)
+    )
 
 
 def sersic_enclosed_inv(f, amplitude, r_eff, n, ellip=0):
     """Radius that would enclose the input flux."""
-    bn = gammaincinv(2. * n, 0.5)
-    g = f / (amplitude * (r_eff) ** 2 * 2 * np.pi * n * ((np.exp(bn)) / (bn) ** (2 * n)) * (1 - ellip))
+    bn = gammaincinv(2.0 * n, 0.5)
+    g = f / (
+        amplitude
+        * (r_eff) ** 2
+        * 2
+        * np.pi
+        * n
+        * ((np.exp(bn)) / (bn) ** (2 * n))
+        * (1 - ellip)
+    )
 
-    x = gammaincinv(2. * n, g / gamma(2. * n))
+    x = gammaincinv(2.0 * n, g / gamma(2.0 * n))
 
     return (x / bn) ** n * r_eff
 
@@ -571,7 +667,7 @@ def sersic_enclosed_model(x, amplitude=1000, r_eff=30, n=2, ellip=0):
 
 def petrosian_profile(r, r_eff, n):
     """Ideal Sersic Petrosian profile evaluated at input radii."""
-    bn = gammaincinv(2. * n, 0.5)
+    bn = gammaincinv(2.0 * n, 0.5)
 
     x = bn * (r / r_eff) ** (1 / n)
 
@@ -596,29 +692,56 @@ class PetroApprox:
     @staticmethod
     def u2080_to_c2080(u2080):
         """Uncorrected C2080 to epsilon corrected C2080"""
-        return models.Polynomial1D(6, c0=2.26194802, c1=-3.61130833,
-                                   c2=3.8219758, c3=-1.6414660, c4=0.38059409,
-                                   c5=-0.0450384, c6=0.00221922)(u2080)
+        return models.Polynomial1D(
+            6,
+            c0=2.26194802,
+            c1=-3.61130833,
+            c2=3.8219758,
+            c3=-1.6414660,
+            c4=0.38059409,
+            c5=-0.0450384,
+            c6=0.00221922,
+        )(u2080)
 
     @staticmethod
     def c2080_to_n(c2080):
         """Corrected C2080 to Sersic index n"""
 
-        return models.Polynomial1D(5, c0=-0.41844073, c1=0.20487513, c2=0.08626531,
-                                   c3=0.0106707, c4=-0.00082523, c5=0.00002486)(c2080)
+        return models.Polynomial1D(
+            5,
+            c0=-0.41844073,
+            c1=0.20487513,
+            c2=0.08626531,
+            c3=0.0106707,
+            c4=-0.00082523,
+            c5=0.00002486,
+        )(c2080)
 
     @staticmethod
     def n_to_epsilon(n):
         """Sersic index n to epsilon"""
-        approx_model = models.Polynomial1D(5, c0=-6.54870813,
-                                           c1=-2.15040843, c2=-0.28993623, c3=-0.04099376, c4=-0.00046837,
-                                           c5=-0.00022305) + models.Exponential1D(amplitude=7.48787292, tau=2.6876055)
+        approx_model = models.Polynomial1D(
+            5,
+            c0=-6.54870813,
+            c1=-2.15040843,
+            c2=-0.28993623,
+            c3=-0.04099376,
+            c4=-0.00046837,
+            c5=-0.00022305,
+        ) + models.Exponential1D(amplitude=7.48787292, tau=2.6876055)
         return approx_model(n)
 
     @staticmethod
     def p0502_to_epsilon(p0502):
         """Petrosian concentration index P0502 (uncorrected quantity) to epsilon"""
-        approx_model = models.Polynomial1D(6, c0=1.09339566, c1=-0.14524911,
-                                           c2=0.50361697, c3=-0.1215809, c4=0.02533795, c5=-0.00196243,
-                                           c6=0.00009081) + models.Exponential1D(amplitude=0.03312881, tau=1.83616642)
+        approx_model = models.Polynomial1D(
+            6,
+            c0=1.09339566,
+            c1=-0.14524911,
+            c2=0.50361697,
+            c3=-0.1215809,
+            c4=0.02533795,
+            c5=-0.00196243,
+            c6=0.00009081,
+        ) + models.Exponential1D(amplitude=0.03312881, tau=1.83616642)
         return approx_model(p0502)
