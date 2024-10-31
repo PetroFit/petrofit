@@ -4,7 +4,7 @@
 
 PetroFit
 --------
-|repostatus tag| |CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |python version tag| |astropy tag| |photutils tag| 
+|repostatus tag| |CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |python version tag| |CodeCov| |astropy tag| |photutils tag| 
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations,
@@ -170,3 +170,7 @@ petrofit based on its use in the README file for the
 .. |python version tag| image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fpetrofit%2Fpetrofit%2Fmain%2Fpyproject.toml
    :alt: Python Version from PEP 621 TOML
    :target: https://www.python.org/downloads/
+
+.. |CodeCov| image:: https://codecov.io/gh/petrofit/petrofit/graph/badge.svg
+   :alt: Tests code coverage
+   :target: https://codecov.io/gh/petrofit/petrofit
