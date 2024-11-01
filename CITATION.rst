@@ -5,7 +5,7 @@ Citing and Credits
 Publications
 ============
 
-|AJ tag| |ads tag| |zonodo tag| |ascl tag|
+|AJ tag| |zonodo tag| |ads tag|  |ascl tag|
 
 If you would like to cite PetroFit for a publication, please use the acknowledgments below.
 Given the close relationship between PetroFit and Photutils, we ask that you also cite
