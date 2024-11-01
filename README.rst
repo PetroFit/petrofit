@@ -115,6 +115,13 @@ the `Astropy package template <https://github.com/astropy/package-template>`_
 which is licensed under the BSD 3-clause license. See the licenses folder for
 more information.
 
+Generative AI Policy
+--------------------
+
+To maintain scientific rigor and reproducibility, no generative AI-produced code 
+is permitted within this repository. All code contributions must be manually authored 
+or closely supervised to ensure our standards. Generative AI can be used, however, for 
+documentation, issues, and PR descriptions (i.e ``git`` and GitHub workflow).
 
 Contributing
 ------------
