@@ -102,7 +102,7 @@ Given a 2D image (``image``) the following code snippet demonstrates how to crea
 Citation
 --------
 
-Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_
+Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/citing.html>`_
 for citation instructions. This information is also available in the ``CITATION.rst`` 
 file in the PetroFit repo.
 
