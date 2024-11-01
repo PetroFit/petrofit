@@ -20,17 +20,18 @@ Installation
 You can install PetroFit using pip or build a `jupyter lab <https://jupyter.org/>`_ environment using ```hatch`` <https://jupyter.org/>`_. Please see
 the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for detailed installation instructions.
 
-**``pip`` Install**: 
+**pip Install**: 
 
 .. code-block:: bash
 
     pip install petrofit
 
-**``hatch``  jupyter lab**:
+**hatch  Jupyter Lab**:
 
- .. code-block:: bash
+cd into the dir you want to launch jupyter lab in, and then run:
+
+.. code-block:: bash
     
-    cd <dir you want to launch jupyter lab in>
     hatch run jupyter:lab
 
 Examples
