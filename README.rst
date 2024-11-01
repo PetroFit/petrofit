@@ -17,7 +17,7 @@ for installation instructions and a guide to the ``petrofit`` module.
 Installation
 ------------
 
-You can install PetroFit using pip or build a `jupyter lab <https://jupyter.org/>`_ environment using `hatch <https://jupyter.org/>`_ . Please see
+You can install PetroFit using pip or build a `jupyter lab <https://jupyter.org/>`_ environment using `hatch <https://hatch.pypa.io/latest/>`_ . Please see
 the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for detailed installation instructions.
 
 **pip Install**: 
