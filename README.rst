@@ -4,7 +4,7 @@
 
 PetroFit
 --------
-|repostatus tag| |CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |python version tag| |astropy tag| |photutils tag| 
+|repostatus tag| |CI tag| |rtd tag| |PyPI tag| |AJ tag| |zonodo tag| |python version tag| |CodeCov| |astropy tag| |photutils tag| 
 
 PetroFit is a package for calculating Petrosian properties, such as radii and concentration indices, as well as fitting
 galaxy light profiles. In particular, PetroFit includes tools for performing accurate photometry, segmentations,
@@ -17,8 +17,22 @@ for installation instructions and a guide to the ``petrofit`` module.
 Installation
 ------------
 
-You can install PetroFit using ``pip install petrofit``. Please see
+You can install PetroFit using pip or build a `jupyter lab <https://jupyter.org/>`_ environment using `hatch <https://jupyter.org/>`_ . Please see
 the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_ for detailed installation instructions.
+
+**pip Install**: 
+
+.. code-block:: bash
+
+    pip install petrofit
+
+**hatch  Jupyter Lab**:
+
+cd into the dir you want to launch jupyter lab in, and then run:
+
+.. code-block:: bash
+    
+    hatch run jupyter:lab
 
 Examples
 --------
@@ -88,8 +102,8 @@ Given a 2D image (``image``) the following code snippet demonstrates how to crea
 Citation
 --------
 
-Please see the `petrofit documentation <https://petrofit.readthedocs.io/en/latest/>`_
-for citation instructions. This information is also available in the `CITATION.rst`` 
+Please see the `PetroFit citation documentation <https://petrofit.readthedocs.io/en/latest/citing.html>`_
+for citation instructions. This information is also available in the ``CITATION.rst`` 
 file in the PetroFit repo.
 
 License
@@ -170,3 +184,7 @@ petrofit based on its use in the README file for the
 .. |python version tag| image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fpetrofit%2Fpetrofit%2Fmain%2Fpyproject.toml
    :alt: Python Version from PEP 621 TOML
    :target: https://www.python.org/downloads/
+
+.. |CodeCov| image:: https://codecov.io/gh/petrofit/petrofit/graph/badge.svg
+   :alt: Tests code coverage
+   :target: https://codecov.io/gh/petrofit/petrofit
