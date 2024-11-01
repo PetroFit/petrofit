@@ -23,6 +23,8 @@ These significant changes are coming in light of the pyOpenSci review process. T
   -  Added a [repostatus.org](https://www.repostatus.org/) badge to the readme file.
   - A badge listing supported python versions.
 
+- Add Generative AI Policy. #231 
+
 ## Version 0.5.1
 *August 16th 2024*
 
