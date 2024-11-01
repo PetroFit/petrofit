@@ -1,5 +1,28 @@
 # Release Notes
 
+## [Unreleased]
+These significant changes are coming in light of the pyOpenSci review process. These changes primarily focus on the packaging and installation infrastructure. These enhancements do not impact the core codebase directly.
+
+**PetroFit Enhancements**
+
+- Transition to Hatch: Migrated from `setuptools` to `hatch` for streamlined packaging and dependency management. #209
+- Configuration Enhancements #209:
+  - Added `.editorconfig` to standardize code style across different editors.
+  - Introduced GitHub issue templates in `.github/ISSUE_TEMPLATE` for consistent issue reporting.
+  - Updated test workflow to utilize `hatch` for test environment setup.
+- Docker Removal #209:
+  - Removed Docker support, including deletion of the Dockerfile and the `docker.py` helper script.
+- Legacy Files #209:
+   - Removed legacy Astropy packaging infrastructure file `_astropy_init.py`.
+- Project Configuration Updates #209:
+  - Updated `pyproject.toml` to align with `hatch` configuration requirements.
+
+- Deprecated `requirements.txt`, `setup.cfg`, `setup.py`, and `tox` in favor of new configuration management with `hatch`. #209
+
+- Add badges #209:
+  -  Added a [repostatus.org](https://www.repostatus.org/) badge to the readme file.
+  - A badge listing supported python versions.
+
 ## Version 0.5.1
 *August 16th 2024*
 
