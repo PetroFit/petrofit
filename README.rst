@@ -156,6 +156,27 @@ petrofit based on its use in the README file for the
 `MetPy project <https://github.com/Unidata/MetPy>`_.
 
 
+Acknowledgments
+---------------
+We thank Dr. Gregory D. Wirth and Dr. D. J. Pisano, and Dr. Alan Kahn for their guidance and support throughout this project. 
+We would also like to thank the developers of Photutils, as much of this work is built on top of the tools they provid. 
+This work was made possible by NASA grant AR 15058. Lastly, we give thanks to the Space Telescope Science Institute and 
+the Technical Staff Research Committee (TSRC), a group that facilitates matching research projects with interested technical staff.
+
+.. container:: images-container
+
+    .. image:: https://gpm.nasa.gov/sites/default/files/document_files/NASA-Logo-Large.png
+        :width: 120px
+        :height: 100px
+        :align: left
+
+    .. image:: https://www.stsci.edu/files/live/sites/www/files/home/_images/stsci-logo-no-text.svg?t=tn2400
+        :width: 100px
+        :height: 100px
+        :align: right
+
+
+
 .. |CI tag| image:: https://github.com/PetroFit/petrofit/actions/workflows/main.yml/badge.svg?branch=main
     :target: https://github.com/PetroFit/petrofit/actions/workflows/main.yml
     :alt: PetroFit CI status
