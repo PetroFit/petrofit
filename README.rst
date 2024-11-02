@@ -163,19 +163,16 @@ We would also like to thank the developers of Photutils, as much of this work is
 This work was made possible by NASA grant AR 15058. Lastly, we give thanks to the Space Telescope Science Institute and 
 the Technical Staff Research Committee (TSRC), a group that facilitates matching research projects with interested technical staff.
 
-.. container:: images-container
+|nasa_logo|  |stsci_logo|
 
-    .. image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/nasa_logo.png
-        :width: 120px
-        :height: 100px
-        :align: left
-
-    .. image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/stsci_logo.png
-        :width: 100px
-        :height: 100px
-        :align: right
+.. |nasa_logo| image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/nasa_logo.png
+    :width: 120px
+    :height: 100px
 
 
+.. |stsci_logo| image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/stsci_logo.svg
+    :width: 100px
+    :height: 100px
 
 .. |CI tag| image:: https://github.com/PetroFit/petrofit/actions/workflows/main.yml/badge.svg?branch=main
     :target: https://github.com/PetroFit/petrofit/actions/workflows/main.yml
