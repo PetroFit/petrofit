@@ -158,7 +158,7 @@ petrofit based on its use in the README file for the
 
 Acknowledgments
 ---------------
-We thank Dr. Gregory D. Wirth and Dr. D. J. Pisano, and Dr. Alan Kahn for their guidance and support throughout this project. 
+We thank Dr. Gregory D. Wirth, Dr. D. J. Pisano, and Dr. Alan Kahn for their guidance and support throughout this project. 
 We would also like to thank the developers of Photutils, as much of this work is built on top of the tools they provid. 
 This work was made possible by NASA grant AR 15058. Lastly, we give thanks to the Space Telescope Science Institute and 
 the Technical Staff Research Committee (TSRC), a group that facilitates matching research projects with interested technical staff.
