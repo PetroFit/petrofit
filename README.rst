@@ -165,12 +165,12 @@ the Technical Staff Research Committee (TSRC), a group that facilitates matching
 
 .. container:: images-container
 
-    .. image:: https://gpm.nasa.gov/sites/default/files/document_files/NASA-Logo-Large.png
+    .. image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/nasa_logo.png
         :width: 120px
         :height: 100px
         :align: left
 
-    .. image:: https://www.stsci.edu/files/live/sites/www/files/home/_images/stsci-logo-no-text.svg?t=tn2400
+    .. image:: https://github.com/PetroFit/petrofit/raw/main/docs/images/stsci_logo.png
         :width: 100px
         :height: 100px
         :align: right
