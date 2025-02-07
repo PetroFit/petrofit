@@ -25,6 +25,11 @@ These significant changes are coming in light of the pyOpenSci review process. T
 
 - Add Generative AI Policy. #231 
 
+**General bug fixes and small changes**
+
+- Fixes issues with PSFConvolvedModel2D that came up in light of the latest astropy version. #237
+
+
 ## Version 0.5.1
 *August 16th 2024*
 
