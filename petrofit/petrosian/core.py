@@ -661,22 +661,27 @@ class Petrosian:
 
     @property
     def r_list(self):
+        """radii list"""
         return self._r_list
 
     @property
     def area_list(self):
+        """aperture area list"""
         return self._area_list
 
     @property
     def area_err(self):
+        """aperture area error list"""
         return self._area_err
 
     @property
     def flux_list(self):
+        """photometric flux list"""
         return self._flux_list
 
     @property
     def flux_err(self):
+        """photometric flux error list"""
         return self._flux_err
 
     @property
@@ -689,6 +694,10 @@ class Petrosian:
 
     @epsilon.setter
     def epsilon(self, value):
+        """
+        epsilon is the multiplication factor used to 
+        find `r_total_flux = r_petrosian * epsilon`
+        """
         self._epsilon = value
 
     @property
@@ -698,6 +707,7 @@ class Petrosian:
 
     @eta.setter
     def eta(self, value):
+        """Eta is the Petrosian value which defines the `r_petrosian`"""
         self._eta = value
 
     @property
@@ -707,6 +717,7 @@ class Petrosian:
 
     @epsilon_fraction.setter
     def epsilon_fraction(self, value):
+        """Fraction of total flux recovered by `epsilon`"""
         self._epsilon_fraction = value
 
     @property
@@ -721,6 +732,12 @@ class Petrosian:
 
     @total_flux_fraction.setter
     def total_flux_fraction(self, value):
+        """
+        Fraction of Sersic flux that defines the Petrosian total flux. Sersic total flux
+        is the flux at infinity, thus a smaller fraction must be used to define the total flux
+        when analysing images. `total_flux_fraction` can also be adjusted if the image has low
+        signal-to-noise or if the profile extends too far out (for example profiles with high Sersic indices).
+        """
         self._total_flux_fraction = value
 
     @property
@@ -826,13 +843,14 @@ class Petrosian:
         r_e, r_e_err = self._calculate_fraction_to_r(0.5)
         return r_e_err
 
-    # Alias for r_half_light
     @property
     def r_50(self):
+        """Alias for r_half_light"""
         return self.r_half_light
 
     @property
     def r_50_err(self):
+        """Alias for r_half_err"""
         return self.r_half_light_err
 
     def fraction_flux_to_r(self, fraction=0.5):
@@ -874,6 +892,7 @@ class Petrosian:
         return self.concentration_index(fraction_1=0.5, fraction_2=0.9)[-1]
 
     def _plot_radii(self, ax, radius_unit="pix"):
+        """Plots the total flux and half-light radii."""
         radius_unit = "" if radius_unit is None else str(radius_unit)
 
         r_petrosian = self.r_petrosian
