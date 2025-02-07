@@ -438,7 +438,7 @@ class PSFConvolvedModel2D(FittableModel):
                         sub_grid_x0
                     )
                     idx = self._model.param_names.index(sub_grid_x0)
-                    sub_grid_x0 = sub_model_params[idx][0]
+                    sub_grid_x0 = sub_model_params[idx][0] if isinstance(sub_model_params[idx], (list, np.ndarray)) else sub_model_params[idx]
 
                 if isinstance(sub_grid_y0, str):
                     assert (
@@ -447,7 +447,7 @@ class PSFConvolvedModel2D(FittableModel):
                         sub_grid_y0
                     )
                     idx = self._model.param_names.index(sub_grid_y0)
-                    sub_grid_y0 = sub_model_params[idx][0]
+                    sub_grid_y0 = sub_model_params[idx][0] if isinstance(sub_model_params[idx], (list, np.ndarray)) else sub_model_params[idx]
 
                 # Compute the corner of the sub-grid
                 sub_grid_origin = (
@@ -500,8 +500,10 @@ class PSFConvolvedModel2D(FittableModel):
         # ------------
         if self.psf is not None:
             psf = self.psf
-            if psf_p[0] != 0:
-                psf = rotate(psf, psf_p[0], reshape=False)
+            
+            psf_p = psf_p[0] if isinstance(psf_p, (list, np.ndarray)) else psf_p 
+            if psf_p != 0:
+                psf = rotate(psf, psf_p, reshape=False)
             model_image = convolve(model_image, psf, mode="same")
 
         if psf_factor > 1:
