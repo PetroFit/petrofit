@@ -351,6 +351,31 @@ class PSFConvolvedModel2D(FittableModel):
             raise ValueError("{} is not a bool, use True or False".format(value))
 
     def evaluate(self, x, y, *params, **kwargs):
+        """
+        Evaluate the model on given coordinates and parameters.
+        Parameters:
+        -----------
+        x : numpy.ndarray
+            Array of x-coordinates where the model is to be evaluated.
+        y : numpy.ndarray
+            Array of y-coordinates where the model is to be evaluated.
+        *params : tuple
+            Additional parameters for the wrapped model, though the last parameter is expected to be `psf_p`.
+        **kwargs : dict
+            Additional keyword arguments for the wrapped mode.
+        Returns:
+        --------
+        numpy.ndarray
+            The evaluated model image at the given coordinates.
+        Notes:
+        ------
+        - The function prepares the main sampling grid based on the provided coordinates and oversampling factors.
+        - It constructs the main model image by sampling the sub-model.
+        - If oversampling is specified, the function handles both integer and sub-grid based oversampling.
+        - The model image is convolved with the PSF if provided.
+        - The final model image is reduced to the data resolution if the PSF is oversampled.
+        - The function returns the model image at the specified coordinates.
+        """
 
         # Extract sub-model params as well as `psf_p`
         *sub_model_params, psf_p = params

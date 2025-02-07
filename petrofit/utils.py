@@ -31,16 +31,19 @@ __all__ = [
 
 
 def natural_sort(l):
+    """Sort the given list of strings or numbers without needing leading zeros"""
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
     return sorted(l, key=alphanum_key)
 
 
 def ellip_to_elong(ellip):
+    """Convert ellipticity to elongation"""
     return 1 / (1 - ellip)
 
 
 def elong_to_ellip(elong):
+    """Convert elongation to ellipticity"""
     return (elong - 1) / elong
 
 
@@ -80,6 +83,7 @@ def match_catalogs(ra_1, dec_1, ra_2, dec_2, unit="deg"):
 
 
 def angular_to_pixel(angular_diameter, wcs):
+    """Convert angular angular diameter to pixel width using wcs"""
     pixel_scales = proj_plane_pixel_scales(wcs)
     assert np.allclose(*pixel_scales)
     pixel_scale = pixel_scales[0] * wcs.wcs.cunit[0] / u.pix
@@ -91,6 +95,7 @@ def angular_to_pixel(angular_diameter, wcs):
 
 
 def pixel_to_angular(pixel_size, wcs):
+    """Convert angular pixel width to angular diameter using wcs"""
     pixel_scales = proj_plane_pixel_scales(wcs)
     assert np.allclose(*pixel_scales)
     pixel_scale = pixel_scales[0] * wcs.wcs.cunit[0] / u.pix
@@ -103,16 +108,37 @@ def pixel_to_angular(pixel_size, wcs):
 
 
 def elliptical_area_to_r(area, elong):
+    """Convert elliptical area to radius by providing elongation"""
     a = np.sqrt(elong * area / (np.pi))
     b = a / elong
     return a, b
 
 
 def circle_area_to_r(area):
+    """Convert circular area to radius"""
     return np.sqrt(area / np.pi)
 
 
 def get_interpolated_values(x, y, num=5000, kind="cubic"):
+    """
+    Interpolate values to a new grid
+
+    Parameters
+    ----------
+    x : array like
+        x values
+    y : array like
+        y values
+    num : int, optional
+        Number of points to interpolate to. Default is 5000.
+    kind : str, optional
+        Kind of interpolation. Default is 'cubic'.
+
+    Returns
+    -------
+    x_new, y_new : array like
+        Interpolated values
+    """
     if kind is None:
         return x, y
 
@@ -212,6 +238,7 @@ def cutout_subtract(image, target, x, y):
 
 
 def mpl_tick_frame(ax=None, minorticks=True, tick_fontsize=None):
+    """Set the tick parameters for a matplotlib plot"""
     if ax is None:
         ax = plt.gca()
     if minorticks:

@@ -406,24 +406,20 @@ class PetrosianCorrection:
 
     @property
     def grid_keys(self):
+        """Return dictionary keys of the grid."""
         return self.grid.colnames
 
     def unique_grid_values(self, key):
+        """Return unique values of a key in the grid."""
         return np.array(np.unique(self.grid[key]))
 
     def filter_grid(self, key, value):
+        """Return a filtered grid based on key and value."""
         idx = np.where(self.grid[key] == value)
         return self.grid[idx]
 
-    def _dr_old(self, x0, y0, z0):
-        wx, wy, wz = self.weights
-        dx = wx * abs(self.x - x0) / x0
-        dy = wy * abs(self.y - y0) / y0
-        dz = wz * abs(self.z - z0) / z0
-        dr = dx + dy + dz
-        return dr
-
     def _dr(self, x0, y0, z0):
+        """Given x0, y0, z0 nearest grid row distance. Called by `_closest_row`"""
         wx, wy, wz = self.weights
 
         # Standardize the data
@@ -451,16 +447,19 @@ class PetrosianCorrection:
         ), "C2080 is outside of the range of the grid"
 
     def _closest_row(self, x0, y0, z0):
+        """Given x0, y0, z0 nearest grid row"""
         if self.enforce_range:
             self._validate_input(x0, y0, z0)
         dr = self._dr(x0, y0, z0)
         return self.grid[dr.argmin()]
 
     def _get_corrected_row(self, p):
+        """Given a Petrosian object, return the correction row"""
         x0, y0, z0 = self._get_xyz_from_p(p)
         return self._closest_row(x0, y0, z0)
 
     def correct(self, p):
+        """Given a Petrosian object, return a corrected Petrosian object"""
         corrected_p = copy(p)
         corrected_p.epsilon = self.estimate_epsilon(p)
         return corrected_p
@@ -517,6 +516,38 @@ class PetrosianCorrection:
         axs=None,
         minorticks=False,
     ):
+        """
+        Plots a grid of scatter plots for the given data.
+        Parameters
+        ----------
+        x0, y0, z0 : float, optional
+        cmap : str, optional
+            Colormap to use for the scatter plots (default "hot").
+        target_c : str, optional
+            Color to use for highlighting the target point (default is "blue").
+        cmap_key : str, optional
+            Key to use for colormap data from the grid (default is "n").
+        colorbar_label : str, optional
+            Label for the colorbar (default is None).
+        suptitle : str, optional
+            Suptitle for the figure (default is None).
+        axs : list of matplotlib.axes.Axes, optional
+            List of 3 axes to plot on (default is None, which creates new axes).
+        minorticks : bool, optional
+            Whether to show minor ticks on the axes (default is False).
+        Returns
+        -------
+        fig : matplotlib.figure.Figure
+            The figure object containing the plots.
+        axs : list of matplotlib.axes.Axes
+            The list of axes containing the scatter plots.
+        Notes
+        -----
+        This function creates a grid of 3 scatter plots showing the relationships
+        between x, y, and z coordinates with color mapping based on `cmap_key`.
+        If `x0`, `y0`, and `z0` are provided, the closest point in the grid is
+        highlighted and connected to the target point.
+        """
         if axs is None:
             fig, axs = plt.subplots(1, 3, figsize=[6 * 3, 6])
         else:
@@ -602,6 +633,32 @@ class PetrosianCorrection:
         suptitle=None,
         axs=None,
     ):
+        """
+        Plots the correction grid for the given a Petrosian object.
+        Parameters:
+        -----------
+        p : array-like
+            The Petrosian object for which the correction grid is to be plotted.
+        cmap : str, optional
+            The colormap to be used for the plot. Default is "hot".
+        target_c : str, optional
+            The color to be used for the target. Default is "blue".
+        cmap_key : str, optional
+            The key to be used for the colormap. Default is "n".
+        colorbar_label : str, optional
+            The label for the colorbar. Default is None.
+        suptitle : str, optional
+            The super title for the plot. Default is None.
+        axs : matplotlib.axes.Axes, optional
+            The axes on which to plot. If None, a new figure and axes are created. Default is None.
+        Returns:
+        --------
+        fig : matplotlib.figure.Figure
+            The figure object containing the plot.
+        axs : matplotlib.axes.Axes
+            The axes object containing the plot.
+        """
+        
         x0, y0, z0 = self._get_xyz_from_p(p)
         fig, axs = self._plot_grid(
             x0=x0,
