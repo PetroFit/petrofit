@@ -1,7 +1,9 @@
 # Release Notes
 
-## [Unreleased]
-These significant changes are coming in light of the pyOpenSci review process. These changes primarily focus on the packaging and installation infrastructure. These enhancements do not impact the core codebase directly.
+## Version 0.6.0
+*March 3rd 2025*
+
+These significant changes are in light of the pyOpenSci review process. These changes primarily focus on the packaging and installation infrastructure. These enhancements do not impact the core codebase directly.
 
 **PetroFit Enhancements**
 
