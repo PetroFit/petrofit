@@ -8,9 +8,6 @@ from astropy.wcs.utils import proj_plane_pixel_scales
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 
-from matplotlib import pyplot as plt
-
-
 __all__ = [
     "match_catalogs",
     "angular_to_pixel",
@@ -19,12 +16,10 @@ __all__ = [
     "circle_area_to_r",
     "get_interpolated_values",
     "closest_value_index",
-    "plot_target",
     "cutout_subtract",
     "hst_flux_to_abmag",
     "make_radius_list",
     "natural_sort",
-    "mpl_tick_frame",
     "ellip_to_elong",
     "elong_to_ellip",
 ]
@@ -165,49 +160,6 @@ def closest_value_index(value, array, growing=False):
         idx = abs(array[: idx + 1] - value).argmin()
     return idx
 
-
-def plot_target(
-    image, position, size=None, c="r", lw=None, vmin=None, vmax=None, marker_base_size=2
-):
-    """
-    Plot an image with a target marker.
-
-    Parameters
-    ----------
-    image : np.ndarray or object with `data` attribute
-        The image to be displayed.
-    position : tuple of int
-        (x, y) coordinates of the target location.
-    size : int, optional
-        The pixel size around the target to display.
-        If not specified, it defaults to the maximum dimension of the image.
-    c : str, optional
-        Color of the target marker. Default is red (`'r'`).
-    lw : int or float, optional
-        Line width of the target marker.
-    vmin, vmax : int or float, optional
-        Values to anchor the colormap.
-    marker_base_size : int, optional
-        Base size of the marker which gets scaled relative to the image size.
-        Default is 2.
-    Notes
-    -----
-    The target is plotted as a red '+' at the given position. The displayed
-    region is determined by the `size` parameter centered at the target position.
-    """
-
-    if size is None:
-        size = max(image.shape)
-    x, y = position
-
-    # Calculate marker size relative to the average size of the image dimensions
-    marker_size = np.mean(image.shape) / 20 * marker_base_size
-    plt.imshow(image, vmin=vmin, vmax=vmax)
-    plt.plot(x, y, "+", c=c, label="Target", markersize=marker_size, markeredgewidth=lw)
-    plt.xlim(x - (size / 2.0), x + (size / 2.0))
-    plt.ylim(y - (size / 2.0), y + (size / 2.0))
-
-
 def cutout_subtract(image, target, x, y):
     """
     Subtract cutout from image
@@ -235,29 +187,3 @@ def cutout_subtract(image, target, x, y):
     ymin, ymax, xmin, xmax = bounds
     image[ymin:ymax, xmin:xmax] -= target
     return image
-
-
-def mpl_tick_frame(ax=None, minorticks=True, tick_fontsize=None):
-    """Set the tick parameters for a matplotlib plot"""
-    if ax is None:
-        ax = plt.gca()
-    if minorticks:
-        ax.minorticks_on()
-    ax.tick_params(
-        which="minor",
-        direction="in",
-        top=True,
-        right=True,
-        width=1.5,
-        length=8 / 2,
-        labelsize=tick_fontsize,
-    )
-    ax.tick_params(
-        which="major",
-        direction="in",
-        top=True,
-        right=True,
-        width=1.5,
-        length=8,
-        labelsize=tick_fontsize,
-    )

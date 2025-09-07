@@ -10,15 +10,11 @@ from astropy.utils.exceptions import AstropyWarning
 from photutils.segmentation import SourceCatalog, deblend_sources, detect_sources
 from photutils.isophote import EllipseGeometry, Ellipse
 
-from matplotlib import pyplot as plt
-
 from .modeling.fitting import fit_background, model_to_image
 from .photometry import radial_photometry
-from .utils import mpl_tick_frame
+from .plotting import subplots, mpl_tick_frame, plot_segments, plot_segment_residual, package_plot_style
 
 __all__ = [
-    "plot_segments",
-    "plot_segment_residual",
     "get_source_position",
     "get_source_elong",
     "get_source_ellip",
@@ -32,35 +28,6 @@ __all__ = [
     "make_catalog",
     "source_photometry",
 ]
-
-
-def plot_segments(segm, image=None, vmin=None, vmax=None, alpha=0.5, title=None):
-    """
-    Plot segmented areas over an image (2D array, if provided)
-    """
-
-    cmap = segm.make_cmap(seed=np.random.randint(1000000))
-
-    if image is not None:
-        plt.imshow(image, vmin=vmin, vmax=vmax, cmap="gist_gray")
-
-    plt.imshow(segm, cmap=cmap, alpha=alpha)
-
-    if title is not None:
-        plt.title(title)
-
-    plt.xlabel("Pixels")
-    plt.ylabel("Pixels")
-
-
-def plot_segment_residual(segm, image, vmin=None, vmax=None):
-    """
-    Plot segment subtracted image (residual)
-    """
-    temp = image.copy()
-    temp[np.where(segm.data != 0)] = 0.0
-    plt.imshow(temp, vmin=vmin, vmax=vmax)
-
 
 def get_source_position(source):
     """Return max x, y value of a SourceCatalog or catalog row"""
@@ -379,7 +346,6 @@ def make_catalog(
     plot=True,
     vmax=None,
     vmin=None,
-    figsize=None,
 ):
     """
     This function constructs a catalog using `PhotUtils`. The `petrofit.segmentation.make_segments` and
@@ -430,9 +396,6 @@ def make_catalog(
     vmin, vmax : float
         vmax and vmin values for plot.
 
-    figsize : tuple
-        Figure size.
-
     Returns
     -------
     cat, segm, segm_deblend
@@ -454,12 +417,13 @@ def make_catalog(
 
     if plot and segm:
         # Make plots
-        if deblend:
-            fig, ax = plt.subplots(1, 2, figsize=figsize)
-            plt.sca(ax[0])
-        else:
-            fig, ax = plt.subplots(1, 1, figsize=figsize)
-        plot_segments(segm, image=image, vmax=vmax, vmin=vmin, title="Segmentation Map")
+        with package_plot_style():
+            if deblend:
+                fig, axs = subplots(1, 2)
+                ax = axs[0]
+            else:
+                fig, ax = subplots(1, 1)
+            plot_segments(segm, image=image, ax=ax, vmax=vmax, vmin=vmin, title="Segmentation Map")
 
     # Deblend segmentation map
     segm_deblend = None
@@ -470,14 +434,15 @@ def make_catalog(
 
         if plot and segm_deblend:
             # Make plots
-            plt.sca(ax[1])
-            plot_segments(
-                segm_deblend,
-                image=image,
-                vmax=vmax,
-                vmin=vmin,
-                title="Deblended Segmentation Map",
-            )
+            with package_plot_style():
+                plot_segments(
+                    segm_deblend,
+                    image=image,
+                    ax=axs[1],
+                    vmax=vmax,
+                    vmin=vmin,
+                    title="Deblended Segmentation Map",
+                )
 
     # Make catalog
     cat = SourceCatalog(image, segm_deblend if deblend else segm, wcs=wcs)
@@ -500,7 +465,8 @@ def source_photometry(
     plot=False,
     vmin=0,
     vmax=None,
-    figsize=[12, 6],
+    imshow_kwargs=None,
+    aperture_plot_kwargs=None,
 ):
     """
     Aperture photometry on a PhotUtils `SourceProperties`.
@@ -585,6 +551,12 @@ def source_photometry(
 
     figsize : tuple
         Figure size.
+
+    imshow_kwargs : dict
+        Additional keyword arguments to pass to the imshow function.
+
+    aperture_plot_kwargs : dict
+        Additional keyword arguments to pass to the aperture plot function.
 
     Returns
     -------
@@ -684,60 +656,59 @@ def source_photometry(
 
     position = np.array(masked_image.data.shape) / 2.0
 
-    if plot:
-        print(source.label)
-        fig, ax = plt.subplots(1, 2, figsize=figsize)
+    with package_plot_style():
+        ax = None 
+        if plot:
+            fig, axs = subplots(2, 2)
+            ax = axs[0][0]
 
-    if plot:
-        plt.sca(ax[0])
+        flux_arr, area_arr, error_arr = radial_photometry(
+            masked_image,
+            position,
+            r_list,
+            error=masked_err,
+            mask=mask,
+            elong=elong,
+            theta=theta,
+            plot=plot,
+            ax=ax,
+            vmin=vmin,
+            vmax=vmax,
+            method=method,
+            imshow_kwargs=imshow_kwargs,
+            aperture_plot_kwargs=aperture_plot_kwargs,
+        )
 
-    flux_arr, area_arr, error_arr = radial_photometry(
-        masked_image,
-        position,
-        r_list,
-        error=masked_err,
-        mask=mask,
-        elong=elong,
-        theta=theta,
-        plot=plot,
-        vmin=vmin,
-        vmax=vmax,
-        method=method,
-    )
+        if plot:
+            ax = axs[0][1]
+            ax.plot(r_list, flux_arr, c="tab:blue", zorder=3, marker="o")
+            ax.set_title("Curve of Growth")
+            ax.set_xlabel("Radius [pix]")
+            ax.set_ylabel("Flux Enclosed")
+            mpl_tick_frame(ax=ax, minorticks=True)
 
-    if plot:
-        plt.sca(ax[1])
-        plt.plot(r_list, flux_arr, c="tab:blue", linewidth=3, zorder=3)
-        for r in r_list:
-            plt.axvline(r, alpha=0.5, c="gray")
-        plt.title("Curve of Growth")
-        plt.xlabel("Radius in Pixels")
-        plt.ylabel("Flux Enclosed")
-        mpl_tick_frame(ax=ax[1], minorticks=True)
-        plt.show()
+            r = max(r_list)
 
-        r = max(r_list)
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
+            ax = axs[1][0]
+            ax.plot(masked_image[int(position[1]), :], c="tab:blue", zorder=3)
+            ax.axhline(0, c="black")
+            # ax.axhline(noise_sigma, c='b')
+            ax.axvline(position[0], linestyle="--", c="gray")
+            ax.axvline(position[0] + r, alpha=0.5, c="gray")
+            ax.axvline(position[0] - r, alpha=0.5, c="gray")
+            ax.set_xlabel("X-Center Slice [pix]")
+            ax.set_ylabel("Pixel Value")
+            mpl_tick_frame(ax=ax, minorticks=True)
 
-        plt.plot(masked_image[int(position[1]), :], c="tab:blue", linewidth=3, zorder=3)
-        plt.axhline(0, c="black")
-        # plt.axhline(noise_sigma, c='b')
-        plt.axvline(position[0], linestyle="--", c="gray")
-        plt.axvline(position[0] + r, alpha=0.5, c="gray")
-        plt.axvline(position[0] - r, alpha=0.5, c="gray")
-        plt.xlabel("Slice Along X [pix]")
-        plt.ylabel("Pixel Value")
-        mpl_tick_frame(ax=ax, minorticks=True)
-
-        fig, ax = plt.subplots(1, 1, figsize=figsize)
-        plt.plot(masked_image[:, int(position[0])], c="tab:blue", linewidth=3, zorder=3)
-        plt.axhline(0, c="black")
-        # plt.axhline(noise_sigma, c='b')
-        plt.axvline(position[0], linestyle="--", c="gray")
-        plt.axvline(position[0] + r, alpha=0.5, c="gray")
-        plt.axvline(position[0] - r, alpha=0.5, c="gray")
-        plt.xlabel("Slice Along Y [pix]")
-        plt.ylabel("Pixel Value")
-        mpl_tick_frame(ax=ax, minorticks=True)
+            ax = axs[1][1]
+            ax.plot(masked_image[:, int(position[0])], c="tab:blue", zorder=3)
+            ax.axhline(0, c="black")
+            # ax.axhline(noise_sigma, c='b')
+            ax.axvline(position[0], linestyle="--", c="gray")
+            ax.axvline(position[0] + r, alpha=0.5, c="gray")
+            ax.axvline(position[0] - r, alpha=0.5, c="gray")
+            ax.set_xlabel("Y-Center Slice [pix]")
+            ax.set_ylabel("Pixel Value")
+            mpl_tick_frame(ax=ax, minorticks=True)
 
     return flux_arr, area_arr, error_arr

@@ -1,48 +1,14 @@
 import numpy as np
 
-from matplotlib import pyplot as plt
-
 from photutils.aperture import EllipticalAnnulus, EllipticalAperture
 
+from .plotting import imshow, subplots, package_plot_style
+
 __all__ = [
-    "plot_apertures",
     "radial_elliptical_aperture",
     "radial_elliptical_annulus",
     "radial_photometry",
 ]
-
-
-def plot_apertures(
-    image=None, apertures=[], vmin=None, vmax=None, color="white", lw=1.5
-):
-    """
-    Plot apertures on image
-
-    Parameters
-    ----------
-    image : numpy.ndarray
-        2D image array.
-
-    apertures : list
-        List of photutils Apertures.
-
-    vmin, vmax : float
-        vmax and vmin values for plot.
-
-    color : string
-        Matplotlib color for the apertures, default=White.
-
-    lw : float
-        Line width of aperture outline.
-    """
-    if image is not None:
-        plt.imshow(image, cmap="Greys_r", vmin=vmin, vmax=vmax)
-
-    for aperture in apertures:
-        aperture.plot(axes=plt.gca(), color=color, lw=lw)
-
-    if image is not None or apertures is not None or len(apertures) > 0:
-        plt.title("Apertures")
 
 
 def radial_elliptical_aperture(position, r, elong=1.0, theta=0.0):
@@ -113,10 +79,14 @@ def radial_photometry(
     mask=None,
     elong=1.0,
     theta=0.0,
+    method='exact',
     plot=False,
+    ax=None, 
     vmin=0,
     vmax=None,
-    method="exact",
+    imshow_kwargs=None,
+    aperture_plot_kwargs=None,
+    subplots_kwargs={},
 ):
     """
     Core photometry function.  Given a position, a list of radii and the shape
@@ -145,8 +115,37 @@ def radial_photometry(
     theta : float
         Orientation in rad.
 
+    method : {'exact', 'center', 'subpixel'}, optional
+        The method used to determine the overlap of the aperture on
+        the pixel grid.  Not all options are available for all
+        aperture types.  Note that the more precise methods are
+        generally slower.  The following methods are available:
+
+            * ``'exact'`` (default):
+                The the exact fractional overlap of the aperture and
+                each pixel is calculated.  The returned mask will
+                contain values between 0 and 1.
+
+            * ``'center'``:
+                A pixel is considered to be entirely in or out of the
+                aperture depending on whether its center is in or out
+                of the aperture.  The returned mask will contain
+                values only of 0 (out) and 1 (in).
+
+            * ``'subpixel'``
+                A pixel is divided into subpixels (see the
+                ``subpixels`` keyword), each of which are considered
+                to be entirely in or out of the aperture depending on
+                whether its center is in or out of the aperture.  If
+                ``subpixels=1``, this method is equivalent to
+                ``'center'``.  The returned mask will contain values
+                between 0 and 1.
+
     plot : bool
         Plot the target and apertures.
+
+    ax : matplotlib.axes.Axes, optional
+        Axes to plot on. If not provided, a new figure and axes will be created.
 
     vmin : int
         Min value for plot.
@@ -154,31 +153,14 @@ def radial_photometry(
     vmax : int
         Max value for plot.
 
-    method : {'exact', 'center', 'subpixel'}, optional
-            The method used to determine the overlap of the aperture on
-            the pixel grid.  Not all options are available for all
-            aperture types.  Note that the more precise methods are
-            generally slower.  The following methods are available:
+    imshow_kwargs : dict
+        Additional keyword arguments to pass to the imshow function.
 
-                * ``'exact'`` (default):
-                  The the exact fractional overlap of the aperture and
-                  each pixel is calculated.  The returned mask will
-                  contain values between 0 and 1.
+    aperture_plot_kwargs : dict
+        Additional keyword arguments to pass to the aperture plot function.
 
-                * ``'center'``:
-                  A pixel is considered to be entirely in or out of the
-                  aperture depending on whether its center is in or out
-                  of the aperture.  The returned mask will contain
-                  values only of 0 (out) and 1 (in).
-
-                * ``'subpixel'``
-                  A pixel is divided into subpixels (see the
-                  ``subpixels`` keyword), each of which are considered
-                  to be entirely in or out of the aperture depending on
-                  whether its center is in or out of the aperture.  If
-                  ``subpixels=1``, this method is equivalent to
-                  ``'center'``.  The returned mask will contain values
-                  between 0 and 1.
+    subplots_kwargs : dict
+        Additional keyword arguments to pass to the subplots initialization.
 
     Returns
     -------
@@ -186,16 +168,31 @@ def radial_photometry(
         Returns photometry, aperture area (unmasked pixels) and error at each radius.
     """
 
+    if imshow_kwargs is None:
+        imshow_kwargs = {'cmap': 'viridis'}
+    if aperture_plot_kwargs is None:
+        aperture_plot_kwargs = {'color': 'white', 'alpha': 0.5}
+
     flux_arr = []
     error_arr = []
     area_arr = []
 
     if plot:
-        ax = plt.gca()
-        plt.imshow(image, vmin=vmin, vmax=image.mean() * 10 if vmax is None else vmax)
-        ax.set_title("Image and Aperture Radii")
-        ax.set_xlabel("Pixels")
-        ax.set_ylabel("Pixels")
+        with package_plot_style():
+            if ax is None:
+               fig, ax = subplots(1, 1, **subplots_kwargs)
+            if vmax is not None:
+                assert 'vmax' not in list(imshow_kwargs.keys()), "vmax and vmax in imshow_kwargs cannot be both set."
+            if vmin is not None:
+                assert 'vmin' not in list(imshow_kwargs.keys()), "vmin and vmin in imshow_kwargs cannot be both set."
+
+            imshow_kwargs['vmax'] = image.mean() * 10 if vmax is None else vmax
+            imshow_kwargs['vmin'] = vmin
+            imshow(image, ax=ax, **imshow_kwargs)
+
+            ax.set_title("Image and Aperture Radii")
+            ax.set_xlabel("Pixels")
+            ax.set_ylabel("Pixels")
 
     mask = ~mask if mask is not None else None
     for i, r in enumerate(r_list):
@@ -218,7 +215,8 @@ def radial_photometry(
             raise Exception("Nan photometric_value")
 
         if plot:
-            aperture.plot(plt.gca(), color="w", alpha=0.5)
+            with package_plot_style():
+                aperture.plot(ax, **aperture_plot_kwargs)
 
         flux_arr.append(photometric_value)
         area_arr.append(aperture_area)

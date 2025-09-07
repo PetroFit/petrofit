@@ -13,7 +13,7 @@ from astropy.table import Table
 from ..modeling.models import PSFConvolvedModel2D, sersic_enclosed, sersic_enclosed_inv
 from ..modeling.fitting import model_to_image
 from ..photometry import radial_photometry
-from ..utils import mpl_tick_frame
+from ..plotting import subplots, _plot_correction_grid
 from .core import Petrosian, calculate_petrosian_r, calculate_petrosian
 
 from matplotlib import pyplot as plt
@@ -167,11 +167,11 @@ def _generate_petrosian_correction(args):
     ]
 
     if plot:
-        fig, axs = plt.subplots(1, 2, figsize=[12, 6])
+        fig, axs = subplots(1, 2)
         plt.sca(axs[0])
-        corrected_p.plot()
+        corrected_p.plot(ax=axs[0])
         plt.sca(axs[1])
-        corrected_p.plot_cog()
+        corrected_p.plot_cog(ax=axs[1])
         plt.show()
         print(corrected_epsilon)
         print(r_eff, p.r_half_light, corrected_p.r_half_light)
@@ -502,132 +502,12 @@ class PetrosianCorrection:
         r_p = row[self.eta_keys[eta]]
         epsilon = r_ep / r_p
         return epsilon
-
-    def _plot_grid(
-        self,
-        x0=None,
-        y0=None,
-        z0=None,
-        cmap="hot",
-        target_c="blue",
-        cmap_key="n",
-        colorbar_label=None,
-        suptitle=None,
-        axs=None,
-        minorticks=False,
-    ):
-        """
-        Plots a grid of scatter plots for the given data.
-        Parameters
-        ----------
-        x0, y0, z0 : float, optional
-        cmap : str, optional
-            Colormap to use for the scatter plots (default "hot").
-        target_c : str, optional
-            Color to use for highlighting the target point (default is "blue").
-        cmap_key : str, optional
-            Key to use for colormap data from the grid (default is "n").
-        colorbar_label : str, optional
-            Label for the colorbar (default is None).
-        suptitle : str, optional
-            Suptitle for the figure (default is None).
-        axs : list of matplotlib.axes.Axes, optional
-            List of 3 axes to plot on (default is None, which creates new axes).
-        minorticks : bool, optional
-            Whether to show minor ticks on the axes (default is False).
-        Returns
-        -------
-        fig : matplotlib.figure.Figure
-            The figure object containing the plots.
-        axs : list of matplotlib.axes.Axes
-            The list of axes containing the scatter plots.
-        Notes
-        -----
-        This function creates a grid of 3 scatter plots showing the relationships
-        between x, y, and z coordinates with color mapping based on `cmap_key`.
-        If `x0`, `y0`, and `z0` are provided, the closest point in the grid is
-        highlighted and connected to the target point.
-        """
-        if axs is None:
-            fig, axs = plt.subplots(1, 3, figsize=[6 * 3, 6])
-        else:
-            assert len(axs) == 3, "axs should be a list of 3 axis"
-            fig = axs[0].figure
-
-        cm = plt.cm.get_cmap(cmap)
-
-        sim_n_list = self.grid[cmap_key]
-
-        ax = axs[0]
-        sc = ax.scatter(
-            self.x,
-            self.y,
-            c=sim_n_list,
-            vmin=0,
-            vmax=max(sim_n_list) + 1,
-            s=35,
-            cmap=cm,
-        )
-        ax.set_xlabel(r"$r_{{p}}(\eta=0.2)$")
-        ax.set_ylabel(r"$r_{{50}}$")
-        mpl_tick_frame(ax=ax, minorticks=minorticks)
-
-        ax = axs[1]
-        sc = ax.scatter(
-            self.x,
-            self.z,
-            c=sim_n_list,
-            vmin=0,
-            vmax=max(sim_n_list) + 1,
-            s=35,
-            cmap=cm,
-        )
-        ax.set_xlabel(r"$r_{{p}}(\eta=0.2)$")
-        ax.set_ylabel(r"$C_{2080}$")
-        mpl_tick_frame(ax=ax, minorticks=minorticks)
-
-        ax = axs[2]
-        sc = ax.scatter(
-            self.y,
-            self.z,
-            c=sim_n_list,
-            vmin=0,
-            vmax=max(sim_n_list) + 1,
-            s=35,
-            cmap=cm,
-        )
-        ax.set_xlabel(r"$r_{{50}}$")
-        ax.set_ylabel(r"$C_{2080}$")
-        mpl_tick_frame(ax=ax, minorticks=minorticks)
-
-        if None not in [x0, y0, z0]:
-            idx = self._dr(x0, y0, z0).argmin()
-            cx, cy, cz = self.x[idx], self.y[idx], self.z[idx]
-
-            axs[0].scatter(x0, y0, marker="o", s=200, ec=target_c, fc="None", lw=5)
-            axs[1].scatter(x0, z0, marker="o", s=200, ec=target_c, fc="None", lw=5)
-            axs[2].scatter(y0, z0, marker="o", s=200, ec=target_c, fc="None", lw=5)
-
-            axs[0].plot([x0, cx], [y0, cy], marker="o", lw=5)
-            axs[1].plot([x0, cx], [z0, cz], marker="o", lw=5)
-            axs[2].plot([y0, cy], [z0, cz], marker="o", lw=5)
-
-        fig.colorbar(
-            sc,
-            ax=axs,
-            location="bottom",
-            aspect=50,
-            label=colorbar_label if colorbar_label else cmap_key,
-        )
-        fig.suptitle(suptitle if suptitle else "Petrosian Correction Grid")
-
-        return fig, axs
-
+    
     def plot_correction(
         self,
         p,
-        cmap="hot",
-        target_c="blue",
+        cmap="rainbow",
+        target_c="black",
         cmap_key="n",
         colorbar_label=None,
         suptitle=None,
@@ -660,7 +540,8 @@ class PetrosianCorrection:
         """
         
         x0, y0, z0 = self._get_xyz_from_p(p)
-        fig, axs = self._plot_grid(
+        fig, axs = _plot_correction_grid(
+            pc=self,
             x0=x0,
             y0=y0,
             z0=z0,

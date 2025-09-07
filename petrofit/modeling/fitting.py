@@ -12,9 +12,7 @@ from astropy.stats import sigma_clip, gaussian_sigma_to_fwhm
 from astropy.nddata import CCDData, Cutout2D
 from astropy.convolution.utils import discretize_model
 
-from ..utils import mpl_tick_frame
-
-from matplotlib import pyplot as plt
+from ..plotting import mpl_tick_frame, subplots, imshow, package_plot_style
 
 
 __all__ = [
@@ -24,7 +22,6 @@ __all__ = [
     "fit_gaussian2d",
     "print_model_params",
     "plot_fit",
-    "measure_fwhm",
 ]
 
 
@@ -334,10 +331,9 @@ def plot_fit(
     center=None,
     vmin=None,
     vmax=None,
-    cbar=True,
-    fontsize=18,
-    figsize=[18, 6],
-    flux_label="Pixel Value",
+    fontsize=None,
+    cmap=None,
+    imshow_kwargs=None,
 ):
     """
     Plot fitted model, its 1D fit profile and residuals.
@@ -398,183 +394,77 @@ def plot_fit(
     vmax : float
         Max plot value
 
-    cbar : bool
-        Show color-bar if True.
-
     fontsize : int
         Font size of labels.
 
     figsize : tuple
         Figure size, should be (3*size, size).
 
-    flux_label : str
-        Label for color-bar.
+    imshow_kwargs : dict
+        Additional keyword arguments passed to `imshow`.
 
     Returns
     -------
-    axs, cbar, model_image, residual_image : (array of `.axes.Axes`, cbar, array, array)
+    axs, model_image, residual_image : (array of `.axes.Axes`, array, array)
     """
+    with package_plot_style():
+        if imshow_kwargs is None:
+            imshow_kwargs = {}
+        
+        for arg, param in zip([vmin, vmax, cmap], ['vmin', 'vmax', 'cmap']):
+            if arg is not None:
+                assert param not in list(imshow_kwargs.keys()), f"{param} cannot be both in imshow_kwargs and as a parameter."
+                imshow_kwargs[param] = arg
 
-    if isinstance(image, (CCDData, Cutout2D)):
-        image = image.data
+        if isinstance(image, (CCDData, Cutout2D)):
+            image = image.data
 
-    # Make Model Image
-    # ----------------
+        # Make Model Image
+        # ----------------
 
-    # Set the size of the model image equal to the fitted image
-    fitted_image_size = (image.shape[1], image.shape[0])
+        # Set the size of the model image equal to the fitted image
+        fitted_image_size = (image.shape[1], image.shape[0])
 
-    # Generate a model image from the model
-    model_image = model_to_image(
-        model=model, size=fitted_image_size, mode=mode, center=center
-    )
-
-    residual_image = image - model_image
-
-    # Plot Model Image
-    # ----------------
-    fig, axs = plt.subplots(1, 3, figsize=figsize)
-
-    # If vmin and vmax are not provided, compute them
-    if vmax is None:
-        vmax = max(np.nanstd(image), np.nanstd(model_image)) * 3
-    if vmin is None:
-        vmin = -vmax
-
-    im0 = axs[0].imshow(image, vmin=vmin, vmax=vmax)
-    axs[0].set_title("Data", fontsize=fontsize)
-    axs[0].set_xlabel("Pixels", fontsize=fontsize)
-    axs[0].set_ylabel("Pixels", fontsize=fontsize)
-    axs[0].tick_params(axis="both", labelsize=fontsize)
-    mpl_tick_frame(ax=axs[0])
-
-    axs[1].imshow(model_image, vmin=vmin, vmax=vmax)
-    axs[1].set_title("Model", fontsize=fontsize)
-    axs[1].set_xlabel("Pixels", fontsize=fontsize)
-    axs[1].tick_params(axis="both", labelsize=fontsize)
-    mpl_tick_frame(ax=axs[1])
-
-    axs[2].imshow(residual_image, vmin=vmin, vmax=vmax)
-    axs[2].set_title("Residual", fontsize=fontsize)
-    axs[2].set_xlabel("Pixels", fontsize=fontsize)
-    axs[2].tick_params(axis="both", labelsize=fontsize)
-    mpl_tick_frame(ax=axs[2])
-
-    fig.subplots_adjust(
-        bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.04, hspace=0.04
-    )
-    axs[1].set_yticklabels([])
-    axs[2].set_yticklabels([])
-
-    fig_cbar = None
-    if cbar:
-        cbar_ax = fig.add_axes([0.1, 0.08, 0.7, 0.05])
-        fig_cbar = fig.colorbar(im0, cax=cbar_ax, aspect=40, orientation="horizontal")
-        fig.subplots_adjust(bottom=0.23)
-        fig_cbar.ax.set_xlabel(flux_label, fontsize=fontsize)
-
-    return axs, fig_cbar, model_image, residual_image
-
-
-def measure_fwhm(image, plot=True, printout=True):
-    """
-    Find the 2D FWHM of a background/continuum subtracted cutout image of a target.
-    The target should be centered and cropped in the cutout.
-    Use `lcbg.utils.cutout` for cropping targets.
-    FWHM is estimated using the sigmas from a 2D gaussian fit of the target's flux.
-    The FWHM is returned as a tuple of the FWHM in the x and y directions.
-
-    Parameters
-    ----------
-    image : array like
-        Input background/continuum subtracted cutout image.
-    printout : bool
-        Print out info.
-    plot : bool
-        To plot fit or not.
-
-    Returns
-    -------
-    tuple : array of floats
-        FWHM in x and y directions.
-    """
-
-    # Find FWHM
-    # ----------
-
-    fitted_line = fit_gaussian2d(image)
-
-    # Find fitted center
-    x_mean, y_mean = [i.value for i in [fitted_line.x_mean, fitted_line.y_mean]]
-
-    # Estimate FWHM using gaussian_sigma_to_fwhm
-    x_fwhm = fitted_line.x_stddev * gaussian_sigma_to_fwhm
-    y_fwhm = fitted_line.y_stddev * gaussian_sigma_to_fwhm
-
-    # Find half max
-    hm = fitted_line(x_mean, y_mean) / 2.0
-
-    # Find the mean of the x and y direction
-    mean_fwhm = np.mean([x_fwhm, y_fwhm])
-    mean_fwhm = int(np.round(mean_fwhm))
-
-    # Print info about fit and FWHM
-    # ------------------------------
-
-    if printout:
-        print("Image Max: {}".format(image.max()))
-        print("Amplitude: {}".format(fitted_line.amplitude.value))
-        print("Center: ({}, {})".format(x_mean, y_mean))
-        print(
-            "Sigma = ({}, {})".format(
-                fitted_line.x_stddev.value,
-                fitted_line.y_stddev.value,
-            )
+        # Generate a model image from the model
+        model_image = model_to_image(
+            model=model, size=fitted_image_size, mode=mode, center=center
         )
-        print("Mean FWHM: {} Pix ".format(mean_fwhm))
-        print("FWHM: (x={}, y={}) Pix ".format(x_fwhm, y_fwhm))
 
-    if plot:
+        residual_image = image - model_image
 
-        fig, [ax0, ax1, ax2, ax3] = plot_fit(image, fitted_line)
+        # Plot Model Image
+        # ----------------
+        fig, axs = subplots(1, 3, label_gap=0)
 
-        # Make x and y grid to plot to
-        y_arange, x_arange = np.mgrid[: image.shape[0], : image.shape[1]]
+        # If vmin and vmax are not provided, compute them
+        if vmax is None:
+            vmax = max(np.nanstd(image), np.nanstd(model_image)) * 3
+        if vmin is None:
+            vmin = -vmax
 
-        # Plot input image with FWHM and center
-        # -------------------------------------
+        im0 = imshow(image, ax=axs[0], **imshow_kwargs)
+        axs[0].set_title("Data", fontsize=fontsize)
+        axs[0].set_xlabel("Pixels", fontsize=fontsize)
+        axs[0].set_ylabel("Pixels", fontsize=fontsize)
+        axs[0].tick_params(axis="both", labelsize=fontsize)
+        mpl_tick_frame(ax=axs[0])
 
-        ax0.imshow(image, cmap="gray_r")
+        imshow(model_image, ax=axs[1], **imshow_kwargs)
+        axs[1].set_title("Model", fontsize=fontsize)
+        axs[1].set_xlabel("Pixels", fontsize=fontsize)
+        axs[1].tick_params(axis="both", labelsize=fontsize)
+        mpl_tick_frame(ax=axs[1])
 
-        ax0.axvline(x_mean - x_fwhm / 2, c="c", linestyle="--", label="X FWHM")
-        ax0.axvline(x_mean + x_fwhm / 2, c="c", linestyle="--")
+        imshow(residual_image, ax=axs[2], **imshow_kwargs)
+        axs[2].set_title("Residual", fontsize=fontsize)
+        axs[2].set_xlabel("Pixels", fontsize=fontsize)
+        axs[2].tick_params(axis="both", labelsize=fontsize)
+        mpl_tick_frame(ax=axs[2])
 
-        ax0.axhline(y_mean - y_fwhm / 2, c="g", linestyle="--", label="Y FWHM")
-        ax0.axhline(y_mean + y_fwhm / 2, c="g", linestyle="--")
+        fig.subplots_adjust(
+            bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.04, hspace=0.04
+        )
+        axs[1].set_yticklabels([])
+        axs[2].set_yticklabels([])
 
-        ax0.set_title("Center and FWHM Plot")
-        ax0.legend()
-
-        # Plot X fit
-        # ----------
-
-        ax2.axvline(x_mean, linestyle="-", label="Center")
-        ax2.axvline(x_mean - x_fwhm / 2, c="c", linestyle="--", label="X FWHM")
-        ax2.axvline(x_mean + x_fwhm / 2, c="c", linestyle="--")
-        ax2.axhline(hm, c="black", linestyle="--", label="Half Max")
-
-        ax2.legend()
-
-        # Plot Y fit
-        # ----------
-
-        ax3.axvline(y_mean, linestyle="-", label="Center")
-        ax3.axvline(y_mean - y_fwhm / 2, c="g", linestyle="--", label="Y FWHM")
-        ax3.axvline(y_mean + y_fwhm / 2, c="g", linestyle="--")
-        ax3.axhline(hm, c="black", linestyle="--", label="Half Max")
-
-        ax3.legend()
-
-        plt.show()
-
-    return np.array([x_fwhm, y_fwhm])
+        return axs, model_image, residual_image

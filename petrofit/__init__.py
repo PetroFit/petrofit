@@ -4,10 +4,13 @@ try:
 except ImportError:
     __version__ = "N.A"
 
+from .config import *
 from .petrosian import *
 from .photometry import *
 from .segmentation import *
+from .plotting import *
 from .utils import *
+
 
 from .modeling.fitting import *
 from .modeling.models import *

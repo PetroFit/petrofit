@@ -2,15 +2,13 @@ import numpy as np
 
 from scipy.interpolate import interp1d
 
-from matplotlib import pyplot as plt
-
 from ..utils import (
     closest_value_index,
     get_interpolated_values,
     pixel_to_angular,
-    mpl_tick_frame,
 )
 from ..photometry import radial_elliptical_aperture
+from ..plotting import _petrosian_imshow, _petrosian_plot_cog, _petrosian_plot
 
 __all__ = [
     "calculate_petrosian",
@@ -989,78 +987,14 @@ class Petrosian:
         ax : matplotlib.axis
             Matplotlib axis object with the plot.
         """
-        radius_unit = "" if radius_unit is None else str(radius_unit)
-        if ax is None:
-            ax = plt.gca()
 
-        ax.errorbar(
-            self.r_list,
-            self.petrosian_list,
-            yerr=self.petrosian_err,
-            marker="o",
-            capsize=err_capsize,
-            label="Data",
-            color=color,
+        return _petrosian_plot(
+            self, plot_r=plot_r, title=title, radius_unit=radius_unit,
+            ax=ax, color=color, err_alpha=err_alpha,
+            err_capsize=err_capsize, show_legend=show_legend,
+            legend_fontsize=legend_fontsize, ax_fontsize=ax_fontsize,
+            tick_fontsize=tick_fontsize
         )
-
-        if err_alpha is not None and self.has_petrosian_err and err_alpha > 0:
-            ax.fill_between(
-                self.r_list,
-                self.petrosian_list - self.petrosian_err,
-                self.petrosian_list + self.petrosian_err,
-                alpha=err_alpha,
-                color=color,
-            )
-
-        r_petrosian = self.r_petrosian
-        r_petrosian_err = self.r_petrosian_err
-
-        if plot_r:
-            r_color = "black"
-            ax.axhline(
-                self.eta, linestyle="--", color=r_color, alpha=self._r_plot_alpha
-            )
-            if not np.isnan(r_petrosian):
-                ax.axvline(
-                    r_petrosian,
-                    linestyle="--",
-                    color=r_color,
-                    alpha=self._r_plot_alpha,
-                    label=r"$R_{{p}}(\eta_{{{}}})={:0.4f}$ {}".format(
-                        self.eta, r_petrosian, radius_unit
-                    ),
-                )
-                if not np.isnan(r_petrosian_err):
-                    ax.errorbar(
-                        r_petrosian,
-                        self.eta,
-                        xerr=r_petrosian_err,
-                        zorder=6,
-                        marker="o",
-                        capsize=5,
-                        lw=3,
-                        color="tab:orange",
-                    )
-                else:
-                    ax.scatter(
-                        r_petrosian, self.eta, zorder=6, marker="o", color="tab:orange"
-                    )
-
-        ax.axhline(0, c="black")
-        ax.set_title(title, fontsize=ax_fontsize)
-        ax.set_xlabel(
-            "Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "",
-            fontsize=ax_fontsize,
-        )
-        ax.set_ylabel(r"Petrosian Index $\eta(r)$", fontsize=ax_fontsize)
-
-        mpl_tick_frame(minorticks=True, tick_fontsize=tick_fontsize)
-
-        ax.set_xlim(0, None)
-        if show_legend:
-            ax.legend(fontsize=legend_fontsize)
-
-        return ax
 
     def plot_cog(
         self,
@@ -1124,89 +1058,16 @@ class Petrosian:
         ax : matplotlib.axis
             Matplotlib axis object with the plot.
         """
-        radius_unit = "" if radius_unit is None else str(radius_unit)
-        if ax is None:
-            ax = plt.gca()
 
-        ax.errorbar(
-            self.r_list,
-            self.flux_list,
-            yerr=self.flux_err,
-            marker="o",
-            capsize=err_capsize,
-            c=color,
-            label="Data",
+        return _petrosian_plot_cog(
+            self, plot_r=plot_r, title=title, radius_unit=radius_unit,
+            flux_unit=flux_unit, ax=ax, color=color, err_alpha=err_alpha,
+            err_capsize=err_capsize, show_legend=show_legend,
+            legend_fontsize=legend_fontsize, ax_fontsize=ax_fontsize,
+            tick_fontsize=tick_fontsize
         )
 
-        if err_alpha is not None and self.has_petrosian_err and err_alpha > 0:
-            ax.fill_between(
-                self.r_list,
-                self.flux_list - self.flux_err,
-                self.flux_list + self.flux_err,
-                alpha=err_alpha,
-                color=color,
-            )
-
-        if plot_r:
-            r_half_light = self.r_half_light
-            half_flux = self.half_flux
-            if not np.isnan(r_half_light) and not np.isnan(half_flux):
-                ax.axvline(
-                    r_half_light,
-                    linestyle="--",
-                    c="black",
-                    alpha=self._r_plot_alpha,
-                    label="$R_{{50}}(L_{{50}}) = {:0.4f}$ {}".format(
-                        r_half_light, radius_unit
-                    ),
-                )
-                ax.axhline(
-                    half_flux, linestyle="--", c="black", alpha=self._r_plot_alpha
-                )
-                ax.scatter(
-                    r_half_light, half_flux, zorder=6, marker="o", color="tab:orange"
-                )
-
-            r_total_flux = self.r_total_flux
-            total_flux = self.total_flux
-            if not np.isnan(r_total_flux) and not np.isnan(total_flux):
-                total_flux_fraction = int(self.total_flux_fraction * 100)
-                ax.axvline(
-                    r_total_flux,
-                    linestyle="-",
-                    c="black",
-                    alpha=self._r_plot_alpha,
-                    label="$R_{{total}}(L_{{{}}}) = {:0.4f}$ {}".format(
-                        total_flux_fraction, r_total_flux, radius_unit
-                    ),
-                )
-                ax.axhline(
-                    total_flux, linestyle="-", c="black", alpha=self._r_plot_alpha
-                )
-                ax.scatter(
-                    r_total_flux, total_flux, zorder=6, marker="o", color="tab:orange"
-                )
-
-        ax.set_title(title, fontsize=ax_fontsize)
-        ax.set_xlabel(
-            "Aperture Radius" + " [{}]".format(radius_unit) if radius_unit else "",
-            fontsize=ax_fontsize,
-        )
-        ax.set_ylabel(
-            r"$L(\leq r)$" + (" [{}]".format(flux_unit) if flux_unit else ""),
-            fontsize=ax_fontsize,
-        )
-
-        mpl_tick_frame(minorticks=True, tick_fontsize=tick_fontsize)
-
-        ax.set_xlim(0, None)
-        ax.set_ylim(0, None)
-        if show_legend:
-            ax.legend(fontsize=legend_fontsize)
-
-        return ax
-
-    def imshow(self, position=(0, 0), elong=1.0, theta=0.0, color=None, lw=None):
+    def imshow(self, position=(0, 0), elong=1.0, theta=0.0, color=None, lw=None, show_legend=True, show_arrow=False, min_arrow_radius=10.0):
         """
         Make 2D plots of elliptical apertures with radii  of `r_half_light`, `r_total_flux`, `r_20` and `r_80`.
 
@@ -1227,23 +1088,8 @@ class Petrosian:
         lw : float
             Line width (thickness) of the plotted apertures.
         """
+        return _petrosian_imshow(
+            self, position=position, elong=elong, theta=theta, color=color, lw=lw,
+            show_legend=show_legend, show_arrow=show_arrow, min_arrow_radius=min_arrow_radius
+        )
 
-        labels = ["r_half_light", "r_total_flux", "r_20", "r_80"]
-        radii = [
-            self.r_half_light,
-            self.r_total_flux,
-            self._calculate_fraction_to_r(0.2)[0],
-            self._calculate_fraction_to_r(0.8)[0],
-        ]
-        colors = ["r", "r", "b", "b"]
-        linestyles = ["dashed", "solid", "dotted", "dashdot"]
-        for label, r, default_color, ls in zip(labels, radii, colors, linestyles):
-            if not np.isnan(r) and r > 0:
-                radial_elliptical_aperture(position, r, elong, theta).plot(
-                    label=label,
-                    linestyle=ls,
-                    color=color if color else default_color,
-                    lw=lw,
-                )
-
-        plt.scatter(*position, marker="+", color=color if color else "red")
